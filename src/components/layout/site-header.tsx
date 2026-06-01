@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Search, User, ShoppingBag, Menu } from "lucide-react";
+import { Search, User, ShoppingBag } from "lucide-react";
+import { MobileNav } from "./mobile-nav";
 
 const NAV = [
   { slug: "brain-focus", label: "두뇌·집중" },
@@ -50,13 +51,13 @@ export function SiteHeader() {
         </Link>
       </nav>
       <div className="flex gap-4 text-wsb-carbon">
-        <button
-          type="button"
-          aria-label="메뉴 열기"
-          className="md:hidden text-wsb-carbon rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
-        >
-          <Menu size={20} strokeWidth={1.75} aria-hidden />
-        </button>
+        <MobileNav
+          items={[
+            ...NAV.map((n) => ({ href: `/category/${n.slug}`, label: n.label })),
+            { href: "/brand", label: "브랜드" },
+            { href: "/support", label: "고객지원" },
+          ]}
+        />
         {UTILS.map(({ href, label, Icon }) => (
           <Link
             key={href}
