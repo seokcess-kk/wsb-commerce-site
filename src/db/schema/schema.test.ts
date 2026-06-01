@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { getTableColumns } from "drizzle-orm";
-import { categories, products, productVariants, orders, orderItems, payments } from "./index";
+import { categories, products, productVariants, orders, orderItems, payments, banners } from "./index";
 
 describe("schema 형상", () => {
   it("products 는 규제 고지 컬럼을 갖는다", () => {
@@ -24,5 +24,9 @@ describe("schema 형상", () => {
     expect(getTableColumns(orders)).toHaveProperty("orderNumber");
     expect(getTableColumns(orderItems)).toHaveProperty("lineTotal");
     expect(getTableColumns(payments)).toHaveProperty("paymentKey");
+  });
+  it("배너 스키마 컬럼", () => {
+    expect(getTableColumns(banners)).toHaveProperty("title");
+    expect(getTableColumns(banners)).toHaveProperty("isActive");
   });
 });
