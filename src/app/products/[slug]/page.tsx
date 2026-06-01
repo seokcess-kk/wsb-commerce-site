@@ -1,20 +1,51 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/db/queries/products";
 import { resolveVariantPriceLabel } from "@/lib/catalog/product-view";
 import { ComplianceNotice } from "@/components/catalog/compliance-notice";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { buildProductJsonLd } from "@/lib/seo/product-jsonld";
+import { getSiteUrl } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+  if (!product) return { title: "상품" };
+  return {
+    title: product.name,
+    description: product.summary ?? product.name,
+    openGraph: {
+      title: product.name,
+      description: product.summary ?? product.name,
+      images: product.thumbnail ? [product.thumbnail] : [],
+    },
+  };
+}
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
+
+  const jsonLd = buildProductJsonLd({
+    name: product.name,
+    description: product.summary ?? product.name,
+    brand: product.brand,
+    priceKRW: product.basePrice,
+    url: `${getSiteUrl()}/products/${product.slug}`,
+    image: product.thumbnail,
+    availability: product.variants.some((v) => v.stock > 0),
+  });
+
   const zone = product.isNutrogin
     ? "bg-ng-cobalt text-white border-t-2 border-ng-neon"
     : "bg-stone-100 text-stone-400";
   return (
-    <article className="mx-auto grid max-w-6xl gap-8 px-6 py-10 md:grid-cols-2">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <article className="mx-auto grid max-w-6xl gap-8 px-6 py-10 md:grid-cols-2">
       <div className={`flex min-h-80 items-center justify-center rounded-lg ${zone}`}>
         <span className={`font-mono text-sm${product.isNutrogin ? " text-ng-neon" : ""}`}>{product.name}</span>
       </div>
@@ -65,5 +96,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
     </article>
+    </>
   );
 }

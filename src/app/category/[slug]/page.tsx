@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { listProductsByCategory, listCategories } from "@/db/queries/products";
 import { ProductGrid } from "@/components/catalog/product-grid";
 import { CategoryFilter } from "@/components/catalog/category-filter";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const categories = await listCategories();
+  const current = categories.find((c) => c.slug === slug);
+  return { title: current?.name ?? "카테고리" };
+}
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

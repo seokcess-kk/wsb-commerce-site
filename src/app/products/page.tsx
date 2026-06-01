@@ -4,6 +4,8 @@ import { CategoryFilter } from "@/components/catalog/category-filter";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "전체 상품" };
+
 export default async function ProductsPage() {
   const [products, categories] = await Promise.all([listPublishedProducts(), listCategories()]);
   return (
