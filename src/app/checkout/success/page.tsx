@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { confirmTossPayment } from "@/lib/payments/toss";
 import { formatKRW } from "@/lib/format";
@@ -29,12 +29,15 @@ export default async function SuccessPage({
 
   try {
     const result = await confirmTossPayment({ paymentKey, orderId, amount: order.totalAmount });
-    await db.insert(schema.payments).values({
-      orderId: order.id, provider: "toss", paymentKey: result.paymentKey,
-      method: result.method ?? null, amount: result.totalAmount, status: result.status,
-      approvedAt: result.approvedAt ? new Date(result.approvedAt) : null,
+    await db.transaction(async (tx) => {
+      await tx.insert(schema.payments).values({
+        orderId: order.id, provider: "toss", paymentKey: result.paymentKey,
+        method: result.method ?? null, amount: result.totalAmount, status: result.status,
+        approvedAt: result.approvedAt ? new Date(result.approvedAt) : null,
+      }).onConflictDoNothing({ target: schema.payments.paymentKey });
+      await tx.update(schema.orders).set({ status: "paid" })
+        .where(and(eq(schema.orders.id, order.id), eq(schema.orders.status, "pending")));
     });
-    await db.update(schema.orders).set({ status: "paid" }).where(eq(schema.orders.id, order.id));
   } catch (e) {
     return <Result ok={false} message={(e as Error).message} />;
   }

@@ -5,7 +5,7 @@ export const payments = pgTable("payments", {
   id: uuid("id").primaryKey().defaultRandom(),
   orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
   provider: varchar("provider", { length: 40 }).notNull().default("toss"),
-  paymentKey: varchar("payment_key", { length: 200 }).notNull(),
+  paymentKey: varchar("payment_key", { length: 200 }).notNull().unique(),
   method: varchar("method", { length: 40 }),
   amount: integer("amount").notNull(),
   status: varchar("status", { length: 20 }).notNull(),
