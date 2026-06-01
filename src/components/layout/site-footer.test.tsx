@@ -26,4 +26,11 @@ describe("SiteFooter", () => {
       screen.getByRole("link", { name: "이용약관" })
     ).toHaveAttribute("href", "/policy/terms");
   });
+
+  it("배송/교환/환불 안내 링크가 올바른 href를 가진다", () => {
+    render(<SiteFooter />);
+    expect(
+      screen.getByRole("link", { name: "배송/교환/환불 안내" })
+    ).toHaveAttribute("href", "/policy/shipping");
+  });
 });

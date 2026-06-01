@@ -22,6 +22,13 @@ export function SiteFooter() {
           이용약관
         </Link>{" "}
         ·{" "}
+        <Link
+          href="/policy/shipping"
+          className="rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+        >
+          배송/교환/환불 안내
+        </Link>{" "}
+        ·{" "}
         <strong className="text-wsb-lab">본 제품은 질병의 예방·치료를 위한 것이 아닙니다.</strong> · 건강기능식품 표시·광고 심의필
       </p>
     </footer>
