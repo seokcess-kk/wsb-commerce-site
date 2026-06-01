@@ -8,3 +8,26 @@ export async function listAllProductsAdmin() {
     basePrice: schema.products.basePrice, isPublished: schema.products.isPublished, slug: schema.products.slug,
   }).from(schema.products).orderBy(desc(schema.products.createdAt));
 }
+
+export async function listCategoriesAdmin() {
+  return getDb()
+    .select({ id: schema.categories.id, name: schema.categories.name })
+    .from(schema.categories)
+    .orderBy(schema.categories.sortOrder);
+}
+
+export async function getProductForEdit(id: string) {
+  const db = getDb();
+  const [p] = await db
+    .select()
+    .from(schema.products)
+    .where(eq(schema.products.id, id))
+    .limit(1);
+  if (!p) return null;
+  const variants = await db
+    .select()
+    .from(schema.productVariants)
+    .where(eq(schema.productVariants.productId, id))
+    .orderBy(schema.productVariants.sortOrder);
+  return { product: p, variants };
+}
