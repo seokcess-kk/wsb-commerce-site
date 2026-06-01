@@ -1,0 +1,55 @@
+<h2>v1 사이트 구조 & 메인 내비게이션</h2>
+<p class="subtitle">아래는 Lean MVP 기준 제안 사이트맵입니다. 구조에 빠지거나 더할 게 있으면 말씀 주세요. 그리고 메인 메뉴를 무엇 기준으로 묶을지 한 가지만 골라주세요.</p>
+
+<div class="mockup">
+  <div class="mockup-header">제안 사이트맵 (Lean v1)</div>
+  <div class="mockup-body" style="font-size:13px;line-height:1.5">
+    <div class="mock-nav">WSB 로고 &nbsp;|&nbsp; 상품 &nbsp;|&nbsp; 브랜드 &nbsp;|&nbsp; 고객지원 &nbsp;&nbsp;&nbsp; 🔍 검색 · 👤 로그인 · 🛒 장바구니</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px">
+      <div class="placeholder" style="text-align:left;padding:10px">
+        <strong>🏠 홈</strong><br>히어로(NUTROGIN 런칭) · 베스트 · 신상품 · 브랜드 띠배너
+      </div>
+      <div class="placeholder" style="text-align:left;padding:10px">
+        <strong>🧴 상품</strong><br>전체목록 + 필터/정렬 → <strong>상품상세(PDP)</strong><br>· 옵션/수량 · 성분·인증 · 리뷰 · 함께담기
+      </div>
+      <div class="placeholder" style="text-align:left;padding:10px">
+        <strong>📖 브랜드</strong><br>WSB 스토리(스마트팜·데이터) · NUTROGIN 스토리
+      </div>
+      <div class="placeholder" style="text-align:left;padding:10px">
+        <strong>🛒 주문</strong><br>장바구니 → 주문/결제 → 주문완료
+      </div>
+      <div class="placeholder" style="text-align:left;padding:10px">
+        <strong>👤 마이페이지</strong><br>주문·배송조회 · 회원정보 · 내 리뷰 · 쿠폰
+      </div>
+      <div class="placeholder" style="text-align:left;padding:10px">
+        <strong>💬 고객지원</strong><br>FAQ · 1:1 문의 · 공지 · 배송/교환/환불 안내
+      </div>
+    </div>
+    <p style="margin-top:10px;color:#666;font-size:12px">※ 푸터: 사업자정보·통신판매업·개인정보처리방침·이용약관·건강기능식품 심의 문구 영역</p>
+  </div>
+</div>
+
+<h3>메인 메뉴를 무엇 기준으로 묶을까요?</h3>
+<div class="options">
+  <div class="option" data-choice="function" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>효능·기능별 <span class="label">추천</span></h3>
+      <p>두뇌·집중 / 면역 / 수면 / 활력 … 건기식 종합몰의 표준. 상품이 늘어도 자연스럽게 확장. NUTROGIN은 '두뇌·집중'의 간판으로 배치.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="brand" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>브랜드별</h3>
+      <p>NUTROGIN 존 + 기타 제품. 신규 브랜드 각인엔 유리하지만, 기존 제품이 '기타'로 묻히고 확장성은 약함.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="concern" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>건강 고민별 큐레이션</h3>
+      <p>"요즘 집중이 안 돼요 / 잠이 얕아요" 식 고민 진입. 몰입도는 높지만 카피·기획 공수가 크고 Lean엔 다소 무거움(2차 강화 추천).</p>
+    </div>
+  </div>
+</div>

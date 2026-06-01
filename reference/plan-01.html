@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>홈페이지 제작 의뢰서</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+  .boot { display: flex; align-items: center; justify-content: center; min-height: 100vh; color: #78716c; font-size: 14px; gap: 12px; }
+  .boot-spin { width: 18px; height: 18px; border: 2px solid #d6d3d1; border-top-color: #57534e; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="root"><div class="boot"><div class="boot-spin"></div>화면을 준비하는 중…</div></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef } = React;
+
+// ===== localStorage adapter (replaces window.storage from artifacts environment) =====
+window.storage = {
+  get: async (key) => {
+    try {
+      const v = localStorage.getItem(key);
+      return v !== null ? { key, value: v, shared: false } : null;
+    } catch (e) { return null; }
+  },
+  set: async (key, value) => {
+    try {
+      localStorage.setItem(key, value);
+      return { key, value, shared: false };
+    } catch (e) { return null; }
+  },
+  delete: async (key) => {
+    try {
+      localStorage.removeItem(key);
+      return { key, deleted: true, shared: false };
+    } catch (e) { return null; }
+  }
+};
+
+// ===== Inline SVG icons (replaces lucide-react import) =====
+const __icon = (paths) => ({ size = 24, className = '', strokeWidth = 2, ...rest }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"
+       className={className} {...rest}>
+    {paths}
+  </svg>
+);
+const ChevronRight = __icon(<path d="m9 18 6-6-6-6"/>);
+const ChevronDown  = __icon(<path d="m6 9 6 6 6-6"/>);
+const ChevronUp    = __icon(<path d="m18 15-6-6-6 6"/>);
+const FileDown     = __icon(<><path d="M14.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h2"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/></>);
+const Printer      = __icon(<><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V2h12v7"/><rect width="12" height="8" x="6" y="14"/></>);
+const RotateCcw    = __icon(<><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></>);
+const Check        = __icon(<path d="M20 6 9 17l-5-5"/>);
+const CircleDashed = __icon(<><path d="M10.1 2.18a9.93 9.93 0 0 1 3.8 0"/><path d="M17.6 3.71a9.95 9.95 0 0 1 2.69 2.7"/><path d="M21.82 10.1a9.93 9.93 0 0 1 0 3.8"/><path d="M20.29 17.6a9.95 9.95 0 0 1-2.7 2.69"/><path d="M13.9 21.82a9.94 9.94 0 0 1-3.8 0"/><path d="M6.4 20.29a9.95 9.95 0 0 1-2.69-2.7"/><path d="M2.18 13.9a9.93 9.93 0 0 1 0-3.8"/><path d="M3.71 6.4a9.95 9.95 0 0 1 2.7-2.69"/></>);
+const Download     = __icon(<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></>);
+const Copy         = __icon(<><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></>);
+const Save         = __icon(<><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></>);
+const Menu         = __icon(<><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></>);
+const X            = __icon(<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>);
+const FileText     = __icon(<><path d="M14.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h2"/><polyline points="14 2 14 8 20 8"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></>);
+const Layers       = __icon(<><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></>);
+const Globe        = __icon(<><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></>);
+const ShoppingBag  = __icon(<><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></>);
+const Eye          = __icon(<><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></>);
+const EyeOff       = __icon(<><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></>);
+const HelpCircle   = __icon(<><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></>);
+const AlertCircle  = __icon(<><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></>);
+const Star         = __icon(<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>);
+const Sparkles     = __icon(<><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></>);
+
+// ===== ORIGINAL FORM CODE BELOW =====
+// ========== Data Structure ==========
+// Field types: text, textarea, date, kv, responsibility, checklist, references
+// Responsibility: 클라이언트(yellow), 제작사(green), 협의(blue)
+
+const SECTIONS = [
+  // ========== COVER ==========
+  {
+    id: 'cover',
+    title: '프로젝트 기본 정보',
+    part: 'cover',
+    color: 'blue',
+    fields: [
+      { id: 'project_name', label: '프로젝트명', type: 'text', required: true },
+      { id: 'client_name', label: '클라이언트사명', type: 'text', required: true },
+      { id: 'doc_date', label: '작성일', type: 'date' },
+      { id: 'author', label: '작성자', type: 'text' },
+    ]
+  },
+
+  // =============================================================
+  // ============= TAB 1: 공통 사항 ===============================
+  // =============================================================
+
+  // PART 1: 회사 및 프로젝트
+  {
+    id: 's1', part: 1, partTitle: 'Part 1. 회사 및 프로젝트',
+    title: '1. 회사 및 담당자 정보',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'company_kr', label: '회사명 (국문)', placeholder: '예: 다이트한의원', required: true },
+      { id: 'company_en', label: '회사명 (영문)', placeholder: '예: D8T Korea' },
+      { id: 'ceo_name', label: '대표자명', required: true },
+      { id: 'biz_number', label: '사업자등록번호', required: true, tooltip: '10자리 형식 (예: 123-45-67890). PG 가입과 통신판매업 신고 시 필수.' },
+      { id: 'industry', label: '업종/업태' },
+      { id: 'address', label: '회사 주소', type: 'textarea', required: true },
+      { id: 'main_contact', label: '대표 연락처 / 이메일', required: true },
+      { id: 'pm_info', label: '프로젝트 총괄 담당자', placeholder: '성함 / 직책 / 연락처 / 이메일', type: 'textarea', required: true, tooltip: '의사결정과 일정 관리를 담당할 분.' },
+      { id: 'ops_info', label: '실무 담당자', placeholder: '성함 / 직책 / 연락처 / 이메일', type: 'textarea' },
+      { id: 'decision_maker', label: '최종 의사결정자', placeholder: '성함 / 직책', required: true, tooltip: '주요 결정 권한이 있는 분. 의사결정 지연이 일정 지연의 큰 원인입니다.' },
+    ]
+  },
+  {
+    id: 's2', part: 1,
+    title: '2. 프로젝트 개요 (공통)',
+    color: 'yellow', type: 'kv',
+    desc: '회사·프로젝트 차원의 공통 정보입니다. 사이트별 일정·예산·KPI는 각 탭(브랜드 사이트 / 자사몰)에서 별도 작성해 주세요.',
+    fields: [
+      { id: 'site_type', label: '제작 사이트 종류', type: 'multi-check', options: ['브랜드 사이트', '커머스 몰', '둘 다'], required: true },
+      { id: 'target_1', label: '핵심 타겟 고객 1', placeholder: '연령 / 성별 / 직업 / 라이프스타일 / 페르소나', type: 'textarea', required: true },
+      { id: 'target_2', label: '핵심 타겟 고객 2 (선택)', type: 'textarea' },
+      { id: 'usp', label: '차별화 포인트 (USP)', placeholder: '경쟁사 대비 강점 3가지', type: 'textarea', tooltip: 'Unique Selling Proposition. 다른 업체와 차별되는 핵심 가치.' },
+      { id: 'payment_terms', label: '결제 조건 선호', type: 'multi-check', options: ['계약금-중도금-잔금', '월별 분납', '기타'] },
+    ]
+  },
+
+  // PART 2: 브랜드 자산 & 콘텐츠
+  {
+    id: 's4', part: 2, partTitle: 'Part 2. 브랜드 자산 & 콘텐츠',
+    title: '3. 브랜드 자산',
+    color: 'mixed', type: 'responsibility',
+    desc: "각 항목별로 '보유/제공' 또는 '제작사 요청' 중 해당란에 체크해 주세요.",
+    items: [
+      '로고 (AI/SVG 원본 파일)',
+      'CI/BI 가이드라인 (브랜드 매뉴얼)',
+      '메인 컬러 / 서브 컬러 팔레트',
+      '지정 폰트 (한글/영문) 및 라이선스',
+      '슬로건 / 태그라인',
+      '브랜드 보이스 & 톤앤매너 가이드',
+      '브랜드 키 비주얼 / 패턴',
+      '회사 소개 카피 (국문/영문)',
+      '이메일 서명 / 명함 디자인 자산',
+    ]
+  },
+  {
+    id: 's5', part: 2,
+    title: '4. 콘텐츠 자산 (이미지·영상·텍스트)',
+    color: 'mixed', type: 'responsibility',
+    items: [
+      '회사/브랜드 소개 본문 텍스트',
+      '제품/서비스 설명 카피',
+      '제품 촬영 컷 (스튜디오/누끼)',
+      '제품 연출 컷 (분위기 컷)',
+      '인물/팀 프로필 사진',
+      '공간/매장 사진',
+      '브랜드 영상 / 광고 영상',
+      '제품 시연 영상 / 후킹 영상',
+      '일러스트 / 인포그래픽',
+      '아이콘 세트',
+      '외국어 번역본 (영/중/일 등)',
+    ]
+  },
+
+  // PART 3: 기술 인프라 & 환경
+  {
+    id: 's6', part: 3, partTitle: 'Part 3. 기술 인프라 & 환경',
+    title: '5. 기술 인프라 및 환경',
+    color: 'mixed', type: 'responsibility',
+    items: [
+      '도메인 (구매·소유)',
+      '웹 호스팅 / 서버',
+      'SSL 인증서',
+      '회사 이메일 (Google Workspace, MS365 등)',
+      'CDN / 이미지 최적화 서비스',
+      'Google Analytics 4 (GA4) 계정',
+      'Google Tag Manager (GTM) 계정',
+      '네이버 서치어드바이저 / 사이트 등록',
+      'Meta(페이스북·인스타) 광고 픽셀',
+      '카카오 광고 픽셀',
+      'Google Search Console',
+    ]
+  },
+  {
+    id: 's_browser', part: 3,
+    title: '5-1. 브라우저 / 디바이스 지원 매트릭스',
+    color: 'blue', type: 'kv',
+    desc: '대응할 환경을 명확히 하면 견적과 검수 기준이 명확해집니다.',
+    fields: [
+      { id: 'browser_support', label: '지원 브라우저', type: 'multi-check', options: ['Chrome', 'Edge', 'Safari', 'Firefox', '네이버 웨일', '삼성 인터넷', 'IE11 (구형)'] },
+      { id: 'browser_version', label: '최소 지원 버전', placeholder: '예: 모든 브라우저 최신 2개 메이저 버전' },
+      { id: 'mobile_os', label: '모바일 OS 최소 버전', placeholder: '예: iOS 14+, Android 8.0+' },
+      { id: 'min_resolution', label: '최소 화면 해상도', placeholder: '예: 모바일 375px / 데스크탑 1280px', tooltip: 'PC와 모바일 최소 너비. 작을수록 개발 비용 증가.' },
+      { id: 'tablet_support', label: '태블릿 별도 대응', type: 'multi-check', options: ['반응형으로 통합', '태블릿 전용 레이아웃', '미대응'] },
+    ]
+  },
+  {
+    id: 's_perf', part: 3,
+    title: '5-2. 성능 목표 (Core Web Vitals)',
+    color: 'blue', type: 'kv',
+    desc: 'Google이 SEO에 반영하는 성능 지표입니다. 미정 시 권장값 기준으로 진행합니다.',
+    fields: [
+      { id: 'lcp_target', label: 'LCP (가장 큰 콘텐츠 표시)', type: 'multi-check', options: ['우수 2.5초 이하', '보통 4초 이하', '미정'], tooltip: 'Largest Contentful Paint. 페이지 핵심 콘텐츠가 보이기까지 걸리는 시간.' },
+      { id: 'inp_target', label: 'INP (상호작용 응답성)', type: 'multi-check', options: ['우수 200ms 이하', '보통 500ms 이하', '미정'], tooltip: 'Interaction to Next Paint. 클릭/탭 후 화면 반응 속도.' },
+      { id: 'cls_target', label: 'CLS (레이아웃 이동)', type: 'multi-check', options: ['우수 0.1 이하', '보통 0.25 이하', '미정'], tooltip: 'Cumulative Layout Shift. 페이지 로딩 중 요소가 갑자기 움직이는 정도.' },
+      { id: 'lighthouse_target', label: 'Lighthouse 점수 목표', placeholder: '예: 모바일 80점 이상, 데스크탑 90점 이상' },
+      { id: 'image_optimization', label: '이미지 최적화 방식', type: 'multi-check', options: ['WebP/AVIF 자동 변환', 'CDN 자동 리사이즈', '수동 최적화', '미정'] },
+    ]
+  },
+  {
+    id: 's_staging', part: 3,
+    title: '5-3. 스테이징 / 시범 운영 환경',
+    color: 'blue', type: 'kv',
+    fields: [
+      { id: 'staging_env', label: '스테이징 서버 운영', type: 'multi-check', options: ['필요', '불필요'], tooltip: '실제 오픈 전 내부 검수용 환경. 개발 중 테스트와 클라이언트 검수에 사용.' },
+      { id: 'soft_launch', label: '시범 운영 기간', placeholder: '예: 정식 오픈 전 1~2주 비공개 운영', tooltip: '소수 사용자 대상으로 미리 운영하며 버그를 발견하는 기간.' },
+      { id: 'qa_method', label: '검수(UAT) 방식', type: 'multi-check', options: ['클라이언트 직접 검수', '제작사 QA 후 인계', '외부 QA 의뢰', '협의'], tooltip: 'User Acceptance Test. 클라이언트가 결과물을 확인하는 절차.' },
+      { id: 'qa_period', label: '검수 기간', placeholder: '예: 단계별 3일, 최종 7일' },
+    ]
+  },
+
+  // PART 4: 법적·규제 & 접근성
+  {
+    id: 's7', part: 4, partTitle: 'Part 4. 법적·규제 & 접근성',
+    title: '6. 법적 서류 및 정책',
+    color: 'mixed', type: 'responsibility',
+    desc: '클라이언트 제공이 원칙이며, 일부는 제작사 작성 지원이 가능합니다.',
+    items: [
+      '사업자등록증 사본',
+      '통신판매업 신고증 (커머스 몰 필수)',
+      '구매안전서비스(에스크로) 이용 확인증',
+      '개인정보처리방침 문서',
+      '이용약관 문서',
+      '개인정보보호 책임자(CPO) 지정',
+      '이메일 무단 수집 거부 문구',
+      '쿠키 사용 안내 (정보통신망법 대응)',
+      '환불·반품 정책 문서 (커머스)',
+      '전자금융거래 약관 (필요 시)',
+      '가명정보 처리 정책 (해당 시)',
+      '개인정보 영향평가 (공공/대규모)',
+    ]
+  },
+  {
+    id: 's_minor', part: 4,
+    title: '6-1. 만 14세 미만 아동 정보 처리',
+    color: 'yellow', type: 'kv',
+    desc: '14세 미만 회원/방문자가 발생할 수 있는 경우 법정대리인 동의 절차가 필수입니다.',
+    fields: [
+      { id: 'minor_target', label: '14세 미만 사용자 발생 가능성', type: 'multi-check', options: ['있음 (주요 타겟 또는 일부)', '없음 (성인 대상)', '판단 어려움'] },
+      { id: 'guardian_consent_method', label: '법정대리인 동의 수단', type: 'multi-check', options: ['휴대폰 본인인증', '신용카드 인증', '공동인증서', '이메일 + 우편', '미정'], tooltip: '14세 미만 가입 허용 시 법정대리인 동의 절차 필수. 인증 수단 선택 필요.' },
+      { id: 'minor_data_minimization', label: '수집 정보 최소화 정책', type: 'multi-check', options: ['수립됨', '제작사 요청', '불필요'] },
+    ]
+  },
+  {
+    id: 's_a11y', part: 4,
+    title: '6-2. 웹 접근성 (KWCAG 2.2)',
+    color: 'blue', type: 'kv',
+    desc: '한국형 웹 콘텐츠 접근성 지침. 공공·금융·이커머스 분야에서 점차 필수화되고 있습니다.',
+    fields: [
+      { id: 'a11y_level', label: '준수 목표 수준', type: 'multi-check', options: ['최소 준수 (alt 텍스트, 키보드 탐색)', 'KWCAG 2.2 충족', '품질마크 인증 취득', '미정'], tooltip: '한국형 웹 콘텐츠 접근성 지침 2.2. 33개 검사 항목으로 구성.' },
+      { id: 'a11y_cert', label: '인증 마크 취득 의향', type: 'multi-check', options: ['취득 (WA 인증)', '미취득 (내부 준수만)', '추후 검토'] },
+      { id: 'screen_reader', label: '스크린리더 호환', type: 'multi-check', options: ['필수', '권장', '불필요'] },
+      { id: 'a11y_test', label: '접근성 테스트 도구', placeholder: '예: WAVE, axe DevTools, OpenWAX' },
+    ]
+  },
+  {
+    id: 's_intl', part: 4,
+    title: '6-3. 다국어 / 다통화 / 해외 대응',
+    color: 'yellow', type: 'kv',
+    desc: '글로벌 진출 계획이 있는 경우 추가 항목입니다.',
+    fields: [
+      { id: 'languages', label: '지원 언어', type: 'multi-check', options: ['한국어', '영어', '일본어', '중국어 간체', '중국어 번체', '베트남어', '기타'] },
+      { id: 'multi_currency', label: '다통화 지원', type: 'multi-check', options: ['필요', '불필요', '추후 검토'] },
+      { id: 'currency_method', label: '환율 적용 방식', placeholder: '예: 실시간 자동 환율, 고정 환율, 통화별 가격 별도 입력' },
+      { id: 'overseas_shipping', label: '해외 배송', type: 'multi-check', options: ['직접 배송', '배대지 활용', '미지원'] },
+      { id: 'gdpr', label: 'GDPR / 해외 개인정보 규제 대응', type: 'multi-check', options: ['필요', '불필요', '추후 검토'], tooltip: 'EU 일반 개인정보 보호법. 유럽 사용자 데이터 처리 시 필수.' },
+    ]
+  },
+
+  // PART 5: 디자인 방향성
+  {
+    id: 's19', part: 5, partTitle: 'Part 5. 디자인 방향성',
+    title: '7. 디자인 방향성',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'design_keywords', label: '원하는 톤앤매너 키워드 3~5개', placeholder: '예: 모던, 신뢰, 따뜻함, 미니멀, 프리미엄', required: true },
+      { id: 'avoid_keywords', label: '피해야 할 디자인 키워드', placeholder: '예: 화려한, 유아적, 올드한' },
+      { id: 'color_pref', label: '선호 컬러 / 피해야 할 컬러' },
+      { id: 'font_mood', label: '폰트 분위기', type: 'multi-check', options: ['산세리프', '세리프', '필기체', '믹스'] },
+      { id: 'layout_pref', label: '레이아웃 선호', placeholder: '브랜드: 한 페이지형 스토리텔링 / 자사몰: 그리드형 카탈로그 등 사이트별 차이가 있다면 함께 적어주세요.', type: 'textarea' },
+      { id: 'animation', label: '애니메이션·인터랙션 선호도', type: 'multi-check', options: ['정적', '적당한 모션', '풍부한 인터랙션'] },
+      { id: 'mood_board', label: '브랜드 무드 보드 / 추가 설명', type: 'textarea' },
+    ]
+  },
+
+  // PART 6: 운영·SLA·분석
+  {
+    id: 's20', part: 6, partTitle: 'Part 6. 운영·SLA·분석',
+    title: '8. 운영 및 유지보수',
+    color: 'blue', type: 'kv',
+    fields: [
+      { id: 'cms_need', label: '콘텐츠 직접 관리 여부', type: 'multi-check', options: ['직접 관리 (CMS 필수)', '제작사 위탁', '혼합'], tooltip: 'CMS = Content Management System. 비개발자가 콘텐츠를 직접 등록·수정하는 시스템.' },
+      { id: 'staff_skill', label: '운영 인력 IT 역량', type: 'multi-check', options: ['비전공/입문', '기본 운영 가능', '개발자 보유'] },
+      { id: 'manual_format', label: '관리자 매뉴얼 필요', type: 'multi-check', options: ['영상', 'PDF', '둘 다', '불필요'] },
+      { id: 'training', label: '관리자 교육 세션', type: 'multi-check', options: ['1회', '2회 이상', '불필요'] },
+      { id: 'maintenance', label: '유지보수 계약 범위', type: 'multi-check', options: ['호스팅만', '정기 업데이트', '월 단위 기능 추가', '24시간 응대'] },
+      { id: 'update_freq_brand', label: '월 평균 업데이트 빈도 — 브랜드 사이트', placeholder: '예: 월 1~2회 보도자료, 분기별 채용 공고', tooltip: '브랜드 사이트는 보통 월 1~4회 정도 업데이트가 일반적입니다.' },
+      { id: 'update_freq_commerce', label: '월 평균 업데이트 빈도 — 자사몰', placeholder: '예: 주 1회 신상품 등록, 월 2회 기획전, 시즌별 디자인 교체', tooltip: '자사몰은 주 단위 신상품·기획전 운영이 일반적입니다.' },
+    ]
+  },
+  {
+    id: 's21', part: 6,
+    title: '9. SEO / 마케팅 요구사항',
+    color: 'mixed', type: 'responsibility',
+    items: [
+      '타겟 검색 키워드 리스트',
+      '메타 태그 / 구조화 데이터 적용',
+      '사이트맵 / robots.txt',
+      '네이버 웹마스터 등록',
+      '구글 Search Console 등록',
+      '콘텐츠 마케팅 (블로그·매거진)',
+      '퍼포먼스 광고 운영',
+      '이메일 마케팅 운영',
+    ]
+  },
+  {
+    id: 's_analytics', part: 6,
+    title: '9-1. 분석·실험 도구 (CRO)',
+    color: 'mixed', type: 'responsibility',
+    desc: '전환율 최적화(CRO)와 사용자 행동 분석을 위한 추가 도구입니다.',
+    items: [
+      'Microsoft Clarity (무료 히트맵)',
+      'Hotjar (히트맵·세션 녹화)',
+      'A/B 테스트 도구 (Optimizely·VWO 등)',
+      'GrowthBook (오픈소스 A/B 테스트)',
+      '사용자 인터뷰·설문 도구',
+      'Mixpanel·Amplitude (제품 분석)',
+      'Customer.io / Braze (CRM·CDP)',
+    ]
+  },
+  {
+    id: 's22', part: 6,
+    title: '10. 보안 / 백업',
+    color: 'blue', type: 'checklist',
+    desc: '필요한 항목에 체크해 주세요.',
+    items: [
+      'SSL/HTTPS 적용',
+      '관리자 2단계 인증',
+      '정기 데이터 백업 (일/주/월)',
+      'ISMS 인증 필요 여부',
+      'PCI-DSS 대응 (결제 관련)',
+      '로그 보관 기간 (개인정보보호법 준수)',
+      '웹 방화벽(WAF) 적용',
+      '정기 보안 취약점 점검',
+    ]
+  },
+  {
+    id: 's_sla', part: 6,
+    title: '10-1. 장애 대응 SLA',
+    color: 'blue', type: 'kv',
+    desc: '서비스 수준 협약. 자사몰은 다운 시 매출 손실로 직결되므로 더 엄격한 기준이 권장됩니다.',
+    fields: [
+      { id: 'incident_channel', label: '장애 접수 채널', type: 'multi-check', options: ['전화 핫라인', '이메일', '카카오톡 채널', '전용 티켓 시스템'] },
+      { id: 'response_time', label: '1차 응답 시간', placeholder: '예: 평일 4시간 이내, 야간/휴일 익영업일' },
+      { id: 'recovery_time', label: '장애 복구 목표(RTO)', placeholder: '예: 치명적 4시간, 일반 24시간', tooltip: 'Recovery Time Objective. 장애 발생부터 복구까지 허용 시간.' },
+      { id: 'rpo_target', label: '데이터 손실 허용(RPO)', placeholder: '예: 최대 1시간 분량까지', tooltip: 'Recovery Point Objective. 백업 복원 시 허용되는 데이터 손실 양.' },
+      { id: 'sla_uptime_brand', label: '가동률 목표 — 브랜드 사이트', type: 'multi-check', options: ['99% (월 7시간 다운)', '99.5% (월 3.6시간)', '99.9% (월 43분)', '미정'] },
+      { id: 'sla_uptime_commerce', label: '가동률 목표 — 자사몰', type: 'multi-check', options: ['99% (월 7시간 다운)', '99.5% (월 3.6시간)', '99.9% (월 43분)', '99.95% (월 22분)', '미정'], tooltip: '자사몰 다운 = 매출 손실. 통상 99.9% 이상 권장.' },
+      { id: 'after_hours', label: '야간/휴일 응대', type: 'multi-check', options: ['24/7 응대', '평일 업무시간만', '협의'] },
+    ]
+  },
+
+  // PART 7: 계약 & 거버넌스
+  {
+    id: 's_governance', part: 7, partTitle: 'Part 7. 계약 & 거버넌스',
+    title: '11. 산출물 소유권 및 권리',
+    color: 'blue', type: 'kv',
+    desc: '결과물의 저작권·소유권 귀속을 사전에 명시하면 향후 분쟁을 예방할 수 있습니다.',
+    fields: [
+      { id: 'source_ownership', label: '소스코드 소유권', type: 'multi-check', options: ['클라이언트 귀속', '제작사 귀속', '공동 소유', '협의'], tooltip: '오픈 후 다른 업체로 이관할 때 중요. 계약서 명시 필수.' },
+      { id: 'design_ownership', label: '디자인 산출물 소유권', type: 'multi-check', options: ['클라이언트 귀속', '제작사 귀속', '공동 소유', '협의'] },
+      { id: 'repo_access', label: 'Git 저장소 / 코드 인계', type: 'multi-check', options: ['클라이언트 저장소 사용', '제작사 저장소 → 인계', '인계 불필요'] },
+      { id: 'third_party_license', label: '서드파티 라이선스 정책', placeholder: '예: 유료 폰트, 유료 이미지, 플러그인 라이선스 비용 부담 주체', type: 'textarea', tooltip: '유료 폰트·이미지·플러그인의 라이선스 비용을 누가 부담할지 명시.' },
+      { id: 'image_rights', label: '제공 이미지 저작권 책임', type: 'multi-check', options: ['클라이언트 책임', '제작사 책임', '제공 이미지 = 클라이언트 / 신규 제작 = 제작사'] },
+    ]
+  },
+  {
+    id: 's_revisions', part: 7,
+    title: '12. 수정 횟수 및 검수 정책',
+    color: 'blue', type: 'kv',
+    fields: [
+      { id: 'revision_planning', label: '기획 단계 수정 횟수', placeholder: '예: 무료 3회, 추가 시 회당 ___원' },
+      { id: 'revision_design', label: '디자인 단계 수정 횟수', placeholder: '예: 메인 시안 3회, 서브 페이지 2회' },
+      { id: 'revision_dev', label: '개발 단계 수정 횟수', placeholder: '예: 단계별 2회 무료' },
+      { id: 'revision_overage', label: '추가 수정 비용 산정', placeholder: '예: 시간당 ___원 또는 페이지당 ___원' },
+      { id: 'change_request', label: '변경 요청(Change Request) 절차', type: 'textarea', placeholder: '서면/이메일 요청 → 견적 → 승인 → 작업', tooltip: '범위 외 추가 요구사항 처리 절차. 명확히 정해두면 분쟁 예방.' },
+    ]
+  },
+  {
+    id: 's_warranty', part: 7,
+    title: '13. 무상 하자보수 및 유지보수',
+    color: 'blue', type: 'kv',
+    fields: [
+      { id: 'warranty_period', label: '무상 하자보수 기간', type: 'multi-check', options: ['1개월', '3개월', '6개월', '12개월', '협의'], tooltip: '오픈 후 일정 기간 무료 버그 수정. 통상 1~3개월.' },
+      { id: 'warranty_scope', label: '무상 하자보수 범위', type: 'textarea', placeholder: '예: 단순 버그 수정, 콘텐츠 변경 제외' },
+      { id: 'paid_maintenance', label: '유상 유지보수 형태', type: 'multi-check', options: ['월 정액', '시간당 청구', '연간 계약', '필요 시 단건 청구'] },
+      { id: 'maintenance_rate', label: '유지보수 단가 기준', placeholder: '예: 월 ___원 / 시간당 ___원' },
+    ]
+  },
+  {
+    id: 's_docs', part: 7,
+    title: '14. 인도 산출물 / 문서',
+    color: 'blue', type: 'checklist',
+    desc: '오픈 시 제작사가 인도해야 하는 산출물 목록입니다.',
+    items: [
+      '디자인 시안 / 디자인 가이드',
+      '소스코드 (Git 또는 압축 파일)',
+      'API 명세서',
+      '데이터베이스 ERD / 스키마',
+      '관리자 운영 매뉴얼 (PDF)',
+      '관리자 운영 매뉴얼 (영상)',
+      '서버 / 호스팅 접속 정보',
+      '계정 정보 (도메인·PG·분석 도구)',
+      'SEO 키워드·메타데이터 정리',
+      '인수인계 미팅 / 교육',
+    ]
+  },
+
+  // PART 8: 추가 요청 및 첨부
+  {
+    id: 's23', part: 8, partTitle: 'Part 8. 추가 요청 및 첨부',
+    title: '15. 자유 기재 사항',
+    color: 'yellow', type: 'freeform',
+    desc: '위 항목에 포함되지 않은 추가 요청, 우려사항, 참고사항을 자유롭게 작성해 주세요.',
+  },
+  {
+    id: 's24', part: 8,
+    title: '16. 첨부 자료 체크리스트',
+    color: 'yellow', type: 'checklist',
+    desc: '클라이언트가 제공할 자료 목록입니다.',
+    items: [
+      '사업자등록증 사본',
+      '통신판매업 신고증 (커머스)',
+      '구매안전서비스 이용 확인증 (커머스)',
+      '로고 원본 파일 (AI/SVG/PNG)',
+      'CI/BI 가이드라인 PDF',
+      '회사 소개서 PDF',
+      '기존 사이트 URL / 운영 데이터',
+      '벤치마킹 사이트 URL 리스트',
+      '상품 데이터 엑셀',
+      '이미지·영상 자산 폴더 (구글드라이브 등 링크)',
+      '개인정보처리방침·이용약관 문서',
+      '타겟 키워드 리스트',
+      '예산·일정 관련 내부 합의서',
+    ]
+  },
+  {
+    id: 's25', part: 8,
+    title: '17. 제작사 측 작업 범위 안내',
+    color: 'green', type: 'checklist',
+    desc: '제작사가 추가 제공 가능한 서비스입니다. 필요한 항목에 체크해 주세요.',
+    items: [
+      '로고·BI 신규 디자인',
+      '브랜드 가이드라인 제작',
+      '카피라이팅 / 네이밍',
+      '제품·인물·공간 사진 촬영',
+      '브랜드 / 제품 영상 제작',
+      '일러스트·인포그래픽 제작',
+      '외국어 번역',
+      '상품 상세페이지 디자인 (건당 또는 패키지)',
+      'SEO 컨설팅 / 키워드 리서치',
+      '퍼포먼스 광고 운영 대행',
+      '콘텐츠 마케팅 / SNS 운영',
+      '월 단위 유지보수 패키지',
+      '관리자 운영 교육',
+      '웹 접근성 인증 컨설팅',
+    ]
+  },
+  {
+    id: 's26', part: 8,
+    title: '18. 최종 확인',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'final_date', label: '작성 완료일', type: 'date' },
+      { id: 'final_signer', label: '작성자 서명' },
+      { id: 'reply_method', label: '회신 방법', type: 'multi-check', options: ['이메일', '미팅 시 전달', '클라우드 업로드'] },
+      { id: 'next_meeting', label: '다음 미팅 희망일', type: 'date' },
+    ]
+  },
+
+  // =============================================================
+  // ============= TAB 2: 브랜드 사이트 ===========================
+  // =============================================================
+
+  // 사이트별 개요/일정/레퍼런스
+  {
+    id: 'b_overview', part: 'b0', partTitle: '브랜드 사이트 개요',
+    title: '1. 프로젝트 개요 (브랜드 사이트)',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'is_renewal_b', label: '신규 / 리뉴얼', type: 'multi-check', options: ['신규 제작', '리뉴얼'], required: true },
+      { id: 'existing_url_b', label: '기존 사이트 URL (리뉴얼 시)' },
+      { id: 'main_purpose_b', label: '주요 제작 목적', placeholder: '예: 브랜드 인지도 제고, 신뢰성 확보, 채용 강화 등', type: 'textarea', required: true },
+      { id: 'kpi_b', label: '주요 KPI / 성공 지표', placeholder: '예: 월 방문자 ___명, 문의 ___건, 평균 체류시간 ___초', type: 'textarea', tooltip: '브랜드 사이트의 KPI는 보통 트래픽·체류·문의 수가 중심입니다.' },
+    ]
+  },
+  {
+    id: 'b_schedule', part: 'b0',
+    title: '2. 일정 및 예산 (브랜드 사이트)',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'launch_date_b', label: '희망 오픈일', type: 'date', required: true, tooltip: '브랜드 사이트는 보통 10~14주 소요됩니다.' },
+      { id: 'milestones_b', label: '선호 마일스톤', placeholder: '예: 기획 ___주, 디자인 ___주, 개발 ___주, 검수 ___주', type: 'textarea' },
+      { id: 'budget_range_b', label: '예산 범위', type: 'multi-check', options: ['~1천만원', '1~3천만원', '3~5천만원', '5천만원 이상'], required: true },
+      { id: 'budget_split_b', label: '예산 분리 (제작/유지보수/마케팅)', type: 'textarea' },
+    ]
+  },
+  {
+    id: 'b_refs', part: 'b0',
+    title: '3. 벤치마킹 / 레퍼런스 사이트 (브랜드)',
+    color: 'yellow', type: 'references',
+    desc: '마음에 드는 브랜드 사이트를 자유롭게 적어주세요.',
+    count: 5,
+  },
+
+  // 기존 브랜드 섹션 (재번호: 4부터)
+  {
+    id: 's8', part: 'b1', partTitle: '사이트 구조 및 콘텐츠',
+    title: '4. 사이트 구조 및 페이지 구성',
+    color: 'blue', type: 'checklist',
+    desc: '필요한 페이지에 체크해 주세요. 미정 항목은 미팅에서 함께 정리합니다.',
+    items: [
+      '메인 (Home)',
+      '회사 소개 / About Us',
+      '대표 인사말 (CEO Greeting)',
+      '회사 연혁 (History)',
+      '비전·미션·핵심가치',
+      '조직도 / 팀 소개',
+      '사업영역 / 서비스 소개',
+      '제품·솔루션 카탈로그',
+      '포트폴리오 / 프로젝트 사례',
+      '보도자료·뉴스',
+      '블로그·인사이트',
+      '채용 (Careers)',
+      '오시는 길 / 지점 안내',
+      '문의하기 (Contact)',
+      'FAQ',
+      '다국어 페이지',
+    ]
+  },
+  {
+    id: 's9', part: 'b1',
+    title: '5. 콘텐츠 자료 제공 현황 (브랜드 사이트)',
+    color: 'mixed', type: 'responsibility',
+    items: [
+      '회사 연혁 정리 자료 (연도별)',
+      '대표 인사말 원고 + 대표 사진',
+      '임직원/팀 멤버 프로필',
+      '사업영역 설명 자료',
+      '포트폴리오 케이스 (이미지+설명)',
+      '포트폴리오 클라이언트 게재 동의 여부',
+      '보도자료 원본 (PDF/링크)',
+      '수상·인증 이미지',
+      '회사 소개서 PDF (다운로드용)',
+    ]
+  },
+  {
+    id: 's10', part: 'b1',
+    title: '6. 기능 요건 (브랜드 사이트)',
+    color: 'mixed', type: 'responsibility',
+    items: [
+      '문의 폼 (메일·DB 자동 저장)',
+      '뉴스레터 구독 (스티비/메일침프 연동)',
+      '지도 임베드 (네이버 지도/Google Maps)',
+      '채용 지원서 양식',
+      '다운로드 자료실 (회원·비회원 분리)',
+      '블로그 CMS (관리자 직접 등록)',
+      '사이트 내 검색 기능',
+      '다국어 전환 기능',
+      'SNS 공유 / OG 태그 최적화',
+      '챗봇 / 채널톡 연동',
+      '구글·네이버 SEO 최적화',
+    ]
+  },
+  {
+    id: 's11', part: 'b1',
+    title: '7. 문의 폼 항목 정의',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'inquiry_email_1', label: '수신 이메일 (1차)', required: true },
+      { id: 'inquiry_email_2', label: '수신 이메일 (2차/CC)' },
+      { id: 'required_fields', label: '필수 입력 항목', placeholder: '예: 성함, 이메일, 연락처, 회사명, 문의 내용', type: 'textarea' },
+      { id: 'optional_fields', label: '선택 입력 항목', type: 'textarea' },
+      { id: 'auto_reply', label: '자동 회신 메일 발송 여부', type: 'multi-check', options: ['발송', '미발송'] },
+      { id: 'privacy_consent', label: '개인정보 수집·이용 동의문', type: 'multi-check', options: ['보유', '제작사 요청'] },
+    ]
+  },
+  {
+    id: 's_press', part: 'b2', partTitle: '확장 페이지',
+    title: '8. 프레스킷 / 미디어 자료실',
+    color: 'mixed', type: 'kv',
+    desc: '언론·파트너용 자료를 다운로드할 수 있는 페이지.',
+    fields: [
+      { id: 'press_kit_need', label: '프레스킷 페이지 운영', type: 'multi-check', options: ['운영', '미운영'] },
+      { id: 'press_kit_assets', label: '제공 자료', placeholder: '예: 로고, 브랜드 사진, 보도자료 PDF, 미디어 문의처', type: 'textarea' },
+      { id: 'press_contact', label: '미디어 문의 담당자' },
+      { id: 'press_archive', label: '보도 이력 아카이브', type: 'multi-check', options: ['연도별 정리', '카테고리별', '미운영'] },
+    ]
+  },
+  {
+    id: 's_esg', part: 'b2',
+    title: '9. ESG / 지속가능경영',
+    color: 'mixed', type: 'kv',
+    desc: 'B2B와 채용에서 중요도가 커지는 영역입니다.',
+    fields: [
+      { id: 'esg_page', label: 'ESG 페이지 운영', type: 'multi-check', options: ['운영', '미운영', '추후 검토'] },
+      { id: 'esg_content', label: '주요 콘텐츠', placeholder: '환경 정책, 사회공헌, 지배구조, 윤리경영, 협력사 정책 등', type: 'textarea' },
+      { id: 'esg_report', label: '지속가능경영 보고서', type: 'multi-check', options: ['보유 (다운로드 페이지 필요)', '미보유'] },
+    ]
+  },
+  {
+    id: 's_ir', part: 'b2',
+    title: '10. IR / 투자정보 (해당 시)',
+    color: 'mixed', type: 'kv',
+    desc: '상장사 또는 투자 유치 단계 기업의 경우.',
+    fields: [
+      { id: 'ir_page', label: 'IR 페이지 운영', type: 'multi-check', options: ['운영', '미운영', '해당 없음'] },
+      { id: 'ir_content', label: '주요 콘텐츠', placeholder: '재무 공시, 사업보고서, 주주 정보, 공시 일정 등', type: 'textarea' },
+      { id: 'ir_disclosure', label: '공시 시스템 연동', type: 'multi-check', options: ['DART 연동', '직접 업로드', '미해당'] },
+    ]
+  },
+  {
+    id: 's_ats', part: 'b2',
+    title: '11. 채용 시스템 연동',
+    color: 'mixed', type: 'kv',
+    desc: '채용 페이지의 지원서 처리 방식.',
+    fields: [
+      { id: 'recruit_method', label: '채용 운영 방식', type: 'multi-check', options: ['자체 지원서 양식', '외부 ATS 연동', '이메일 접수', '미해당'], tooltip: 'ATS = Applicant Tracking System. 채용 지원자 관리 시스템.' },
+      { id: 'ats_provider', label: 'ATS 도구', placeholder: '예: 그리팅, 점핏, 사람인 ATS, 잡코리아, Greenhouse' },
+      { id: 'recruit_workflow', label: '지원자 처리 워크플로', type: 'textarea', placeholder: '서류 → 면접 → 합격 통보 등 단계별 자동 메일 여부' },
+    ]
+  },
+  {
+    id: 's_branches', part: 'b2',
+    title: '12. 다지점 / 글로벌 사이트',
+    color: 'mixed', type: 'kv',
+    desc: '여러 지점·지사를 운영하는 경우.',
+    fields: [
+      { id: 'multi_branch', label: '다지점 운영', type: 'multi-check', options: ['국내 다지점', '글로벌 지사', '해당 없음'] },
+      { id: 'branch_count', label: '지점 수' },
+      { id: 'branch_features', label: '지점별 기능', placeholder: '예: 지점 검색, 예약 시스템, 지점별 별도 페이지, 길찾기' },
+      { id: 'global_structure', label: '글로벌 사이트 구조', type: 'multi-check', options: ['국가별 도메인 분리(.kr, .com)', '단일 도메인 + 언어 선택', '서브도메인(jp.example.com)', '미해당'] },
+    ]
+  },
+
+  // =============================================================
+  // ============= TAB 3: 자사몰 =================================
+  // =============================================================
+
+  // 사이트별 개요/일정/레퍼런스
+  {
+    id: 'c_overview', part: 'c0', partTitle: '자사몰 개요',
+    title: '1. 프로젝트 개요 (자사몰)',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'is_renewal_c', label: '신규 / 리뉴얼', type: 'multi-check', options: ['신규 제작', '리뉴얼'], required: true },
+      { id: 'existing_url_c', label: '기존 사이트 URL (리뉴얼 시)' },
+      { id: 'main_purpose_c', label: '주요 제작 목적', placeholder: '예: 매출 증대, 오픈마켓 의존도 감축, 회원 데이터 직접 확보 등', type: 'textarea', required: true },
+      { id: 'kpi_c', label: '주요 KPI / 성공 지표', placeholder: '예: 월 매출 ___원, 전환율 ___%, 객단가 ___원, 재구매율 ___%', type: 'textarea', tooltip: '자사몰의 KPI는 매출·전환율·객단가·재구매율이 중심입니다.' },
+    ]
+  },
+  {
+    id: 'c_schedule', part: 'c0',
+    title: '2. 일정 및 예산 (자사몰)',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'launch_date_c', label: '희망 오픈일', type: 'date', required: true, tooltip: '자사몰은 결제·배송·상품 시스템으로 인해 보통 14~18주 소요됩니다.' },
+      { id: 'milestones_c', label: '선호 마일스톤', placeholder: '예: 기획 ___주, 디자인 ___주, 개발 ___주, 검수 ___주, 시범 운영 ___주', type: 'textarea' },
+      { id: 'budget_range_c', label: '예산 범위', type: 'multi-check', options: ['~1천만원', '1~3천만원', '3~5천만원', '5천만원~1억원', '1억원 이상'], required: true },
+      { id: 'budget_split_c', label: '예산 분리 (제작/유지보수/마케팅)', type: 'textarea' },
+    ]
+  },
+  {
+    id: 'c_refs', part: 'c0',
+    title: '3. 벤치마킹 / 레퍼런스 사이트 (자사몰)',
+    color: 'yellow', type: 'references',
+    desc: '마음에 드는 자사몰·이커머스 사이트를 자유롭게 적어주세요.',
+    count: 5,
+  },
+
+  // 기존 자사몰 섹션 (재번호: 4부터)
+  {
+    id: 's_restricted', part: 'c1', partTitle: '판매 가능 사전 확인',
+    title: '4. 판매 상품 / 업종 사전 확인',
+    color: 'yellow', type: 'kv',
+    desc: 'PG 가입 단계에서 결제 불가 업종으로 분류되면 심사가 반려됩니다. 사전에 확인해주세요.',
+    fields: [
+      { id: 'product_type', label: '주요 판매 상품', type: 'textarea', placeholder: '예: 한방 다이어트 식품, 건강기능식품, 의류 등', required: true },
+      { id: 'restricted_check', label: '결제 불가/제한 업종 해당 여부', type: 'multi-check', options: ['해당 없음', '상품권/사이버머니', '주류/담배/도박', '성인 콘텐츠', '귀금속/보석류', '해외 직구', '확실치 않음'], tooltip: '카드사·PG사 정책에 따라 결제 불가 또는 별도 심사가 필요한 업종.' },
+      { id: 'health_food_cert', label: '건강기능식품/의약품 인증 (해당 시)', type: 'multi-check', options: ['식약처 인증 보유', '해당 없음', '신청 중'] },
+      { id: 'tongguan_id', label: '개인통관고유부호 수집 필요', type: 'multi-check', options: ['필요 (해외 직배송)', '불필요'], tooltip: '해외에서 직배송하는 경우 관세청에서 발급받는 개인 식별 번호.' },
+    ]
+  },
+  {
+    id: 's12', part: 'c2', partTitle: '플랫폼 & 상품',
+    title: '5. 구축 플랫폼 / 방식',
+    color: 'blue', type: 'kv',
+    desc: '클라이언트 선호도와 예산·기능 요건에 따라 협의 결정합니다.',
+    fields: [
+      { id: 'build_method', label: '희망 구축 방식', type: 'multi-check', options: ['자체 개발(커스텀)', '솔루션 사용', '미정 (제작사 추천)'], required: true },
+      { id: 'platform_pref', label: '솔루션 선호도', type: 'multi-check', options: ['카페24', '메이크샵', '고도몰', '아임웹', '식스샵', 'Shopify', 'WooCommerce', 'NHN커머스', '기타'] },
+      { id: 'has_existing_mall', label: '기존 몰 보유 여부', type: 'multi-check', options: ['신규', '이전'] },
+      { id: 'existing_platform', label: '기존 플랫폼 (이전 시)' },
+      { id: 'data_migration', label: '데이터 마이그레이션 범위', type: 'multi-check', options: ['회원', '주문 이력', '상품', '후기', '적립금', '해당없음'] },
+      { id: 'devices', label: '대응 디바이스', type: 'multi-check', options: ['PC', '모바일 웹', '모바일 앱(추후)', '반응형(필수)'] },
+    ]
+  },
+  {
+    id: 's13', part: 'c2',
+    title: '6. 상품 정보',
+    color: 'yellow', type: 'kv',
+    desc: '상품 등록용 엑셀 양식은 제작사가 제공해드립니다. PG 심사 시 최소 5개 이상 등록 필요.',
+    fields: [
+      { id: 'product_count', label: '전체 상품 수 (예상)', placeholder: '약 ___개', required: true },
+      { id: 'category_count', label: '대분류 카테고리 수' },
+      { id: 'category_list', label: '대분류 목록', type: 'textarea' },
+      { id: 'sub_category', label: '중·소분류 운영 여부', type: 'multi-check', options: ['운영', '미운영'] },
+      { id: 'options', label: '옵션 운영 (사이즈/색상 등)', type: 'multi-check', options: ['단일', '단일옵션', '조합옵션'] },
+      { id: 'product_data', label: '상품 등록용 데이터 보유', type: 'multi-check', options: ['엑셀', '기존 몰 DB', '신규 입력 필요'] },
+      { id: 'detail_page_owner', label: '상품 상세페이지 제작 주체', type: 'multi-check', options: ['클라이언트 직접', '제작사 외주', '일부 외주'] },
+      { id: 'pim_need', label: 'PIM (상품 정보 관리) 도구 필요', type: 'multi-check', options: ['필요 (대규모 카탈로그)', '불필요'], tooltip: 'Product Information Management. 1000+ 상품을 다채널 운영할 때 유용.' },
+    ]
+  },
+  {
+    id: 's13b', part: 'c2',
+    title: '6-1. 상품 자산',
+    color: 'mixed', type: 'responsibility',
+    items: [
+      '상품 메인 이미지 (정사각/누끼)',
+      '상품 연출 컷 (분위기/모델 컷)',
+      '상품 상세페이지 디자인',
+      '상품 설명 카피 / SEO 텍스트',
+      '성분·원산지·인증 정보',
+      '상품 영상 / GIF',
+      '사이즈 차트 / 가이드',
+    ]
+  },
+  {
+    id: 's14', part: 'c3', partTitle: '결제 · 배송 · 회원',
+    title: '7. 결제 / 배송 / 정산',
+    color: 'mixed', type: 'kv',
+    fields: [
+      { id: 'pg_pref', label: 'PG사 선호도', type: 'multi-check', options: ['토스페이먼츠', 'KG이니시스', 'NHN KCP', '나이스페이', '카카오페이', '네이버페이', '기타'], tooltip: 'Payment Gateway. 카드사·은행과 가맹점 사이의 결제 대행사.' },
+      { id: 'payment_methods', label: '결제 수단', type: 'multi-check', options: ['신용카드', '계좌이체', '무통장입금', '간편결제', '휴대폰', '해외카드'] },
+      { id: 'tax_type', label: '부가세 사업자 구분', type: 'multi-check', options: ['일반과세', '간이과세', '면세사업자'] },
+      { id: 'shipping_company', label: '택배사 / 기본 배송비', placeholder: '예: 우체국택배 / 3,000원' },
+      { id: 'free_shipping', label: '무료배송 기준', placeholder: '예: 50,000원 이상 무료' },
+      { id: 'remote_shipping', label: '도서산간 추가 배송비', placeholder: '예: 제주 3,000원, 도서산간 5,000원' },
+      { id: 'return_policy', label: '반품/교환 정책', placeholder: '기간: ___일 / 왕복배송비: ____원' },
+      { id: 'returnless_refund', label: '비반송 환불 (Returnless)', type: 'multi-check', options: ['도입 (저가 상품)', '미도입'], tooltip: '저가 상품에 대해 반품 없이 환불 처리하는 정책. CS 비용 절감.' },
+      { id: 'tax_invoice', label: '세금계산서 발행', type: 'multi-check', options: ['자동 발행 시스템 필요', '수동 발행'] },
+      { id: 'cash_receipt', label: '현금영수증 발행', type: 'multi-check', options: ['자동 발행 필요', '수동 발행'] },
+    ]
+  },
+  {
+    id: 's15', part: 'c3',
+    title: '8. 회원 시스템',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'signup_policy', label: '가입 정책', type: 'multi-check', options: ['필수 가입', '비회원 주문 허용', '둘 다'] },
+      { id: 'social_login', label: '소셜 로그인', type: 'multi-check', options: ['카카오', '네이버', '구글', 'Apple', '페이스북'] },
+      { id: 'membership_tier', label: '회원 등급제', type: 'multi-check', options: ['운영', '미운영'] },
+      { id: 'tier_count', label: '등급 수 / 산정 기준', placeholder: '예: 4등급 / 누적 구매액 기준' },
+      { id: 'tier_benefits', label: '등급별 혜택', type: 'textarea', placeholder: '예: 등급별 할인율, 무료배송, 전용 쿠폰' },
+      { id: 'minor_signup', label: '만 14세 미만 가입', type: 'multi-check', options: ['허용 (보호자 동의)', '불허'] },
+    ]
+  },
+  {
+    id: 's16', part: 'c4', partTitle: '마케팅 · 운영',
+    title: '9. 마케팅 / 프로모션 기능',
+    color: 'mixed', type: 'responsibility',
+    items: [
+      '적립금 시스템',
+      '쿠폰 / 할인코드',
+      '할인 자동 적용 (장바구니 룰)',
+      '리뷰·포토리뷰 작성',
+      '상품 Q&A 게시판',
+      '위시리스트 / 즐겨찾기',
+      '재입고 알림 (이메일·SMS)',
+      '장바구니 이탈 리마케팅',
+      '친구 초대 / 추천인 코드',
+      '기획전 / 이벤트 페이지',
+      '타임세일 / 한정수량',
+      '구독 결제 (정기 배송)',
+    ]
+  },
+  {
+    id: 's_live', part: 'c4',
+    title: '9-1. 라이브 커머스',
+    color: 'mixed', type: 'kv',
+    desc: '실시간 영상으로 상품을 판매하는 채널.',
+    fields: [
+      { id: 'live_commerce', label: '라이브 커머스 운영', type: 'multi-check', options: ['외부 플랫폼 활용', '자사몰 내장', '미운영', '추후 검토'] },
+      { id: 'live_platform', label: '활용 플랫폼', type: 'multi-check', options: ['네이버 쇼핑라이브', '그립', '카카오쇼핑라이브', '인스타 라이브', '자체 개발', '미정'] },
+    ]
+  },
+  {
+    id: 's17', part: 'c4',
+    title: '10. 외부 연동 / 운영',
+    color: 'mixed', type: 'responsibility',
+    items: [
+      'ERP / 재고관리 (이지어드민·셀러허브 등)',
+      '물류 / 풀필먼트',
+      'SMS / 카카오 알림톡 발송',
+      '이메일 자동화 (스티비·메일침프)',
+      '채널톡 / 채팅 상담',
+      '네이버 쇼핑 연동',
+      '카카오 쇼핑하우스 연동',
+      '쿠팡·11번가 등 오픈마켓',
+      '구글 쇼핑 / Meta Shop 연동',
+      '리뷰 위젯 (크리마·라이브리)',
+      '세무·회계 시스템 (세친구·삼쩜삼)',
+      'CDP / 마케팅 자동화 (Braze·Klaviyo)',
+    ]
+  },
+  {
+    id: 's_omni', part: 'c4',
+    title: '10-1. 옴니채널 / 오프라인 연동',
+    color: 'mixed', type: 'kv',
+    desc: '오프라인 매장이나 다른 판매 채널과의 통합 운영.',
+    fields: [
+      { id: 'offline_store', label: '오프라인 매장 보유', type: 'multi-check', options: ['있음 (매장 수: ___)', '없음'] },
+      { id: 'pos_integration', label: 'POS 연동', type: 'multi-check', options: ['POS 시스템 연동', '재고만 통합', '미연동'] },
+      { id: 'click_collect', label: '매장 픽업 (Click & Collect)', type: 'multi-check', options: ['도입', '미도입', '추후 검토'] },
+      { id: 'unified_membership', label: '온·오프 회원 통합', type: 'multi-check', options: ['통합 운영', '별도 운영'] },
+    ]
+  },
+  {
+    id: 's_channels', part: 'c4',
+    title: '10-2. 다른 판매 채널 운영 현황',
+    color: 'yellow', type: 'kv',
+    desc: '자사몰 외 운영 중인 채널과 비중을 정리해주세요.',
+    fields: [
+      { id: 'other_channels', label: '운영 중인 채널', type: 'multi-check', options: ['네이버 스마트스토어', '쿠팡', '11번가', '지마켓/옥션', '카카오톡 스토어', '오픈마켓 종합', '없음'] },
+      { id: 'channel_priority', label: '채널별 매출 비중', type: 'textarea', placeholder: '예: 자사몰 30%, 스마트스토어 50%, 쿠팡 20%' },
+      { id: 'integration_tool', label: '통합 관리 도구', type: 'multi-check', options: ['이지어드민', '셀러허브', '플레이오토', '미사용', '미정'] },
+    ]
+  },
+  {
+    id: 's_b2b', part: 'c5', partTitle: 'B2B / 추가 기능',
+    title: '11. B2B / 도매 기능',
+    color: 'blue', type: 'kv',
+    desc: '사업자 회원 대상 도매 판매 운영 시.',
+    fields: [
+      { id: 'b2b_need', label: 'B2B / 도매 운영', type: 'multi-check', options: ['운영', '미운영', '추후 검토'] },
+      { id: 'b2b_signup', label: '사업자 회원 별도 가입', type: 'multi-check', options: ['필요', '불필요'], tooltip: '사업자등록증 검증 후 도매가 노출.' },
+      { id: 'b2b_pricing', label: '도매가 노출 방식', type: 'multi-check', options: ['전체 회원 노출', '사업자 회원만 노출', '로그인 후 노출'] },
+      { id: 'bulk_order', label: '대량 주문 기능', type: 'multi-check', options: ['엑셀 일괄 주문', '견적서 발행', '후불 결제(여신)', '필요 없음'] },
+      { id: 'b2b_min_order', label: 'MOQ (최소 주문 수량)', placeholder: '예: 10개 이상 / 50,000원 이상' },
+    ]
+  },
+  {
+    id: 's18', part: 'c5',
+    title: '12. 운영자 관리 권한',
+    color: 'yellow', type: 'kv',
+    fields: [
+      { id: 'admin_count', label: '관리자 계정 수', placeholder: '총 ___명' },
+      { id: 'admin_roles', label: '권한 분리 필요 여부', type: 'multi-check', options: ['마스터/매니저/CS 등 분리', '단일 관리자'] },
+      { id: 'order_volume', label: '주문 처리 인원 / 일일 주문 예상', placeholder: '처리 인원: ___명 / 예상 주문 수: ___건' },
+      { id: 'cs_channels', label: 'CS 응대 채널', type: 'multi-check', options: ['전화', '이메일', '카카오 채널', '채널톡', '1:1 게시판'] },
+      { id: 'cs_hours', label: '운영시간 / CS 시간', placeholder: '예: 평일 10:00~17:00' },
+    ]
+  },
+];
+
+// Color tokens
+const colorMap = {
+  yellow: { bg: 'bg-amber-50', border: 'border-amber-300', text: 'text-amber-900', dot: 'bg-amber-400', label: '클라이언트 작성' },
+  green: { bg: 'bg-emerald-50', border: 'border-emerald-300', text: 'text-emerald-900', dot: 'bg-emerald-500', label: '제작사 요청 가능' },
+  blue: { bg: 'bg-sky-50', border: 'border-sky-300', text: 'text-sky-900', dot: 'bg-sky-500', label: '협의/공동 결정' },
+  mixed: { bg: 'bg-stone-50', border: 'border-stone-300', text: 'text-stone-900', dot: 'bg-gradient-to-r from-amber-400 to-emerald-500', label: '구분 작성' },
+};
+
+// Tabs (top-level grouping)
+const TABS = [
+  {
+    id: 'common',
+    label: '공통 사항',
+    desc: '두 사이트에 모두 적용되는 정보',
+    Icon: Layers,
+    accent: 'stone',
+  },
+  {
+    id: 'brand',
+    label: '브랜드 사이트',
+    desc: '기업/브랜드 소개 홈페이지',
+    Icon: Globe,
+    accent: 'sky',
+  },
+  {
+    id: 'commerce',
+    label: '자사몰',
+    desc: '온라인 커머스 / 쇼핑몰',
+    Icon: ShoppingBag,
+    accent: 'emerald',
+  },
+];
+
+// Map a section to its tab based on part number
+function getSectionTab(section) {
+  const p = section.part;
+  if (typeof p === 'string' && p.startsWith('b')) return 'brand';
+  if (typeof p === 'string' && p.startsWith('c')) return 'commerce';
+  if (p === 2) return 'brand';     // legacy compatibility
+  if (p === 3) return 'commerce';  // legacy compatibility
+  return 'common';
+}
+
+const STORAGE_KEY = 'project-brief-form-v1';
+const HIDDEN_KEY = '_hidden_sections';
+
+// ========== Helper Components ==========
+
+function Tooltip({ text }) {
+  if (!text) return null;
+  return (
+    <span className="relative inline-flex items-center group ml-1.5 align-middle">
+      <HelpCircle size={13} className="text-stone-400 hover:text-stone-700 cursor-help" />
+      <span className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 w-64 px-3 py-2 bg-stone-900 text-white text-xs rounded-md shadow-lg leading-relaxed pointer-events-none">
+        {text}
+        <span className="absolute left-1/2 top-full -translate-x-1/2 -mt-px border-4 border-transparent border-t-stone-900" />
+      </span>
+    </span>
+  );
+}
+
+function RequiredMark({ show }) {
+  if (!show) return null;
+  return <span className="text-rose-500 ml-0.5" aria-label="필수">*</span>;
+}
+
+function FieldLabel({ label, required, tooltip, htmlFor, className = '' }) {
+  return (
+    <label htmlFor={htmlFor} className={`text-sm font-medium text-stone-700 ${className}`}>
+      {label}
+      <RequiredMark show={required} />
+      <Tooltip text={tooltip} />
+    </label>
+  );
+}
+
+// ========== Field Components ==========
+
+function TextField({ id, value, onChange, placeholder, multi }) {
+  if (multi) {
+    return (
+      <textarea
+        value={value || ''}
+        onChange={e => onChange(id, e.target.value)}
+        placeholder={placeholder || ''}
+        rows={3}
+        className="w-full px-4 py-3 bg-white border border-stone-300 rounded-md text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent resize-y text-sm leading-relaxed"
+      />
+    );
+  }
+  return (
+    <input
+      type="text"
+      value={value || ''}
+      onChange={e => onChange(id, e.target.value)}
+      placeholder={placeholder || ''}
+      className="w-full px-4 py-2.5 bg-white border border-stone-300 rounded-md text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent text-sm"
+    />
+  );
+}
+
+function DateField({ id, value, onChange }) {
+  return (
+    <input
+      type="date"
+      value={value || ''}
+      onChange={e => onChange(id, e.target.value)}
+      className="px-4 py-2.5 bg-white border border-stone-300 rounded-md text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-900 focus:border-transparent text-sm"
+    />
+  );
+}
+
+function MultiCheck({ id, value, onChange, options }) {
+  const selected = value || [];
+  const toggle = (opt) => {
+    const next = selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt];
+    onChange(id, next);
+  };
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map(opt => {
+        const on = selected.includes(opt);
+        return (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => toggle(opt)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
+              on
+                ? 'bg-stone-900 text-white border-stone-900 shadow-sm'
+                : 'bg-white text-stone-600 border-stone-300 hover:border-stone-500 hover:text-stone-900'
+            }`}
+          >
+            {on && <span className="mr-1">✓</span>}{opt}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ResponsibilityRow({ index, item, value, onChange }) {
+  const v = value || {};
+  const update = (k, val) => onChange(`resp_${index}`, { ...v, [k]: val });
+  return (
+    <tr className="border-b border-stone-200 last:border-0 hover:bg-stone-50/50 transition-colors">
+      <td className="py-3 px-4 text-sm text-stone-800 align-top w-2/5">{item}</td>
+      <td className="py-3 px-2 align-top">
+        <button
+          type="button"
+          onClick={() => update('owned', !v.owned)}
+          className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all mx-auto ${
+            v.owned ? 'bg-amber-400 border-amber-400' : 'bg-white border-stone-300 hover:border-amber-400'
+          }`}
+          aria-label="보유"
+        >
+          {v.owned && <Check size={14} className="text-white" strokeWidth={3} />}
+        </button>
+      </td>
+      <td className="py-3 px-2 align-top">
+        <button
+          type="button"
+          onClick={() => update('request', !v.request)}
+          className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all mx-auto ${
+            v.request ? 'bg-emerald-500 border-emerald-500' : 'bg-white border-stone-300 hover:border-emerald-500'
+          }`}
+          aria-label="제작사 요청"
+        >
+          {v.request && <Check size={14} className="text-white" strokeWidth={3} />}
+        </button>
+      </td>
+      <td className="py-3 px-2 align-top">
+        <input
+          type="text"
+          value={v.note || ''}
+          onChange={e => update('note', e.target.value)}
+          placeholder="비고/세부 요구"
+          className="w-full px-3 py-1.5 bg-white border border-stone-200 rounded text-xs text-stone-700 placeholder-stone-400 focus:outline-none focus:border-stone-500"
+        />
+      </td>
+    </tr>
+  );
+}
+
+function ChecklistItem({ index, item, value, onChange }) {
+  const v = value || {};
+  const update = (k, val) => onChange(`cl_${index}`, { ...v, [k]: val });
+  return (
+    <div className="flex gap-3 items-start py-2.5 px-3 rounded-md hover:bg-stone-50 transition-colors group">
+      <button
+        type="button"
+        onClick={() => update('checked', !v.checked)}
+        className={`mt-0.5 w-5 h-5 flex-shrink-0 rounded border-2 flex items-center justify-center transition-all ${
+          v.checked ? 'bg-stone-900 border-stone-900' : 'bg-white border-stone-300 group-hover:border-stone-500'
+        }`}
+      >
+        {v.checked && <Check size={12} className="text-white" strokeWidth={3} />}
+      </button>
+      <div className="flex-1 min-w-0">
+        <div className={`text-sm ${v.checked ? 'text-stone-900 font-medium' : 'text-stone-700'}`}>{item}</div>
+        <input
+          type="text"
+          value={v.note || ''}
+          onChange={e => update('note', e.target.value)}
+          placeholder="메모"
+          className="mt-1 w-full px-2 py-1 bg-transparent border-0 border-b border-stone-200 text-xs text-stone-600 placeholder-stone-400 focus:outline-none focus:border-stone-500"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ReferencesTable({ value, onChange, count, storageKey = 'refs' }) {
+  const refs = value || Array.from({ length: count }, () => ({ url: '', note: '' }));
+  const update = (i, k, v) => {
+    const next = [...refs];
+    next[i] = { ...next[i], [k]: v };
+    onChange(storageKey, next);
+  };
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="grid grid-cols-12 gap-2">
+          <div className="col-span-12 md:col-span-4">
+            <input
+              type="text"
+              value={refs[i]?.url || ''}
+              onChange={e => update(i, 'url', e.target.value)}
+              placeholder={`레퍼런스 ${i + 1} URL`}
+              className="w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900 text-sm"
+            />
+          </div>
+          <div className="col-span-12 md:col-span-8">
+            <input
+              type="text"
+              value={refs[i]?.note || ''}
+              onChange={e => update(i, 'note', e.target.value)}
+              placeholder="좋은 점 / 아쉬운 점"
+              className="w-full px-3 py-2 bg-white border border-stone-300 rounded-md text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900 text-sm"
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ========== Section Renderer ==========
+
+function SectionBlock({ section, formData, updateField, sectionRef, isHidden, onToggleHide }) {
+  const c = colorMap[section.color] || colorMap.blue;
+
+  // Render hidden section as collapsed header
+  if (isHidden) {
+    return (
+      <section ref={sectionRef} id={section.id} className="scroll-mt-32 mb-3 break-inside-avoid">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 bg-stone-100/60 border border-dashed border-stone-300 rounded-lg">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <EyeOff size={14} className="text-stone-400 flex-shrink-0" />
+            <span className="text-sm text-stone-500 truncate">{section.title}</span>
+            <span className="text-[10px] uppercase tracking-wider text-stone-400 px-2 py-0.5 bg-white border border-stone-200 rounded">숨김</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => onToggleHide(section.id)}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-white rounded transition-colors flex-shrink-0"
+          >
+            <Eye size={12} />보이기
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  // KV (key-value) section
+  if (section.type === 'kv' || section.id === 'cover') {
+    return (
+      <section ref={sectionRef} id={section.id} className="scroll-mt-32 mb-10 break-inside-avoid">
+        <SectionHeader section={section} c={c} onToggleHide={onToggleHide} />
+        <div className="space-y-5 mt-5">
+          {section.fields.map(f => (
+            <div key={f.id} className="grid grid-cols-12 gap-3 md:gap-4 items-start">
+              <div className="col-span-12 md:col-span-3 md:pt-2.5 flex items-start">
+                <FieldLabel htmlFor={f.id} label={f.label} required={f.required} tooltip={f.tooltip} />
+              </div>
+              <div className="col-span-12 md:col-span-9">
+                {f.type === 'date' ? (
+                  <DateField id={f.id} value={formData[f.id]} onChange={updateField} />
+                ) : f.type === 'multi-check' ? (
+                  <MultiCheck id={f.id} value={formData[f.id]} onChange={updateField} options={f.options} />
+                ) : f.type === 'textarea' ? (
+                  <TextField id={f.id} value={formData[f.id]} onChange={updateField} placeholder={f.placeholder} multi />
+                ) : (
+                  <TextField id={f.id} value={formData[f.id]} onChange={updateField} placeholder={f.placeholder} />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  // Responsibility table
+  if (section.type === 'responsibility') {
+    return (
+      <section ref={sectionRef} id={section.id} className="scroll-mt-32 mb-10 break-inside-avoid">
+        <SectionHeader section={section} c={c} onToggleHide={onToggleHide} />
+        <div className="mt-5 overflow-x-auto rounded-lg border border-stone-200">
+          <table className="w-full">
+            <thead className="bg-stone-100">
+              <tr>
+                <th className="text-left py-3 px-4 text-xs font-semibold uppercase tracking-wide text-stone-700">항목</th>
+                <th className="py-3 px-2 text-xs font-semibold text-amber-800 w-20 bg-amber-50">보유/제공</th>
+                <th className="py-3 px-2 text-xs font-semibold text-emerald-800 w-20 bg-emerald-50">제작사 요청</th>
+                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wide text-stone-700">비고</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {section.items.map((item, i) => (
+                <ResponsibilityRow
+                  key={i}
+                  index={`${section.id}_${i}`}
+                  item={item}
+                  value={formData[`resp_${section.id}_${i}`]}
+                  onChange={updateField}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    );
+  }
+
+  // Simple checklist
+  if (section.type === 'checklist') {
+    return (
+      <section ref={sectionRef} id={section.id} className="scroll-mt-32 mb-10 break-inside-avoid">
+        <SectionHeader section={section} c={c} onToggleHide={onToggleHide} />
+        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-1 bg-white p-3 rounded-lg border border-stone-200">
+          {section.items.map((item, i) => (
+            <ChecklistItem
+              key={i}
+              index={`${section.id}_${i}`}
+              item={item}
+              value={formData[`cl_${section.id}_${i}`]}
+              onChange={updateField}
+            />
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  // References
+  if (section.type === 'references') {
+    const refsKey = `refs_${section.id}`;
+    return (
+      <section ref={sectionRef} id={section.id} className="scroll-mt-32 mb-10 break-inside-avoid">
+        <SectionHeader section={section} c={c} onToggleHide={onToggleHide} />
+        <div className="mt-5">
+          <ReferencesTable value={formData[refsKey]} onChange={updateField} count={section.count} storageKey={refsKey} />
+        </div>
+      </section>
+    );
+  }
+
+  // Freeform
+  if (section.type === 'freeform') {
+    return (
+      <section ref={sectionRef} id={section.id} className="scroll-mt-32 mb-10 break-inside-avoid">
+        <SectionHeader section={section} c={c} onToggleHide={onToggleHide} />
+        <div className="mt-5">
+          <textarea
+            value={formData['freeform_text'] || ''}
+            onChange={e => updateField('freeform_text', e.target.value)}
+            rows={8}
+            placeholder="자유롭게 작성해주세요..."
+            className="w-full px-4 py-3 bg-white border border-stone-300 rounded-md text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900 resize-y text-sm leading-relaxed"
+          />
+        </div>
+      </section>
+    );
+  }
+
+  return null;
+}
+
+function SectionHeader({ section, c, onToggleHide }) {
+  return (
+    <header className="flex items-start gap-3 pb-3 border-b border-stone-200">
+      <div className="flex-1 min-w-0">
+        <h3 className="text-xl font-bold text-stone-900 tracking-tight">{section.title}</h3>
+        {section.desc && <p className="mt-1 text-sm text-stone-600">{section.desc}</p>}
+      </div>
+      <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${c.bg} ${c.text} border ${c.border} flex-shrink-0`}>
+        <span className={`w-2 h-2 rounded-full ${c.dot}`} />
+        {c.label}
+      </span>
+      {onToggleHide && section.id !== 'cover' && (
+        <button
+          type="button"
+          onClick={() => onToggleHide(section.id)}
+          title="이 섹션 숨기기"
+          aria-label="이 섹션 숨기기"
+          className="flex-shrink-0 p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded transition-colors print:hidden"
+        >
+          <EyeOff size={15} />
+        </button>
+      )}
+    </header>
+  );
+}
+
+// ========== Main App ==========
+
+function ProjectBriefForm() {
+  const [formData, setFormData] = useState({});
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved
+  const [tocOpen, setTocOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('cover');
+  const [activeTab, setActiveTab] = useState('common');
+  const sectionRefs = useRef({});
+
+  // Migrate old single-site fields to new per-site fields
+  const migrateData = (data) => {
+    if (!data || typeof data !== 'object') return data;
+    const m = { ...data };
+    const fieldMap = [
+      ['is_renewal',   ['is_renewal_b', 'is_renewal_c']],
+      ['existing_url', ['existing_url_b', 'existing_url_c']],
+      ['main_purpose', ['main_purpose_b', 'main_purpose_c']],
+      ['kpi',          ['kpi_b', 'kpi_c']],
+      ['launch_date',  ['launch_date_b', 'launch_date_c']],
+      ['milestones',   ['milestones_b', 'milestones_c']],
+      ['budget_range', ['budget_range_b', 'budget_range_c']],
+      ['budget_split', ['budget_split_b', 'budget_split_c']],
+    ];
+    fieldMap.forEach(([oldKey, [newB, newC]]) => {
+      if (m[oldKey] !== undefined && m[newB] === undefined && m[newC] === undefined) {
+        m[newB] = m[oldKey];
+        m[newC] = m[oldKey];
+        delete m[oldKey];
+      }
+    });
+    // References — old 'refs' (was attached to s2b) → new 'refs_b_refs' as default
+    if (m.refs && !m['refs_b_refs'] && !m['refs_c_refs']) {
+      m['refs_b_refs'] = m.refs;
+      delete m.refs;
+    }
+    return m;
+  };
+
+  // Load saved data
+  useEffect(() => {
+    const load = async () => {
+      try {
+        if (window.storage) {
+          const result = await window.storage.get(STORAGE_KEY);
+          if (result?.value) {
+            setFormData(migrateData(JSON.parse(result.value)));
+          }
+        }
+      } catch (e) {
+        // No saved data — start fresh
+      }
+      setIsLoaded(true);
+    };
+    load();
+  }, []);
+
+  // Auto-save (debounced)
+  useEffect(() => {
+    if (!isLoaded) return;
+    setSaveStatus('saving');
+    const timer = setTimeout(async () => {
+      try {
+        if (window.storage) {
+          await window.storage.set(STORAGE_KEY, JSON.stringify(formData));
+        }
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 1500);
+      } catch (e) {
+        setSaveStatus('idle');
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [formData, isLoaded]);
+
+  // Track active section on scroll — re-runs when tab changes
+  useEffect(() => {
+    if (!isLoaded) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-30% 0px -60% 0px' }
+    );
+    // Wait one tick for refs to populate after tab switch
+    const t = setTimeout(() => {
+      Object.values(sectionRefs.current).forEach(ref => {
+        if (ref) observer.observe(ref);
+      });
+    }, 80);
+    return () => {
+      clearTimeout(t);
+      observer.disconnect();
+    };
+  }, [isLoaded, activeTab]);
+
+  const updateField = (id, value) => {
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleTabChange = (tabId) => {
+    if (tabId === activeTab) return;
+    setActiveTab(tabId);
+    sectionRefs.current = {};
+    setActiveSection(null);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    setTocOpen(false);
+  };
+
+  // Hidden sections helpers
+  const hiddenSections = formData[HIDDEN_KEY] || [];
+  const isHidden = (sectionId) => hiddenSections.includes(sectionId);
+  const toggleHidden = (sectionId) => {
+    const next = hiddenSections.includes(sectionId)
+      ? hiddenSections.filter(id => id !== sectionId)
+      : [...hiddenSections, sectionId];
+    updateField(HIDDEN_KEY, next);
+  };
+  const restoreAllHidden = () => updateField(HIDDEN_KEY, []);
+
+  // Compute progress per tab + overall (excludes hidden sections)
+  const progressByTab = useMemo(() => {
+    const calc = (sections) => {
+      let total = 0, filled = 0;
+      sections.forEach(s => {
+        if (hiddenSections.includes(s.id)) return; // skip hidden
+        if (s.type === 'kv' || s.id === 'cover') {
+          s.fields.forEach(f => {
+            total++;
+            const v = formData[f.id];
+            if (v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)) filled++;
+          });
+        } else if (s.type === 'responsibility') {
+          s.items.forEach((_, i) => {
+            total++;
+            const v = formData[`resp_${s.id}_${i}`];
+            if (v && (v.owned || v.request)) filled++;
+          });
+        } else if (s.type === 'checklist') {
+          s.items.forEach((_, i) => {
+            total++;
+            const v = formData[`cl_${s.id}_${i}`];
+            if (v && v.checked) filled++;
+          });
+        } else if (s.type === 'references') {
+          total++;
+          const v = formData[`refs_${s.id}`];
+          if (v && v.some(r => r.url)) filled++;
+        } else if (s.type === 'freeform') {
+          total++;
+          if (formData['freeform_text']) filled++;
+        }
+      });
+      return { total, filled, percent: total ? Math.round((filled / total) * 100) : 0 };
+    };
+
+    const byTab = {};
+    TABS.forEach(t => {
+      byTab[t.id] = calc(SECTIONS.filter(s => getSectionTab(s) === t.id));
+    });
+    byTab.all = calc(SECTIONS);
+    return byTab;
+  }, [formData, hiddenSections]);
+
+  const progress = progressByTab.all;
+
+  // Group sections by part — filtered by active tab
+  const partGroups = useMemo(() => {
+    const filtered = SECTIONS.filter(s => getSectionTab(s) === activeTab);
+    const groups = [];
+    let current = null;
+    filtered.forEach(s => {
+      if (s.partTitle || s.id === 'cover' || !current) {
+        current = {
+          partTitle: s.partTitle || (s.id === 'cover' ? '프로젝트 정보' : ''),
+          part: s.part,
+          sections: []
+        };
+        groups.push(current);
+      }
+      current.sections.push(s);
+    });
+    return groups;
+  }, [activeTab]);
+
+  // Export functions
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(formData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `project-brief-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importJSON = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+          alert('올바른 JSON 형식이 아닙니다.');
+          return;
+        }
+        const migrated = migrateData(parsed);
+        const hasExisting = Object.keys(formData).some(k => k !== HIDDEN_KEY && formData[k]);
+        let mode = 'replace';
+        if (hasExisting) {
+          const choice = confirm(
+            '기존 작성 내용이 있습니다.\n\n' +
+            '확인 → 불러온 내용으로 전체 교체 (기존 내용 삭제)\n' +
+            '취소 → 병합 (불러온 항목으로 덮어쓰되 기존 다른 항목은 유지)'
+          );
+          mode = choice ? 'replace' : 'merge';
+        }
+        const next = mode === 'replace' ? migrated : { ...formData, ...migrated };
+        setFormData(next);
+        alert(`불러오기 완료 (${mode === 'replace' ? '전체 교체' : '병합'})`);
+      } catch (err) {
+        alert('JSON 파싱 실패: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const fileInputRef = useRef(null);
+  const triggerImport = () => fileInputRef.current?.click();
+
+  const exportText = () => {
+    const lines = ['===== 홈페이지 제작 의뢰서 =====', ''];
+    SECTIONS.forEach(s => {
+      if (hiddenSections.includes(s.id)) return; // skip hidden
+      if (s.partTitle) lines.push('', `## ${s.partTitle}`, '');
+      lines.push(`### ${s.title}`);
+      if (s.type === 'kv' || s.id === 'cover') {
+        s.fields.forEach(f => {
+          const v = formData[f.id];
+          if (v !== undefined && v !== '' && !(Array.isArray(v) && v.length === 0)) {
+            const display = Array.isArray(v) ? v.join(', ') : v;
+            lines.push(`- ${f.label}: ${display}`);
+          }
+        });
+      } else if (s.type === 'responsibility') {
+        s.items.forEach((item, i) => {
+          const v = formData[`resp_${s.id}_${i}`];
+          if (v && (v.owned || v.request || v.note)) {
+            const tags = [];
+            if (v.owned) tags.push('[보유]');
+            if (v.request) tags.push('[요청]');
+            lines.push(`- ${tags.join(' ')} ${item}${v.note ? ` — ${v.note}` : ''}`);
+          }
+        });
+      } else if (s.type === 'checklist') {
+        s.items.forEach((item, i) => {
+          const v = formData[`cl_${s.id}_${i}`];
+          if (v && v.checked) lines.push(`- [✓] ${item}${v.note ? ` — ${v.note}` : ''}`);
+        });
+      } else if (s.type === 'references') {
+        (formData[`refs_${s.id}`] || []).forEach((r, i) => {
+          if (r.url || r.note) lines.push(`- ${r.url || '(URL 없음)'}: ${r.note || ''}`);
+        });
+      } else if (s.type === 'freeform') {
+        if (formData['freeform_text']) lines.push(formData['freeform_text']);
+      }
+      lines.push('');
+    });
+    const text = lines.join('\n');
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `project-brief-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const reset = async () => {
+    if (!confirm('모든 입력 내용을 초기화합니다. 계속하시겠어요?')) return;
+    setFormData({});
+    try {
+      if (window.storage) await window.storage.delete(STORAGE_KEY);
+    } catch (e) {}
+  };
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+        <div className="text-stone-500 text-sm">불러오는 중...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-stone-50 text-stone-900" style={{ fontFamily: "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif" }}>
+      <style>{`
+        @media print {
+          .no-print { display: none !important; }
+          body { background: white !important; }
+          section { break-inside: avoid; page-break-inside: avoid; }
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
+        textarea { font-family: inherit; }
+      `}</style>
+
+      {/* Top Bar */}
+      <header className="no-print sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-stone-200">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => setTocOpen(!tocOpen)}
+            className="lg:hidden p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition-colors"
+            aria-label="목차"
+          >
+            {tocOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <FileText size={16} className="text-stone-700 flex-shrink-0" />
+              <h1 className="text-sm md:text-base font-bold text-stone-900 truncate">홈페이지 제작 의뢰서</h1>
+            </div>
+            <div className="flex items-center gap-3 mt-1.5">
+              <div className="flex-1 max-w-xs h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-stone-900 transition-all duration-500 ease-out"
+                  style={{ width: `${progress.percent}%` }}
+                />
+              </div>
+              <span className="text-xs text-stone-600 font-medium whitespace-nowrap">
+                {progress.filled}/{progress.total} · {progress.percent}%
+              </span>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center gap-1.5 text-xs text-stone-500">
+            {saveStatus === 'saving' && <><CircleDashed size={12} className="animate-spin" />저장 중</>}
+            {saveStatus === 'saved' && <><Check size={12} className="text-emerald-600" />저장됨</>}
+            {saveStatus === 'idle' && <><Save size={12} />자동 저장</>}
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={exportText}
+              title="텍스트로 내보내기"
+              className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition-colors"
+            >
+              <FileDown size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={exportJSON}
+              title="JSON 백업"
+              className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition-colors"
+            >
+              <Download size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={triggerImport}
+              title="JSON 불러오기"
+              className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition-colors"
+            >
+              <FileText size={16} />
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              className="hidden"
+              onChange={(e) => {
+                importJSON(e.target.files?.[0]);
+                e.target.value = '';
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => window.print()}
+              title="인쇄 / PDF"
+              className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-md transition-colors"
+            >
+              <Printer size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={reset}
+              title="초기화"
+              className="p-2 text-stone-600 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+            >
+              <RotateCcw size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="border-t border-stone-100 bg-white/60">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <div className="flex gap-0 overflow-x-auto -mb-px scrollbar-hide">
+              {TABS.map(tab => {
+                const isActive = activeTab === tab.id;
+                const tp = progressByTab[tab.id];
+                const Icon = tab.Icon;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`group relative flex items-center gap-2.5 px-4 md:px-5 py-3 border-b-2 text-sm font-medium whitespace-nowrap transition-all ${
+                      isActive
+                        ? 'border-stone-900 text-stone-900'
+                        : 'border-transparent text-stone-500 hover:text-stone-800 hover:bg-stone-50/80'
+                    }`}
+                  >
+                    <Icon size={16} className={isActive ? 'text-stone-900' : 'text-stone-400 group-hover:text-stone-700'} strokeWidth={isActive ? 2.25 : 2} />
+                    <span>{tab.label}</span>
+                    <span className={`ml-1 inline-flex items-center justify-center min-w-[2.5rem] h-5 text-[11px] font-semibold rounded-full px-2 transition-colors ${
+                      isActive
+                        ? tp.percent === 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-900 text-white'
+                        : tp.percent > 0 ? 'bg-stone-200 text-stone-700' : 'bg-stone-100 text-stone-400'
+                    }`}>
+                      {tp.percent}%
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8">
+
+          {/* TOC Sidebar */}
+          <aside className={`no-print ${tocOpen ? 'block' : 'hidden'} lg:block lg:col-span-3`}>
+            <nav className="lg:sticky lg:top-32 mb-6 lg:mb-0 bg-white border border-stone-200 rounded-xl p-4 max-h-[calc(100vh-9rem)] overflow-y-auto">
+              <div className="flex items-center justify-between mb-3 px-2">
+                <div className="text-xs font-semibold text-stone-500 uppercase tracking-wider">목차</div>
+                <div className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">
+                  {TABS.find(t => t.id === activeTab)?.label}
+                </div>
+              </div>
+              <div className="space-y-1">
+                {partGroups.map((g, gi) => (
+                  <div key={gi} className="mb-3">
+                    <div className="text-xs font-bold text-stone-700 px-2 py-1.5">{g.partTitle}</div>
+                    {g.sections.map(s => {
+                      const sectionHidden = isHidden(s.id);
+                      return (
+                        <div key={s.id} className="flex items-center group">
+                          <a
+                            href={`#${s.id}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              sectionRefs.current[s.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              setTocOpen(false);
+                            }}
+                            className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors flex-1 min-w-0 ${
+                              activeSection === s.id
+                                ? 'bg-stone-900 text-white font-medium'
+                                : sectionHidden
+                                  ? 'text-stone-400 hover:bg-stone-100'
+                                  : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                            }`}
+                          >
+                            <ChevronRight size={12} className={activeSection === s.id ? 'opacity-100' : 'opacity-40'} />
+                            <span className={`truncate ${sectionHidden ? 'line-through' : ''}`}>{s.title}</span>
+                          </a>
+                          {s.id !== 'cover' && (
+                            <button
+                              type="button"
+                              onClick={() => toggleHidden(s.id)}
+                              title={sectionHidden ? '보이기' : '숨기기'}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-stone-400 hover:text-stone-700 flex-shrink-0"
+                            >
+                              {sectionHidden ? <Eye size={11} /> : <EyeOff size={11} />}
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-stone-200 space-y-2 text-xs">
+                <div className="font-semibold text-stone-500 uppercase tracking-wider mb-2">범례</div>
+                {Object.entries(colorMap).map(([k, c]) => (
+                  <div key={k} className="flex items-center gap-2 text-stone-600">
+                    <span className={`w-2.5 h-2.5 rounded-full ${c.dot}`} />
+                    {c.label}
+                  </div>
+                ))}
+              </div>
+            </nav>
+          </aside>
+
+          {/* Main Content */}
+          <main className="lg:col-span-9">
+
+            {/* Hero — adapts to active tab */}
+            {(() => {
+              const ct = TABS.find(t => t.id === activeTab);
+              const TabIcon = ct.Icon;
+              const tp = progressByTab[activeTab];
+              const headlines = {
+                common: { eyebrow: 'PROJECT BRIEF', sub: '브랜드 소개 사이트 + 자사몰 — 두 사이트에 모두 적용되는 정보' },
+                brand: { eyebrow: 'BRAND WEBSITE', sub: '기업/브랜드 인지도와 신뢰도를 위한 코퍼레이트 사이트 요건' },
+                commerce: { eyebrow: 'COMMERCE STORE', sub: '상품 판매·결제·주문 관리가 필요한 온라인 쇼핑몰 요건' },
+              };
+              const h = headlines[activeTab];
+              return (
+                <div className="mb-12 pb-8 border-b border-stone-200">
+                  <div className="flex items-start gap-4 mb-2">
+                    <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-stone-900 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <TabIcon size={22} strokeWidth={2} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[11px] font-semibold tracking-[0.22em] text-stone-500 uppercase">
+                        {h.eyebrow}
+                      </div>
+                      <h2 className="mt-1 text-2xl md:text-4xl font-bold tracking-tight text-stone-900 leading-tight">
+                        {ct.label}
+                      </h2>
+                    </div>
+                    <div className="hidden md:flex flex-col items-end text-xs text-stone-500">
+                      <span className="text-[10px] uppercase tracking-wider">진행률</span>
+                      <span className="text-2xl font-bold text-stone-900 tabular-nums">{tp.percent}%</span>
+                      <span className="text-[10px] tabular-nums">{tp.filled} / {tp.total}</span>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-base md:text-lg text-stone-600 leading-relaxed">
+                    {h.sub}
+                  </p>
+                  <div className="mt-6 flex flex-wrap items-center gap-2 text-xs">
+                    {Object.entries(colorMap).map(([k, c]) => (
+                      <span key={k} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full ${c.bg} ${c.text} border ${c.border}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
+                        {c.label}
+                      </span>
+                    ))}
+                    {hiddenSections.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={restoreAllHidden}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-stone-100 text-stone-700 border border-stone-300 hover:bg-stone-200 transition-colors print:hidden"
+                      >
+                        <Eye size={12} />
+                        숨김 {hiddenSections.length}개 모두 보이기
+                      </button>
+                    )}
+                  </div>
+                  {activeTab === 'common' && (
+                    <p className="mt-6 text-sm text-stone-600 leading-relaxed bg-stone-100/70 rounded-lg p-4 border border-stone-200">
+                      본 의뢰서는 두 종류의 홈페이지(브랜드 소개 + 자사몰)를 제작하기 위한 초기 요건 수집 문서입니다.
+                      상단 탭으로 <strong className="text-stone-900">공통 / 브랜드 사이트 / 자사몰</strong>을 전환하실 수 있고, 각 항목별 색상 표기를 참고해 작성해 주세요.
+                      <strong className="text-stone-900"> 입력 내용은 자동 저장</strong>되며, 상단 버튼으로 텍스트/JSON 내보내기 또는 PDF 인쇄가 가능합니다.
+                    </p>
+                  )}
+                  {activeTab === 'brand' && (
+                    <p className="mt-6 text-sm text-stone-600 leading-relaxed bg-sky-50/70 rounded-lg p-4 border border-sky-200">
+                      <strong className="text-sky-900">브랜드 사이트 전용 항목</strong>입니다. 회사 정보·예산·브랜드 자산 등 공통 사항은
+                      <button onClick={() => handleTabChange('common')} className="mx-1 underline decoration-sky-400 underline-offset-2 hover:text-sky-900 font-medium">공통 사항 탭</button>
+                      에서 작성해 주세요.
+                    </p>
+                  )}
+                  {activeTab === 'commerce' && (
+                    <p className="mt-6 text-sm text-stone-600 leading-relaxed bg-emerald-50/70 rounded-lg p-4 border border-emerald-200">
+                      <strong className="text-emerald-900">자사몰 전용 항목</strong>입니다. 회사 정보·예산·브랜드 자산 등 공통 사항은
+                      <button onClick={() => handleTabChange('common')} className="mx-1 underline decoration-emerald-400 underline-offset-2 hover:text-emerald-900 font-medium">공통 사항 탭</button>
+                      에서 작성해 주세요.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Sections */}
+            {partGroups.map((g, gi) => (
+              <div key={gi}>
+                {g.partTitle !== '프로젝트 정보' && partGroups.length > 1 && (
+                  <div className="mt-12 mb-8 flex items-center gap-4">
+                    <div className="text-xs font-bold tracking-[0.2em] text-stone-400 uppercase">PART {g.part}</div>
+                    <div className="h-px flex-1 bg-stone-200" />
+                    <div className="text-xs font-semibold text-stone-700">{g.partTitle.replace(/^Part \d+\. /, '')}</div>
+                  </div>
+                )}
+                {g.sections.map(s => (
+                  <SectionBlock
+                    key={s.id}
+                    section={s}
+                    formData={formData}
+                    updateField={updateField}
+                    sectionRef={el => (sectionRefs.current[s.id] = el)}
+                    isHidden={isHidden(s.id)}
+                    onToggleHide={toggleHidden}
+                  />
+                ))}
+              </div>
+            ))}
+
+            {/* Footer */}
+            <div className="mt-16 pt-8 border-t border-stone-200">
+              {(() => {
+                const idx = TABS.findIndex(t => t.id === activeTab);
+                const next = idx < TABS.length - 1 ? TABS[idx + 1] : null;
+                if (next) {
+                  const NextIcon = next.Icon;
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange(next.id)}
+                      className="w-full mb-6 group relative flex items-center justify-between gap-4 px-6 py-5 bg-white border-2 border-stone-200 hover:border-stone-900 rounded-xl transition-all hover:shadow-md"
+                    >
+                      <div className="flex items-center gap-4 text-left">
+                        <div className="w-10 h-10 rounded-lg bg-stone-100 group-hover:bg-stone-900 flex items-center justify-center transition-colors">
+                          <NextIcon size={18} className="text-stone-700 group-hover:text-white transition-colors" />
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-semibold tracking-[0.2em] text-stone-400 uppercase">다음 단계</div>
+                          <div className="text-base font-bold text-stone-900">{next.label}</div>
+                          <div className="text-xs text-stone-500 mt-0.5">{next.desc}</div>
+                        </div>
+                      </div>
+                      <ChevronRight size={20} className="text-stone-400 group-hover:text-stone-900 group-hover:translate-x-1 transition-all" />
+                    </button>
+                  );
+                }
+                return null;
+              })()}
+
+              <div className="bg-stone-900 text-white rounded-xl p-6 md:p-8">
+                <h3 className="text-lg font-bold mb-2">작성을 마치셨나요?</h3>
+                <p className="text-sm text-stone-300 mb-5">
+                  전체 탭의 작성 내용을 텍스트 파일로 저장해 이메일로 회신하시거나, PDF로 인쇄하여 미팅 자료로 활용하실 수 있습니다.
+                  <span className="ml-1 text-stone-400">전체 진행률 {progress.percent}% ({progress.filled}/{progress.total})</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={exportText}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white text-stone-900 rounded-md text-sm font-medium hover:bg-stone-100 transition-colors"
+                  >
+                    <FileDown size={14} />텍스트 파일 다운로드
+                  </button>
+                  <button
+                    type="button"
+                    onClick={exportJSON}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-md text-sm font-medium hover:bg-stone-700 border border-stone-700 transition-colors"
+                  >
+                    <Download size={14} />JSON 백업 (작업 이어쓰기용)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={triggerImport}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-md text-sm font-medium hover:bg-stone-700 border border-stone-700 transition-colors"
+                  >
+                    <FileText size={14} />JSON 불러오기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-md text-sm font-medium hover:bg-stone-700 border border-stone-700 transition-colors"
+                  >
+                    <Printer size={14} />PDF로 인쇄
+                  </button>
+                </div>
+              </div>
+              <p className="mt-6 text-xs text-stone-400 text-center">
+                © Project Brief Form · 입력 내용은 브라우저에 자동 저장됩니다.
+              </p>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ===== Render =====
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<ProjectBriefForm />);
+</script>
+</body>
+</html>

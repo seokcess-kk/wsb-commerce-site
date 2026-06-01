@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WSB 종합몰 — 듀얼 브랜드 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.18/index.min.css">
+<style>
+  :root{
+    --green:#0F5132; --carbon:#1A1F1B; --lab:#FAFBF9;
+    --cobalt:#0047FF; --neon:#E8FF00; --charcoal:#111111; --offwhite:#FAFAFA;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Pretendard Variable',Pretendard,system-ui,sans-serif;background:#e7e5e4;color:var(--charcoal);padding:24px;line-height:1.5}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .wrap{max-width:1000px;margin:0 auto}
+  h1{font-size:20px;margin-bottom:4px}
+  .sub{color:#57534e;font-size:13px;margin-bottom:20px}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#78716c;margin:18px 0 8px}
+  .frame{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.12);margin-bottom:8px}
+
+  /* ---- WSB shell ---- */
+  .hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:var(--lab);border-bottom:1px solid #e7e5e4}
+  .logo{font-weight:800;color:var(--green);font-size:18px;letter-spacing:-.02em}
+  .logo small{display:block;font-size:9px;color:#6b7280;font-weight:500;letter-spacing:.05em}
+  .nav{display:flex;gap:18px;font-size:13px;font-weight:600;color:var(--carbon)}
+  .nav span{cursor:default}
+  .util{display:flex;gap:12px;font-size:13px;color:#57534e}
+
+  /* ---- NUTROGIN hero ---- */
+  .hero{background:var(--cobalt);color:#fff;padding:40px 32px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+  .hero .eyebrow{font-size:11px;letter-spacing:.12em;color:var(--neon);font-weight:700;text-transform:uppercase}
+  .hero h2{font-size:30px;line-height:1.15;margin:8px 0 10px;font-weight:800}
+  .hero p{font-size:13px;opacity:.9;max-width:360px}
+  .hero .cta{margin-top:16px;display:inline-block;background:var(--neon);color:var(--charcoal);font-weight:800;font-size:13px;padding:11px 20px;border-radius:8px}
+  .stickbox{width:150px;height:150px;border-radius:14px;background:linear-gradient(160deg,#1b54ff,#0036c4);display:flex;align-items:center;justify-content:center;color:var(--neon);font-weight:800;border:2px solid rgba(232,255,0,.5)}
+
+  /* ---- efficacy chips ---- */
+  .chips{display:flex;gap:8px;padding:16px 22px;flex-wrap:wrap;background:#fff}
+  .chip{font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;border:1.5px solid var(--green);color:var(--green)}
+  .chip.on{background:var(--green);color:#fff}
+
+  /* ---- product grid ---- */
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:8px 22px 22px;background:#fff}
+  .card{border:1px solid #ececec;border-radius:10px;overflow:hidden}
+  .thumb{height:96px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:11px}
+  .card.ng .thumb{background:linear-gradient(160deg,#e9efff,#dbe4ff);color:var(--cobalt);font-weight:700}
+  .cbody{padding:9px 11px}
+  .cbody .bn{font-size:10px;color:var(--cobalt);font-weight:700}
+  .cbody .nm{font-size:12px;font-weight:600;margin:2px 0 4px}
+  .cbody .pr{font-size:13px;font-weight:800}
+
+  /* ---- WSB data strip ---- */
+  .strip{background:var(--green);color:var(--lab);padding:22px;display:flex;justify-content:space-between;align-items:center}
+  .strip h3{font-size:16px;font-weight:800}
+  .strip .badges{display:flex;gap:8px}
+  .badge{font-size:10px;border:1px solid rgba(250,251,249,.4);border-radius:6px;padding:5px 9px;color:var(--neon)}
+  .badge.lab{color:var(--lab)}
+
+  /* ---- footer ---- */
+  .ftr{background:var(--carbon);color:#a8a29e;padding:18px 22px;font-size:11px;line-height:1.7}
+  .ftr b{color:var(--lab)}
+
+  /* ---- PDP ---- */
+  .pdp{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .pdp .img{background:linear-gradient(160deg,#0047FF,#0036c4);min-height:300px;display:flex;align-items:center;justify-content:center;color:var(--neon);font-weight:800}
+  .pdp .info{padding:26px}
+  .pdp .bn{font-size:11px;color:var(--cobalt);font-weight:800;letter-spacing:.06em}
+  .pdp h2{font-size:22px;margin:6px 0}
+  .pdp .price{font-size:22px;font-weight:800;margin:10px 0}
+  .pdp .opt{border:1px solid #e5e7eb;border-radius:8px;padding:10px;font-size:12px;color:#6b7280;margin:10px 0}
+  .pdp .buy{background:var(--neon);color:var(--charcoal);font-weight:800;text-align:center;padding:13px;border-radius:9px;font-size:14px}
+  .pdp .cart{border:1.5px solid var(--cobalt);color:var(--cobalt);font-weight:700;text-align:center;padding:13px;border-radius:9px;font-size:14px;margin-top:8px}
+  .notice{margin-top:14px;background:#fafad7;border:1px solid #e8e36a;border-radius:8px;padding:10px;font-size:11px;color:#6b6420;line-height:1.6}
+  .specs{margin-top:12px;font-size:11px;color:#6b7280}
+  .specs .mono{color:var(--carbon)}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 28px;font-size:11px;color:#57534e}
+  .sw{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:13px;height:13px;border-radius:3px;border:1px solid rgba(0,0,0,.1)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>WSB 종합몰 — 듀얼 브랜드 컬러 적용안</h1>
+  <p class="sub">WSB(그릇)는 헤더·푸터·데이터 영역에서 그린/카본, NUTROGIN 존(히어로·상품)은 코발트/네온으로 전환됩니다. 두 화면을 보고 방향을 알려주세요.</p>
+
+  <div class="legend">
+    <span class="sw"><span class="dot" style="background:#0F5132"></span>WSB Green #0F5132</span>
+    <span class="sw"><span class="dot" style="background:#1A1F1B"></span>Carbon #1A1F1B</span>
+    <span class="sw"><span class="dot" style="background:#FAFBF9"></span>Lab White #FAFBF9</span>
+    <span class="sw"><span class="dot" style="background:#0047FF"></span>Cobalt #0047FF</span>
+    <span class="sw"><span class="dot" style="background:#E8FF00"></span>Neon #E8FF00</span>
+  </div>
+
+  <div class="tag">화면 1 — 홈 (WSB 쉘 + NUTROGIN 런칭 히어로)</div>
+  <div class="frame">
+    <div class="hdr">
+      <div class="logo">WSB<small>WOORI SMART BIO</small></div>
+      <div class="nav"><span>두뇌·집중</span><span>면역</span><span>수면</span><span>활력</span><span>브랜드</span><span>고객지원</span></div>
+      <div class="util">🔍 &nbsp; 👤 &nbsp; 🛒</div>
+    </div>
+    <div class="hero">
+      <div>
+        <div class="eyebrow">New Launch · NUTROGIN</div>
+        <h2>Sharper mind,<br>brighter day.</h2>
+        <p>Nootropic + Ginsenoside. 데이터로 키운 진세노사이드 브레인케어, 하루 한 스틱.</p>
+        <span class="cta">NUTROGIN 보러가기 →</span>
+      </div>
+      <div class="stickbox">NUTROGIN<br>FOCUS</div>
+    </div>
+    <div class="chips">
+      <span class="chip on">두뇌·집중</span><span class="chip">면역</span><span class="chip">수면</span><span class="chip">활력</span><span class="chip">전체</span>
+    </div>
+    <div class="grid">
+      <div class="card ng"><div class="thumb">NUTROGIN</div><div class="cbody"><div class="bn">NUTROGIN</div><div class="nm">FOCUS 스틱 20g</div><div class="pr">₩39,000</div></div></div>
+      <div class="card ng"><div class="thumb">NUTROGIN</div><div class="cbody"><div class="bn">NUTROGIN</div><div class="nm">CLEAR 스틱 20g</div><div class="pr">₩39,000</div></div></div>
+      <div class="card ng"><div class="thumb">NUTROGIN</div><div class="cbody"><div class="bn">NUTROGIN</div><div class="nm">REST 스틱 20g</div><div class="pr">₩39,000</div></div></div>
+      <div class="card"><div class="thumb">기존 제품</div><div class="cbody"><div class="bn" style="color:#0F5132">WSB</div><div class="nm">기존 건기식 A</div><div class="pr">₩28,000</div></div></div>
+    </div>
+    <div class="strip">
+      <h3>Engineered by Data, Grown by Design.</h3>
+      <div class="badges"><span class="badge mono lab">BATCH-2026-001</span><span class="badge mono">pH 5.8</span><span class="badge mono">+6.7%</span></div>
+    </div>
+    <div class="ftr">
+      <b>(주)우리스마트바이오</b> · 대표 ○○○ · 사업자등록번호 000-00-00000 · 통신판매업 0000-서울-0000<br>
+      개인정보처리방침 · 이용약관 · <b>본 제품은 질병의 예방·치료를 위한 것이 아닙니다.</b> · 건강기능식품 표시·광고 심의필
+    </div>
+  </div>
+
+  <div class="tag">화면 2 — 상품 상세 (NUTROGIN 존)</div>
+  <div class="frame">
+    <div class="hdr">
+      <div class="logo">WSB<small>WOORI SMART BIO</small></div>
+      <div class="nav"><span>두뇌·집중</span><span>면역</span><span>수면</span><span>활력</span><span>브랜드</span><span>고객지원</span></div>
+      <div class="util">🔍 &nbsp; 👤 &nbsp; 🛒</div>
+    </div>
+    <div class="pdp">
+      <div class="img">NUTROGIN FOCUS<br>제품 이미지</div>
+      <div class="info">
+        <div class="bn">NUTROGIN</div>
+        <h2>FOCUS 브레인케어 스틱</h2>
+        <div class="mono" style="font-size:11px;color:#6b7280">2g × 10 STICKS · 진세노사이드 함유</div>
+        <div class="price">₩39,000</div>
+        <div class="opt">옵션 선택 ▾ &nbsp; 1박스 / 3박스 세트 / 정기배송(2차)</div>
+        <div class="buy">바로 구매</div>
+        <div class="cart">장바구니 담기</div>
+        <div class="notice">⚠️ 건강기능식품 표시·광고 심의필 (제○○○○-○○호). <b>본 제품은 질병의 예방·치료를 위한 것이 아닙니다.</b> 이상사례 발생 시 섭취를 중단하고 전문가와 상담하십시오.</div>
+        <div class="specs">기능성: ○○○ · 원료: 데이터 재배 진세노사이드 · 1일 1스틱 · <span class="mono">BATCH-2026-001</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sub" style="margin-top:18px"><b>방향 피드백을 터미널로 주세요:</b> ① 이대로 좋음 · ② NUTROGIN 존을 더 과감하게(네온 강조↑) · ③ 더 차분하게(WSB 그린 위주, 코발트 절제) · ④ 기타</p>
+</div>
+</body>
+</html>

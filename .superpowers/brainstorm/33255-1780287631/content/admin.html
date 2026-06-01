@@ -1,0 +1,47 @@
+<h2>관리자(어드민) 구성 & 판매 통계</h2>
+<p class="subtitle">고객몰과 별도로 운영자용 어드민을 함께 만듭니다. 아래는 Lean v1 어드민 모듈 맵과 대시보드 초안입니다. 통계에서 우선으로 보고 싶은 지표를 골라주세요(복수 선택).</p>
+
+<div class="mockup">
+  <div class="mockup-header">어드민 모듈 맵 (Lean v1)</div>
+  <div class="mockup-body" style="font-size:13px">
+    <div style="display:flex;gap:10px">
+      <div class="mock-sidebar" style="min-width:150px">
+        📊 대시보드<br>📦 상품관리<br>🗂 카테고리<br>🧾 주문관리<br>👥 회원관리<br>⭐ 리뷰/문의<br>🏷 쿠폰<br>🖼 배너/공지<br>⚙️ 설정
+      </div>
+      <div class="mock-content" style="flex:1">
+        <strong>📦 상품관리</strong> — 등록/수정, 옵션·재고, 이미지·상세, 노출/품절, 효능 카테고리 지정, 엑셀 일괄등록<br><br>
+        <strong>🧾 주문관리</strong> — 주문조회, 상태변경(결제완료→배송준비→발송→완료), 송장입력, 취소/환불<br><br>
+        <strong>👥 회원관리</strong> — 조회/검색, 기본 정보<br>
+        <strong>⭐ 리뷰/문의</strong> — 1:1 답변, 리뷰 노출/숨김<br>
+        <strong>🏷 쿠폰</strong> — 기본 발급(선택)
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mockup">
+  <div class="mockup-header">📊 대시보드 초안</div>
+  <div class="mockup-body">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center">
+      <div class="placeholder" style="padding:14px"><div class="label">오늘 매출</div><strong style="font-size:18px">₩1,240,000</strong></div>
+      <div class="placeholder" style="padding:14px"><div class="label">오늘 주문</div><strong style="font-size:18px">37건</strong></div>
+      <div class="placeholder" style="padding:14px"><div class="label">신규 회원</div><strong style="font-size:18px">12명</strong></div>
+      <div class="placeholder" style="padding:14px"><div class="label">배송 대기</div><strong style="font-size:18px">9건</strong></div>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:8px">
+      <div class="placeholder" style="padding:14px;text-align:left"><div class="label">기간별 매출 추이</div><div style="margin-top:8px;color:#888">▁▂▄▆█▆▇ &nbsp;(일/주/월 토글)</div></div>
+      <div class="placeholder" style="padding:14px;text-align:left"><div class="label">상품별 판매 TOP</div><div style="margin-top:8px;color:#888">1. NUTROGIN FOCUS<br>2. NUTROGIN REST<br>3. …</div></div>
+    </div>
+  </div>
+</div>
+
+<h3>통계 대시보드에서 우선 보고 싶은 지표는? (복수 선택)</h3>
+<div class="options" data-multiselect>
+  <div class="option" data-choice="sales" onclick="toggleSelect(this)"><div class="letter">1</div><div class="content"><h3>매출 추이 (일/주/월)</h3><p>기간별 매출·주문수 그래프</p></div></div>
+  <div class="option" data-choice="orderstatus" onclick="toggleSelect(this)"><div class="letter">2</div><div class="content"><h3>주문 상태 현황</h3><p>신규/배송준비/발송/완료/취소 건수</p></div></div>
+  <div class="option" data-choice="topproducts" onclick="toggleSelect(this)"><div class="letter">3</div><div class="content"><h3>상품별 판매순위</h3><p>베스트셀러·판매량/매출 랭킹</p></div></div>
+  <div class="option" data-choice="category" onclick="toggleSelect(this)"><div class="letter">4</div><div class="content"><h3>카테고리(효능)별 매출</h3><p>두뇌/면역/수면… 비중</p></div></div>
+  <div class="option" data-choice="members" onclick="toggleSelect(this)"><div class="letter">5</div><div class="content"><h3>회원/재구매</h3><p>신규·누적 회원, 재구매 비율</p></div></div>
+  <div class="option" data-choice="aov" onclick="toggleSelect(this)"><div class="letter">6</div><div class="content"><h3>객단가·전환 기초</h3><p>객단가(AOV), 방문·전환(GA4 연동)</p></div></div>
+  <div class="option" data-choice="stock" onclick="toggleSelect(this)"><div class="letter">7</div><div class="content"><h3>재고 부족 알림</h3><p>임계치 이하 상품 표시</p></div></div>
+</div>
