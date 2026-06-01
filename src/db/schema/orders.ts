@@ -13,5 +13,7 @@ export const orders = pgTable("orders", {
   itemsSubtotal: integer("items_subtotal").notNull(),
   shippingFee: integer("shipping_fee").notNull(),
   totalAmount: integer("total_amount").notNull(),
+  courier: varchar("courier", { length: 40 }),
+  trackingNumber: varchar("tracking_number", { length: 60 }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
