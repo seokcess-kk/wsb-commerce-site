@@ -1,7 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { SiteHeader } from "./site-header";
 import { CartProvider } from "@/lib/cart/cart-context";
+
+vi.mock("./header-auth", () => ({
+  HeaderAuth: () => <a href="/login" aria-label="로그인">login</a>,
+}));
 
 function renderWithCart(ui: React.ReactElement) {
   return render(<CartProvider>{ui}</CartProvider>);
@@ -23,10 +27,10 @@ describe("SiteHeader", () => {
     expect(screen.getByRole("link", { name: "활력" })).toBeInTheDocument();
   });
 
-  it("유틸리티 아이콘 링크 3개가 aria-label로 접근 가능하다", () => {
+  it("유틸리티 아이콘 링크가 aria-label로 접근 가능하다", () => {
     renderWithCart(<SiteHeader />);
     expect(screen.getByRole("link", { name: "검색" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "내 계정" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "로그인" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "장바구니" })).toBeInTheDocument();
   });
 

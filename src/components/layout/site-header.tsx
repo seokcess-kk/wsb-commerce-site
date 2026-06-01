@@ -1,19 +1,14 @@
 import Link from "next/link";
-import { Search, User, ShoppingBag } from "lucide-react";
+import { Search, ShoppingBag } from "lucide-react";
 import { MobileNav } from "./mobile-nav";
 import { CartBadge } from "@/components/cart/cart-badge";
+import { HeaderAuth } from "./header-auth";
 
 const NAV = [
   { slug: "brain-focus", label: "두뇌·집중" },
   { slug: "immune", label: "면역" },
   { slug: "sleep", label: "수면" },
   { slug: "vitality", label: "활력" },
-];
-
-const UTILS = [
-  { href: "/search", label: "검색", Icon: Search },
-  { href: "/account", label: "내 계정", Icon: User },
-  { href: "/cart", label: "장바구니", Icon: ShoppingBag },
 ];
 
 export function SiteHeader() {
@@ -51,7 +46,7 @@ export function SiteHeader() {
           고객지원
         </Link>
       </nav>
-      <div className="flex gap-4 text-wsb-carbon">
+      <div className="flex gap-4 items-center text-wsb-carbon">
         <MobileNav
           items={[
             ...NAV.map((n) => ({ href: `/category/${n.slug}`, label: n.label })),
@@ -59,17 +54,22 @@ export function SiteHeader() {
             { href: "/support", label: "고객지원" },
           ]}
         />
-        {UTILS.map(({ href, label, Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            aria-label={label}
-            className="relative flex items-center transition-colors hover:text-wsb-green rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
-          >
-            <Icon size={20} strokeWidth={1.75} aria-hidden />
-            {href === "/cart" && <CartBadge />}
-          </Link>
-        ))}
+        <Link
+          href="/search"
+          aria-label="검색"
+          className="relative flex items-center transition-colors hover:text-wsb-green rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+        >
+          <Search size={20} strokeWidth={1.75} aria-hidden />
+        </Link>
+        <HeaderAuth />
+        <Link
+          href="/cart"
+          aria-label="장바구니"
+          className="relative flex items-center transition-colors hover:text-wsb-green rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+        >
+          <ShoppingBag size={20} strokeWidth={1.75} aria-hidden />
+          <CartBadge />
+        </Link>
       </div>
     </header>
   );
