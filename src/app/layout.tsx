@@ -4,12 +4,16 @@ import "@/styles/globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { CartProvider } from "@/lib/cart/cart-context";
+import { getSiteUrl } from "@/lib/site";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
 
 export const metadata: Metadata = {
-  title: "WSB 스토어",
-  description: "Engineered by Data, Grown by Design.",
+  metadataBase: new URL(getSiteUrl()),
+  title: { default: "WSB 스토어", template: "%s | WSB 스토어" },
+  description: "Engineered by Data, Grown by Design. 데이터로 키운 건강기능식품 — NUTROGIN 브레인케어와 WSB 건강기능식품.",
+  openGraph: { type: "website", siteName: "WSB 스토어", locale: "ko_KR" },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -7,6 +7,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_TOSS_CLIENT_KEY: z.string().optional(),
   TOSS_SECRET_KEY: z.string().optional(),
   ADMIN_EMAILS: z.string().optional(),
+  NEXT_PUBLIC_SITE_URL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
