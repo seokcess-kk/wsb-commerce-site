@@ -6,6 +6,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   NEXT_PUBLIC_TOSS_CLIENT_KEY: z.string().optional(),
   TOSS_SECRET_KEY: z.string().optional(),
+  ADMIN_EMAILS: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
