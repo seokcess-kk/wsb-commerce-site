@@ -4,6 +4,8 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
   DATABASE_URL: z.string().min(1),
+  NEXT_PUBLIC_TOSS_CLIENT_KEY: z.string().optional(),
+  TOSS_SECRET_KEY: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
