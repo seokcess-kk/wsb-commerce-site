@@ -974,3 +974,21 @@ git commit -m "feat: add health endpoint and deploy config"
 **3. 타입 일관성:** `parseEnv`/`env`(Task3) → `db/index.ts`(Task4)·supabase 클라이언트(Task5)에서 동일 사용. `brandColors`(Task6) 형태와 테스트 일치. `formatKRW`(Task2) 시그니처 일관. `products.basePrice`/`productVariants.priceDelta` 정수(원) 규약 일관.
 
 **버전 주의:** create-next-app 최신은 Tailwind v4(`@import "tailwindcss"` + `@theme`)를 생성. 만약 환경이 Tailwind v3로 생성되면 Task6의 `@theme` 대신 `tailwind.config.ts` 의 `theme.extend.colors` 에 동일 색을 등록한다.
+
+---
+
+## 실행 결과 & 다음 플랜으로 넘길 후속 과제 (2026-06-01 완료)
+
+**완료:** 10개 커밋(`7bce854`→`4264312`), 19개 테스트 통과, `npm run build`/`tsc --noEmit` 클린. 실제 스택: Next.js 16.2.6 · Tailwind v4 · shadcn(base-nova) · drizzle-orm 0.45 · zod 4 · @supabase/ssr 0.10 · Vitest 4.
+
+**자격증명 대기로 보류된 런타임 스텝(코드/설정은 완료):**
+- Task 4-11 `npm run db:migrate` — 실제 `DATABASE_URL`(Supabase) 필요. 마이그레이션 SQL(`drizzle/0000_*.sql`)은 생성·커밋됨.
+- Task 8-5 `vercel` 배포 + 환경변수 등록 — Vercel 인증 + Supabase 값 필요.
+
+**Plan 2(Storefront) 시작 시 처리할 후속:**
+1. 모바일 내비 실제 구현 — 현재 `메뉴 열기` 버튼은 동작 없는 stub. 드로어 + 상태 + 테스트 추가.
+2. `products` 규제 컬럼 확장 — 품목보고번호·기능성 내용·섭취 시 주의사항·원료/함량 등(신규 Drizzle 마이그레이션).
+3. (선택) Pretendard를 CDN `<link>` 대신 `next/font/local`로 셀프호스팅(렌더 블로킹 제거).
+4. `.gitignore`에 `!.env.example` 예외 추가(현재 force-add 상태라 견고성↑).
+
+**비고:** `env`·`db`는 lazy 접근만 사용(스프레드/`in` 검사 금지). 금액은 정수(원) 규약.
