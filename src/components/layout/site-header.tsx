@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Search, User, ShoppingBag } from "lucide-react";
 import { MobileNav } from "./mobile-nav";
+import { CartBadge } from "@/components/cart/cart-badge";
 
 const NAV = [
   { slug: "brain-focus", label: "두뇌·집중" },
@@ -63,9 +64,10 @@ export function SiteHeader() {
             key={href}
             href={href}
             aria-label={label}
-            className="transition-colors hover:text-wsb-green rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+            className="relative flex items-center transition-colors hover:text-wsb-green rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
           >
             <Icon size={20} strokeWidth={1.75} aria-hidden />
+            {href === "/cart" && <CartBadge />}
           </Link>
         ))}
       </div>

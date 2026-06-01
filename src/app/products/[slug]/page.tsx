@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/db/queries/products";
 import { resolveVariantPriceLabel } from "@/lib/catalog/product-view";
 import { ComplianceNotice } from "@/components/catalog/compliance-notice";
+import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +36,19 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[11px] text-stone-400">장바구니·결제는 다음 계획서(Plan 3)에서 연결됩니다.</p>
         </div>
+
+        <AddToCartButton
+          options={product.variants.map((v) => ({
+            variantId: v.id,
+            productSlug: product.slug,
+            name: `${product.name} / ${v.name}`,
+            unitPrice: product.basePrice + v.priceDelta,
+            quantity: 1,
+            thumbnail: product.thumbnail,
+            stock: v.stock,
+          }))}
+        />
 
         {product.ingredients && (
           <p className="mt-4 text-xs text-stone-500">원료/함량: <span className="font-mono text-stone-700">{product.ingredients}</span></p>
