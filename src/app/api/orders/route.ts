@@ -4,6 +4,7 @@ import { getDb, schema } from "@/db/index";
 import { shippingFee } from "@/lib/checkout/pricing";
 import { buildOrderNumber } from "@/lib/checkout/order-number";
 import { parseQuantity } from "@/lib/checkout/quantity";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 type IncomingItem = { variantId: string; quantity: unknown };
 type Body = {
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
   }
 
   try {
+    const user = await getCurrentUser();
     const db = getDb();
     const variantIds = body.items.map((i) => i.variantId);
     const variants = await db.select().from(schema.productVariants).where(inArray(schema.productVariants.id, variantIds));
@@ -62,6 +64,7 @@ export async function POST(req: Request) {
       customerName: name, customerPhone: phone, customerEmail: email,
       shippingAddress: address, shippingZipcode: body.customer.zipcode ?? null,
       itemsSubtotal: subtotal, shippingFee: ship, totalAmount,
+      userId: user?.id ?? null,
     }).returning();
 
     await db.insert(schema.orderItems).values(itemRows.map((r) => ({ ...r, orderId: order.id })));
