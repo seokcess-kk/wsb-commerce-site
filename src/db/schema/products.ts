@@ -12,6 +12,10 @@ export const products = pgTable("products", {
   description: text("description"),
   reviewPhraseNo: varchar("review_phrase_no", { length: 80 }),
   noticeText: text("notice_text"),
+  reportNo: varchar("report_no", { length: 80 }),          // 품목보고번호
+  functionality: text("functionality"),                     // 기능성 내용(심의 문구)
+  intakeNotice: text("intake_notice"),                      // 섭취 시 주의사항
+  ingredients: text("ingredients"),                         // 원료명 및 함량
   images: jsonb("images").$type<string[]>().notNull().default([]),
   isPublished: boolean("is_published").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

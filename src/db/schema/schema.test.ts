@@ -8,6 +8,10 @@ describe("schema 형상", () => {
     expect(cols).toHaveProperty("reviewPhraseNo");
     expect(cols).toHaveProperty("noticeText");
     expect(cols).toHaveProperty("basePrice");
+    expect(cols).toHaveProperty("reportNo");
+    expect(cols).toHaveProperty("functionality");
+    expect(cols).toHaveProperty("intakeNotice");
+    expect(cols).toHaveProperty("ingredients");
   });
   it("categories 는 slug 를 갖는다", () => {
     expect(getTableColumns(categories)).toHaveProperty("slug");
