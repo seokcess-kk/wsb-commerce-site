@@ -18,4 +18,11 @@ describe("MobileNav", () => {
     await userEvent.click(screen.getByRole("button", { name: "메뉴 열기" }));
     expect(screen.getByRole("link", { name: "두뇌·집중" })).toHaveAttribute("href", "/category/brain-focus");
   });
+  it("Escape 키를 누르면 메뉴가 닫힌다", async () => {
+    render(<MobileNav items={items} />);
+    await userEvent.click(screen.getByRole("button", { name: "메뉴 열기" }));
+    expect(screen.getByRole("link", { name: "두뇌·집중" })).toBeInTheDocument();
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("link", { name: "두뇌·집중" })).not.toBeInTheDocument();
+  });
 });

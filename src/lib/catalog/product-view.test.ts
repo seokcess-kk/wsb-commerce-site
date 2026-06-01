@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toProductSummary, displayPriceLabel, isNutroginBrand } from "./product-view";
+import { toProductSummary, displayPriceLabel, isNutroginBrand, resolveVariantPriceLabel } from "./product-view";
 
 const row = {
   id: "p1", slug: "nutrogin-focus", name: "NUTROGIN FOCUS", brand: "NUTROGIN",
@@ -14,9 +14,19 @@ describe("toProductSummary", () => {
     expect(vm.priceLabel).toBe("₩39,000");
     expect(vm.thumbnail).toBe("/a.png");
     expect(vm.isNutrogin).toBe(true);
+    expect(vm.basePrice).toBe(39000);
   });
   it("이미지가 없으면 thumbnail은 null", () => {
     expect(toProductSummary({ ...row, images: [] }).thumbnail).toBeNull();
+  });
+});
+
+describe("resolveVariantPriceLabel", () => {
+  it("기본가에 델타를 더한 금액을 원화로 표기한다", () => {
+    expect(resolveVariantPriceLabel(39000, 66300)).toBe("₩105,300");
+  });
+  it("델타가 0이면 기본가만 표기한다", () => {
+    expect(resolveVariantPriceLabel(28000, 0)).toBe("₩28,000");
   });
 });
 

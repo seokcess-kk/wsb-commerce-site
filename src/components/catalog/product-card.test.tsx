@@ -5,7 +5,7 @@ import type { ProductSummary } from "@/lib/catalog/product-view";
 
 const base: ProductSummary = {
   id: "1", slug: "nutrogin-focus", name: "NUTROGIN FOCUS", brand: "NUTROGIN",
-  isNutrogin: true, priceLabel: "₩39,000", thumbnail: "/a.png", summary: "요약",
+  basePrice: 39000, isNutrogin: true, priceLabel: "₩39,000", thumbnail: "/a.png", summary: "요약",
   categorySlug: "brain-focus", categoryName: "두뇌·집중",
 };
 

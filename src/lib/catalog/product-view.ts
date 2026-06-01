@@ -18,6 +18,7 @@ export type ProductSummary = {
   slug: string;
   name: string;
   brand: string;
+  basePrice: number;
   isNutrogin: boolean;
   priceLabel: string;
   thumbnail: string | null;
@@ -40,6 +41,7 @@ export function toProductSummary(row: ProductRow): ProductSummary {
     slug: row.slug,
     name: row.name,
     brand: row.brand,
+    basePrice: row.basePrice,
     isNutrogin: isNutroginBrand(row.brand),
     priceLabel: displayPriceLabel(row.basePrice),
     thumbnail: row.images[0] ?? null,
@@ -47,4 +49,8 @@ export function toProductSummary(row: ProductRow): ProductSummary {
     categorySlug: row.categorySlug,
     categoryName: row.categoryName,
   };
+}
+
+export function resolveVariantPriceLabel(basePrice: number, priceDelta: number): string {
+  return formatKRW(basePrice + priceDelta);
 }

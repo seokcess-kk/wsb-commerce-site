@@ -4,7 +4,7 @@ import { ProductGrid } from "./product-grid";
 import type { ProductSummary } from "@/lib/catalog/product-view";
 
 const mk = (slug: string, name: string): ProductSummary => ({
-  id: slug, slug, name, brand: "WSB", isNutrogin: false, priceLabel: "₩10,000",
+  id: slug, slug, name, brand: "WSB", basePrice: 10000, isNutrogin: false, priceLabel: "₩10,000",
   thumbnail: null, summary: null, categorySlug: null, categoryName: null,
 });
 

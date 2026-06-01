@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
@@ -7,8 +7,29 @@ type Item = { href: string; label: string };
 
 export function MobileNav({ items }: { items: Item[] }) {
   const [open, setOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const ring =
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2 rounded-sm";
+
+  // Move focus to close button when drawer opens
+  useEffect(() => {
+    if (open) {
+      closeButtonRef.current?.focus();
+    }
+  }, [open]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   return (
     <div className="md:hidden">
       <button
@@ -30,6 +51,7 @@ export function MobileNav({ items }: { items: Item[] }) {
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              ref={closeButtonRef}
               type="button"
               aria-label="메뉴 닫기"
               className={`self-end text-wsb-carbon ${ring}`}
