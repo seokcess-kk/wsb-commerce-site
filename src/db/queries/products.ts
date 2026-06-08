@@ -1,6 +1,7 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, or, ilike } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { toProductSummary, type ProductRow, type ProductSummary } from "@/lib/catalog/product-view";
+import { toLikePattern } from "@/lib/catalog/search";
 
 const { products, categories, productVariants } = schema;
 
@@ -29,6 +30,19 @@ export async function listPublishedProducts(): Promise<ProductSummary[]> {
     .from(products)
     .leftJoin(categories, eq(products.categoryId, categories.id))
     .where(eq(products.isPublished, true))
+    .orderBy(desc(products.createdAt));
+  return rows.map(joinRowToProductRow).map(toProductSummary);
+}
+
+// 발행 상품을 이름/요약 부분일치로 검색. 빈 쿼리는 호출 측에서 거른다.
+export async function searchProducts(query: string): Promise<ProductSummary[]> {
+  const db = getDb();
+  const pattern = toLikePattern(query);
+  const rows = await db
+    .select({ product: products, category: categories })
+    .from(products)
+    .leftJoin(categories, eq(products.categoryId, categories.id))
+    .where(and(eq(products.isPublished, true), or(ilike(products.name, pattern), ilike(products.summary, pattern))))
     .orderBy(desc(products.createdAt));
   return rows.map(joinRowToProductRow).map(toProductSummary);
 }
