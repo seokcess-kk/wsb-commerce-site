@@ -5,6 +5,7 @@ import { useCart } from "@/lib/cart/cart-context";
 import { orderTotal } from "@/lib/checkout/pricing";
 import { formatKRW } from "@/lib/format";
 import { getTossClientKey } from "@/lib/payments/toss";
+import { isPaymentsEnabled } from "@/lib/payments/toggle";
 
 const FIELD_LABELS = { name: "이름", phone: "연락처", email: "이메일", address: "주소" } as const;
 
@@ -13,8 +14,10 @@ export default function CheckoutPage() {
   const [form, setForm] = useState({ name: "", phone: "", email: "", address: "", agree: false });
   const [loading, setLoading] = useState(false);
   const total = orderTotal(subtotal);
+  const paymentsOn = isPaymentsEnabled(process.env.NEXT_PUBLIC_PAYMENTS_ENABLED);
 
   async function pay() {
+    if (!paymentsOn) return;
     if (!form.agree) return alert("개인정보 수집·이용에 동의해주세요.");
     if (!form.name || !form.phone || !form.email || !form.address) return alert("주문자 정보를 모두 입력해주세요.");
     setLoading(true);
@@ -65,11 +68,16 @@ export default function CheckoutPage() {
           개인정보 수집·이용에 동의합니다.
         </label>
       </div>
+      {!paymentsOn && (
+        <p className="mt-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          현재 온라인 결제를 준비 중입니다. 정식 오픈 시 결제가 가능합니다.
+        </p>
+      )}
       <div className="mt-6 flex items-center justify-between border-t border-stone-200 pt-4">
         <span className="text-lg font-extrabold">결제 금액 {formatKRW(total)}</span>
-        <button type="button" onClick={pay} disabled={loading}
+        <button type="button" onClick={pay} disabled={loading || !paymentsOn}
           className="rounded-md bg-wsb-green px-6 py-3 text-sm font-bold text-white disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2">
-          {loading ? "처리 중…" : "결제하기"}
+          {!paymentsOn ? "결제 준비중" : loading ? "처리 중…" : "결제하기"}
         </button>
       </div>
     </section>

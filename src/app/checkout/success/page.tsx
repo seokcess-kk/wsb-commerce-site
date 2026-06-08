@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { and, eq } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { confirmTossPayment } from "@/lib/payments/toss";
 import { formatKRW } from "@/lib/format";
@@ -35,8 +35,23 @@ export default async function SuccessPage({
         method: result.method ?? null, amount: result.totalAmount, status: result.status,
         approvedAt: result.approvedAt ? new Date(result.approvedAt) : null,
       }).onConflictDoNothing({ target: schema.payments.paymentKey });
-      await tx.update(schema.orders).set({ status: "paid" })
-        .where(and(eq(schema.orders.id, order.id), eq(schema.orders.status, "pending")));
+
+      // pending → paid 전이는 단 한 번만 성공한다(멱등 가드). 이 경로에 도달하는 것은
+      // 위에서 order.status !== "paid" 인 경우뿐이므로, 재고 차감도 결제당 1회만 일어난다.
+      const updated = await tx.update(schema.orders).set({ status: "paid" })
+        .where(and(eq(schema.orders.id, order.id), eq(schema.orders.status, "pending")))
+        .returning({ id: schema.orders.id });
+
+      // 원자적 재고 차감: stock >= qty 조건으로 음수를 방지. 부족분은 차감하지 않고
+      // 결제는 이미 승인됐으므로 운영자가 주문관리에서 처리한다.
+      if (updated.length > 0) {
+        const items = await tx.select().from(schema.orderItems).where(eq(schema.orderItems.orderId, order.id));
+        for (const it of items) {
+          await tx.update(schema.productVariants)
+            .set({ stock: sql`${schema.productVariants.stock} - ${it.quantity}` })
+            .where(and(eq(schema.productVariants.id, it.variantId), gte(schema.productVariants.stock, it.quantity)));
+        }
+      }
     });
   } catch (e) {
     return <Result ok={false} message={(e as Error).message} />;
