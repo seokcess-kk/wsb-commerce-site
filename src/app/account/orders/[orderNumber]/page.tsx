@@ -3,8 +3,11 @@ import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getOrderDetailForUser } from "@/db/queries/orders";
 import { formatKRW } from "@/lib/format";
+import { STATUS_LABEL } from "@/lib/admin/order-status";
 
 export const dynamic = "force-dynamic";
+
+const statusLabel = (s: string) => (STATUS_LABEL as Record<string, string>)[s] ?? s;
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
@@ -16,7 +19,24 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
   return (
     <section className="mx-auto max-w-3xl px-6 py-10">
       <Link href="/account" className="text-sm text-wsb-green">← 마이페이지</Link>
-      <h1 className="mt-2 font-mono text-xl font-extrabold text-wsb-carbon">{order.orderNumber}</h1>
+      <div className="mt-2 flex items-center gap-3">
+        <h1 className="font-mono text-xl font-extrabold text-wsb-carbon">{order.orderNumber}</h1>
+        <span className="rounded-full bg-wsb-green/10 px-2.5 py-0.5 text-xs font-semibold text-wsb-green">{statusLabel(order.status)}</span>
+      </div>
+
+      {order.trackingNumber ? (
+        <div className="mt-5 rounded-lg border border-stone-200 bg-stone-50 p-4 text-sm">
+          <p className="font-semibold text-wsb-carbon">배송 정보</p>
+          <div className="mt-2 flex justify-between text-stone-600">
+            <span>택배사</span><span>{order.courier ?? "-"}</span>
+          </div>
+          <div className="mt-1 flex justify-between text-stone-600">
+            <span>송장번호</span><span className="font-mono">{order.trackingNumber}</span>
+          </div>
+        </div>
+      ) : order.status === "preparing" ? (
+        <p className="mt-5 rounded-lg border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">상품을 준비 중입니다. 발송되면 송장번호가 등록됩니다.</p>
+      ) : null}
       <ul className="mt-6 divide-y divide-stone-200 rounded-lg border border-stone-200">
         {items.map((it) => (
           <li key={it.id} className="flex items-center justify-between p-4 text-sm">
