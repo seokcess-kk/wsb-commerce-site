@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { saveProduct, type ProductInput } from "@/app/admin/products/actions";
 
 type Category = { id: string; name: string };
@@ -8,27 +9,6 @@ type Category = { id: string; name: string };
 type VariantRow = { name: string; priceDelta: number; stock: number };
 
 const DEFAULT_VARIANTS: VariantRow[] = [{ name: "1박스", priceDelta: 0, stock: 0 }];
-
-function emptyInput(): Omit<ProductInput, "id" | "variants"> & { variants: VariantRow[] } {
-  return {
-    slug: "",
-    name: "",
-    brand: "WSB",
-    categoryId: null,
-    basePrice: 0,
-    summary: null,
-    description: null,
-    reviewPhraseNo: null,
-    noticeText: null,
-    reportNo: null,
-    functionality: null,
-    intakeNotice: null,
-    ingredients: null,
-    images: [],
-    isPublished: false,
-    variants: DEFAULT_VARIANTS,
-  };
-}
 
 interface Props {
   categories: Category[];
@@ -376,12 +356,12 @@ export function ProductForm({ categories, initial }: Props) {
         >
           {isPending ? "저장 중..." : initial?.id ? "수정 저장" : "상품 등록"}
         </button>
-        <a
+        <Link
           href="/admin/products"
           className="text-sm font-semibold text-stone-400 hover:text-wsb-carbon"
         >
           취소
-        </a>
+        </Link>
       </div>
     </form>
   );

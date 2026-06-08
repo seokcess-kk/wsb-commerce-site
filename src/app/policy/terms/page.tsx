@@ -12,15 +12,15 @@ export default function TermsPage() {
 
       <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">제1조 목적</h2>
       <p className="text-sm leading-relaxed text-stone-600">
-        이 약관은 (주)우리스마트바이오(이하 "회사")가 운영하는 WSB 스토어(이하 "쇼핑몰")에서
-        제공하는 인터넷 관련 서비스(이하 "서비스")의 이용 조건 및 절차에 관한 사항을 규정함을 목적으로 합니다.
+        이 약관은 (주)우리스마트바이오(이하 “회사”)가 운영하는 WSB 스토어(이하 “쇼핑몰”)에서
+        제공하는 인터넷 관련 서비스(이하 “서비스”)의 이용 조건 및 절차에 관한 사항을 규정함을 목적으로 합니다.
       </p>
 
       <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">제2조 정의</h2>
       <ul className="list-disc pl-5 text-sm leading-relaxed text-stone-600">
-        <li>"쇼핑몰"이란 회사가 재화 및 용역을 이용자에게 제공하기 위하여 운영하는 가상의 영업장을 말합니다.</li>
-        <li>"이용자"란 쇼핑몰에 접속하여 이 약관에 따라 서비스를 이용하는 회원 및 비회원을 말합니다.</li>
-        <li>"회원"이란 쇼핑몰에 회원가입을 한 자로서, 회사가 제공하는 서비스를 지속적으로 이용할 수 있는 자를 말합니다.</li>
+        <li>“쇼핑몰”이란 회사가 재화 및 용역을 이용자에게 제공하기 위하여 운영하는 가상의 영업장을 말합니다.</li>
+        <li>“이용자”란 쇼핑몰에 접속하여 이 약관에 따라 서비스를 이용하는 회원 및 비회원을 말합니다.</li>
+        <li>“회원”이란 쇼핑몰에 회원가입을 한 자로서, 회사가 제공하는 서비스를 지속적으로 이용할 수 있는 자를 말합니다.</li>
       </ul>
 
       <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">제3조 약관의 효력 및 변경</h2>

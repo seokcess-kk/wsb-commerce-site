@@ -23,6 +23,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
+      // localStorage 하이드레이션: mount 후 1회 외부 스토어와 동기화한다(SSR 초기값 []와의
+      // hydration mismatch를 피하기 위한 의도된 패턴이라 set-state-in-effect 룰을 끈다).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setItems(JSON.parse(raw));
     } catch { /* ignore */ }
     setHydrated(true);
