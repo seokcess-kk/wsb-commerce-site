@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-import { eq, like } from "drizzle-orm";
+import { eq, like, sql } from "drizzle-orm";
 import { getDb, schema } from "./index";
 
 const NOTICE = "본 제품은 질병의 예방 및 치료를 위한 것이 아닙니다.";
@@ -251,11 +251,29 @@ async function main() {
   const cats = await db.select().from(schema.categories);
   const catId = (slug: string) => cats.find((c) => c.slug === slug)!.id;
 
-  // 2) 상품 (slug 기준 멱등)
+  // 2) 상품 — slug 기준 UPSERT (재시드 시 콘텐츠 필드 갱신)
   await db
     .insert(schema.products)
     .values(PRODUCTS.map(({ catSlug, ...p }) => ({ ...p, categoryId: catId(catSlug) })))
-    .onConflictDoNothing({ target: schema.products.slug });
+    .onConflictDoUpdate({
+      target: schema.products.slug,
+      set: {
+        name: sql`excluded.name`,
+        basePrice: sql`excluded.base_price`,
+        summary: sql`excluded.summary`,
+        description: sql`excluded.description`,
+        reviewPhraseNo: sql`excluded.review_phrase_no`,
+        noticeText: sql`excluded.notice_text`,
+        reportNo: sql`excluded.report_no`,
+        functionality: sql`excluded.functionality`,
+        intakeNotice: sql`excluded.intake_notice`,
+        ingredients: sql`excluded.ingredients`,
+        images: sql`excluded.images`,
+        isPublished: sql`excluded.is_published`,
+        categoryId: sql`excluded.category_id`,
+        updatedAt: new Date(),
+      },
+    });
 
   // 3) 옵션 — variant 없는 상품에만 생성 (멱등)
   const products = await db.select().from(schema.products);
