@@ -51,4 +51,20 @@ describe("StarRating — input mode", () => {
     await userEvent.click(screen.getByRole("button", { name: "5점" }));
     expect(onChange).toHaveBeenCalledWith(5);
   });
+
+  it("Enter 키를 누르면 해당 별의 값으로 onChange를 호출한다", async () => {
+    const onChange = vi.fn();
+    render(<StarRating value={0} onChange={onChange} />);
+    const btn = screen.getByRole("button", { name: "4점" });
+    await userEvent.type(btn, "{enter}");
+    expect(onChange).toHaveBeenCalledWith(4);
+  });
+
+  it("Space 키를 누르면 해당 별의 값으로 onChange를 호출한다", async () => {
+    const onChange = vi.fn();
+    render(<StarRating value={0} onChange={onChange} />);
+    const btn = screen.getByRole("button", { name: "2점" });
+    await userEvent.type(btn, " ");
+    expect(onChange).toHaveBeenCalledWith(2);
+  });
 });

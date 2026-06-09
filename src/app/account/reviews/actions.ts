@@ -46,7 +46,23 @@ export async function submitReview(
     return { error: "주문을 찾을 수 없습니다." };
   }
 
-  // 2. Check if review already exists for this order+product
+  // 2. Verify the productId is actually a line item on this order (defense-in-depth)
+  const [orderItem] = await db
+    .select({ id: schema.orderItems.id })
+    .from(schema.orderItems)
+    .where(
+      and(
+        eq(schema.orderItems.orderId, orderId),
+        eq(schema.orderItems.productId, productId),
+      ),
+    )
+    .limit(1);
+
+  if (!orderItem) {
+    return { error: "해당 주문에 없는 상품입니다." };
+  }
+
+  // 3. Check if review already exists for this order+product
   const [existing] = await db
     .select({ id: schema.reviews.id })
     .from(schema.reviews)
@@ -77,7 +93,17 @@ export async function submitReview(
     return { error: "이미 작성된 리뷰입니다." };
   }
 
+  // Look up the product slug server-side to revalidate the public PDP
+  const [product] = await db
+    .select({ slug: schema.products.slug })
+    .from(schema.products)
+    .where(eq(schema.products.id, productId))
+    .limit(1);
+
   revalidatePath("/account/reviews");
+  if (product?.slug) {
+    revalidatePath(`/products/${product.slug}`);
+  }
 
   return {};
 }
