@@ -10,6 +10,8 @@ import { ReviewSummary } from "@/components/reviews/review-summary";
 import { ReviewList } from "@/components/reviews/review-list";
 import { buildProductJsonLd } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { isWishlisted } from "@/db/queries/wishlists";
 
 export const dynamic = "force-dynamic";
 
@@ -30,8 +32,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, user] = await Promise.all([
+    getProductBySlug(slug),
+    getCurrentUser(),
+  ]);
   if (!product) notFound();
+
+  const initialWishlisted = user
+    ? await isWishlisted(user.id, product.id)
+    : false;
 
   const jsonLd = buildProductJsonLd({
     name: product.name,
@@ -61,7 +70,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         {product.summary && <p className="mt-2 text-stone-600">{product.summary}</p>}
         <div className="mt-4 flex items-center gap-3">
           <p className="text-2xl font-extrabold text-wsb-carbon">{product.priceLabel}</p>
-          <WishlistButton productId={product.id} />
+          <WishlistButton productId={product.id} initialActive={initialWishlisted} />
         </div>
 
         <div className="mt-4 rounded-md border border-stone-200 p-3 text-sm">
