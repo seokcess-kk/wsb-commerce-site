@@ -32,7 +32,7 @@ export async function applyCouponAction(
  * Returns empty array when not logged in.
  */
 export async function listAvailableCouponsAction(
-  subtotal: number,
+  _subtotal: number,
 ): Promise<UserCouponWithDetails[]> {
   const user = await getCurrentUser();
   if (!user) return [];

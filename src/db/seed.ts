@@ -162,7 +162,42 @@ async function main() {
     }
   }
 
-  console.log(`seed 완료: categories=${cats.length}, products=${products.length}, banners=${BANNERS.length}, orders=${ORDERS.length}`);
+  // 6) 데모 쿠폰 (멱등 — code 기준 onConflictDoNothing)
+  const DEMO_COUPONS = [
+    {
+      code: "WELCOME3000",
+      name: "첫 구매 3,000원 할인",
+      discountType: "fixed",
+      discountValue: 3000,
+      minSubtotal: 0,
+      maxDiscount: null as number | null,
+      isActive: true,
+    },
+    {
+      code: "NUTRO10",
+      name: "NUTROGIN 10% 할인 (최대 5,000원)",
+      discountType: "percent",
+      discountValue: 10,
+      minSubtotal: 30000,
+      maxDiscount: 5000 as number | null,
+      isActive: true,
+    },
+  ];
+  await db.insert(schema.coupons).values(DEMO_COUPONS).onConflictDoNothing({ target: schema.coupons.code });
+
+  // 어드민 유저에게 두 쿠폰 모두 등록해 둠 (마이페이지 테스트용)
+  const insertedCoupons = await db
+    .select({ id: schema.coupons.id, code: schema.coupons.code })
+    .from(schema.coupons)
+    .where(eq(schema.coupons.code, "WELCOME3000"));
+  if (insertedCoupons.length > 0) {
+    await db
+      .insert(schema.userCoupons)
+      .values({ couponId: insertedCoupons[0].id, userId: ADMIN_USER_ID })
+      .onConflictDoNothing();
+  }
+
+  console.log(`seed 완료: categories=${cats.length}, products=${products.length}, banners=${BANNERS.length}, orders=${ORDERS.length}, coupons=${DEMO_COUPONS.length}`);
   process.exit(0);
 }
 
