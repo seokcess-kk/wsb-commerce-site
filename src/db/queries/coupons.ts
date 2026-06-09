@@ -1,8 +1,11 @@
 import { eq, and, isNull } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
+import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { validateCoupon } from "@/lib/coupons/validate";
 import { couponDiscount } from "@/lib/checkout/discount";
 import { couponRowToRule } from "@/lib/checkout/coupon-order";
+
+type DbExecutor = Pick<PostgresJsDatabase<typeof schema>, "update" | "select">;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -183,19 +186,20 @@ export async function getApplicableCoupon(
 
 /**
  * Mark a user's coupon as used after an order is placed.
- * Called by Phase 2 payment flow; no-op if already used.
+ * Accepts an optional `executor` (drizzle db or transaction tx) so that callers
+ * inside a db.transaction() can pass the tx and have this update commit/roll back
+ * atomically with the surrounding transaction. Defaults to the global db connection.
  */
 export async function markCouponUsed(
   userId: string,
   code: string,
   orderId: string,
+  executor: DbExecutor = getDb(),
 ): Promise<void> {
-  const db = getDb();
-
   const coupon = await findCouponByCode(code);
   if (!coupon) return;
 
-  await db
+  await executor
     .update(schema.userCoupons)
     .set({ usedAt: new Date(), orderId })
     .where(

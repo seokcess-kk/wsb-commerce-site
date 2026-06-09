@@ -54,12 +54,13 @@ export default async function SuccessPage({
             .where(and(eq(schema.productVariants.id, it.variantId), gte(schema.productVariants.stock, it.quantity)));
         }
 
-        // Mark the coupon as used — only runs on the successful pending→paid
-        // transition, so it's idempotent even if this page is loaded twice.
+        // Mark the coupon as used inside the transaction — commits/rolls back
+        // atomically with the paid-transition and stock decrement so the coupon
+        // is never orphaned as used against an unpaid order.
         // markCouponUsed sets usedAt WHERE usedAt IS NULL, so a second call
         // is a safe no-op.
         if (order.couponCode && order.userId) {
-          await markCouponUsed(order.userId, order.couponCode, order.id);
+          await markCouponUsed(order.userId, order.couponCode, order.id, tx);
         }
       }
     });

@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { formatKRW } from "@/lib/format";
-import { STATUS_LABEL } from "@/lib/admin/order-status";
+import { formatKRW, formatDate } from "@/lib/format";
+import { statusLabel } from "@/lib/admin/order-status";
 import type { OrderSummaryRow } from "@/db/queries/orders";
 
 export type OrderListTab = {
@@ -22,10 +22,6 @@ type Props = {
   activeStatus?: string;
   baseHref?: string;
 };
-
-function statusLabel(s: string): string {
-  return (STATUS_LABEL as Record<string, string>)[s] ?? s;
-}
 
 export function OrderList({ orders, activeStatus = "", baseHref = "/account" }: Props) {
   return (
@@ -77,7 +73,7 @@ export function OrderList({ orders, activeStatus = "", baseHref = "/account" }: 
                 </div>
                 <div className="mt-1 flex items-center justify-between text-sm text-stone-500">
                   <span>
-                    {new Date(order.createdAt).toLocaleDateString("ko-KR")}
+                    {formatDate(order.createdAt)}
                   </span>
                   <span className="font-mono font-semibold text-wsb-carbon">
                     {formatKRW(order.totalAmount)}
