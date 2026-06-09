@@ -21,21 +21,28 @@ describe("filterByPrice", () => {
     const result = filterByPrice(items, 20000, undefined);
     expect(result.map((r) => r.basePrice)).toEqual([20000, 30000, 50000]);
   });
-  it("max만: max 이하", () => {
+  it("max만: max 미만 (상한 배타)", () => {
     const result = filterByPrice(items, undefined, 20000);
-    expect(result.map((r) => r.basePrice)).toEqual([5000, 10000, 20000]);
+    expect(result.map((r) => r.basePrice)).toEqual([5000, 10000]);
   });
-  it("min+max: 범위 내 (포함)", () => {
+  it("min+max: 반개구간 [min, max) — max 제외", () => {
     const result = filterByPrice(items, 10000, 30000);
-    expect(result.map((r) => r.basePrice)).toEqual([10000, 20000, 30000]);
+    expect(result.map((r) => r.basePrice)).toEqual([10000, 20000]);
   });
   it("둘 다 undefined: 전체 반환", () => {
     const result = filterByPrice(items, undefined, undefined);
     expect(result).toHaveLength(5);
   });
-  it("경계값 min과 일치하는 항목 포함", () => {
-    const result = filterByPrice(items, 5000, 5000);
-    expect(result.map((r) => r.id)).toEqual(["1"]);
+  it("경계: min 포함, max 배타", () => {
+    const result = filterByPrice(items, 5000, 10000);
+    expect(result.map((r) => r.basePrice)).toEqual([5000]); // 5000 포함, 10000 제외
+  });
+  it("인접 프리셋이 경계값에서 겹치지 않음", () => {
+    // "1~3만" = [10000, 30000), "3만~" = [30000, ∞) — 30000은 한쪽에만 속함
+    const oneToThree = filterByPrice(items, 10000, 30000).map((r) => r.basePrice);
+    const threePlus = filterByPrice(items, 30000, undefined).map((r) => r.basePrice);
+    expect(oneToThree).not.toContain(30000);
+    expect(threePlus).toContain(30000);
   });
   it("범위 밖: 빈 배열", () => {
     const result = filterByPrice(items, 100000, 200000);
