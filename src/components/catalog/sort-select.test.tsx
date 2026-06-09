@@ -28,11 +28,11 @@ describe("SortSelect", () => {
     expect(select.value).toBe("price_asc");
   });
 
-  it("변경 시 router.replace 호출", async () => {
+  it("변경 시 router.replace 호출 (sort 파라미터 포함)", async () => {
     mockReplace.mockClear();
     render(<SortSelect currentSort="newest" />);
     const select = screen.getByRole("combobox");
     await userEvent.selectOptions(select, "name");
-    expect(mockReplace).toHaveBeenCalled();
+    expect(mockReplace).toHaveBeenCalledWith("/products?sort=name");
   });
 });

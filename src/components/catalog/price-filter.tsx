@@ -14,15 +14,21 @@ export function PriceFilter({
   presets,
   activePreset,
   basePath = "",
+  currentSort,
 }: {
   presets: readonly PricePreset[];
   activePreset?: string;
   basePath?: string;
+  currentSort?: string;
 }) {
   const base =
     "rounded-full border px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green";
   const on = "bg-wsb-green text-white border-wsb-green";
   const off = "border-wsb-green text-wsb-green hover:bg-wsb-green/5";
+
+  const sortSuffix =
+    currentSort && currentSort !== "newest" ? `&sort=${currentSort}` : "";
+  const root = basePath || "/products";
 
   return (
     <nav className="flex flex-wrap gap-2" aria-label="가격 필터">
@@ -30,15 +36,15 @@ export function PriceFilter({
         const key = presetKey(p);
         const isAll = p.min === undefined && p.max === undefined;
         const isActive = isAll ? !activePreset : activePreset === key;
-        const href = isAll
-          ? basePath || "/products"
-          : `${basePath || "/products"}?price=${key}`;
+        const hrefBase = isAll
+          ? `${root}${sortSuffix ? `?sort=${currentSort}` : ""}`
+          : `${root}?price=${key}${sortSuffix}`;
         return (
           <Link
             key={key}
-            href={href}
+            href={hrefBase}
             className={`${base} ${isActive ? on : off}`}
-            aria-current={isActive ? "true" : undefined}
+            aria-current={isActive ? "page" : undefined}
           >
             {p.label}
           </Link>

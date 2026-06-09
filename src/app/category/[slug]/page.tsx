@@ -7,23 +7,9 @@ import { SortSelect } from "@/components/catalog/sort-select";
 import { PriceFilter } from "@/components/catalog/price-filter";
 import type { SortKey } from "@/lib/catalog/sort";
 import { SORT_OPTIONS } from "@/lib/catalog/sort";
+import { PRICE_PRESETS, parsePricePreset } from "@/lib/catalog/price-presets";
 
 export const dynamic = "force-dynamic";
-
-const PRICE_PRESETS = [
-  { label: "전체", min: undefined, max: undefined },
-  { label: "~1만", min: undefined, max: 10000 },
-  { label: "1~3만", min: 10000, max: 30000 },
-  { label: "3만~", min: 30000, max: undefined },
-] as const;
-
-function parsePricePreset(preset: string | undefined) {
-  if (!preset) return { min: undefined, max: undefined };
-  const found = PRICE_PRESETS.find(
-    (p) => `${p.min ?? ""}-${p.max ?? ""}` === preset,
-  );
-  return { min: found?.min, max: found?.max };
-}
 
 export async function generateMetadata({
   params,
@@ -49,7 +35,7 @@ export default async function CategoryPage({
   const sort = (SORT_OPTIONS.some((o) => o.key === sp.sort)
     ? sp.sort
     : "newest") as SortKey;
-  const { min: minPrice, max: maxPrice } = parsePricePreset(sp.price);
+  const { minPrice, maxPrice } = parsePricePreset(sp.price);
 
   const categories = await listCategories();
   const current = categories.find((c) => c.slug === slug);
@@ -71,7 +57,7 @@ export default async function CategoryPage({
         <CategoryFilter categories={categories} activeSlug={slug} />
       </div>
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <PriceFilter presets={PRICE_PRESETS} activePreset={sp.price} basePath={basePath} />
+        <PriceFilter presets={PRICE_PRESETS} activePreset={sp.price} basePath={basePath} currentSort={sort} />
         <SortSelect currentSort={sort} />
       </div>
       <p className="mt-4 text-sm text-stone-500">총 {products.length}개</p>

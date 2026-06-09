@@ -60,6 +60,11 @@ describe("AddToCartButton", () => {
     expect(screen.getByRole("spinbutton")).toHaveValue(1);
   });
 
+  it("- 버튼은 수량 1일 때 비활성화된다", () => {
+    render(<AddToCartButton options={options} />);
+    expect(screen.getByRole("button", { name: "수량 감소" })).toBeDisabled();
+  });
+
   it("장바구니 담기 시 선택 수량으로 add 호출", async () => {
     render(<AddToCartButton options={options} />);
     await userEvent.click(screen.getByRole("button", { name: "수량 증가" }));

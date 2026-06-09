@@ -5,25 +5,11 @@ import { SortSelect } from "@/components/catalog/sort-select";
 import { PriceFilter } from "@/components/catalog/price-filter";
 import type { SortKey } from "@/lib/catalog/sort";
 import { SORT_OPTIONS } from "@/lib/catalog/sort";
+import { PRICE_PRESETS, parsePricePreset } from "@/lib/catalog/price-presets";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "전체 상품" };
-
-const PRICE_PRESETS = [
-  { label: "전체", min: undefined, max: undefined },
-  { label: "~1만", min: undefined, max: 10000 },
-  { label: "1~3만", min: 10000, max: 30000 },
-  { label: "3만~", min: 30000, max: undefined },
-] as const;
-
-function parsePricePreset(preset: string | undefined) {
-  if (!preset) return { min: undefined, max: undefined };
-  const found = PRICE_PRESETS.find(
-    (p) => `${p.min ?? ""}-${p.max ?? ""}` === preset,
-  );
-  return { min: found?.min, max: found?.max };
-}
 
 export default async function ProductsPage({
   searchParams,
@@ -34,7 +20,7 @@ export default async function ProductsPage({
   const sort = (SORT_OPTIONS.some((o) => o.key === params.sort)
     ? params.sort
     : "newest") as SortKey;
-  const { min: minPrice, max: maxPrice } = parsePricePreset(params.price);
+  const { minPrice, maxPrice } = parsePricePreset(params.price);
 
   const [products, categories] = await Promise.all([
     listPublishedProducts({ sort, minPrice, maxPrice }),
@@ -48,7 +34,7 @@ export default async function ProductsPage({
         <CategoryFilter categories={categories} activeSlug={null} />
       </div>
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <PriceFilter presets={PRICE_PRESETS} activePreset={params.price} />
+        <PriceFilter presets={PRICE_PRESETS} activePreset={params.price} currentSort={sort} />
         <SortSelect currentSort={sort} />
       </div>
       <p className="mt-4 text-sm text-stone-500">총 {products.length}개</p>

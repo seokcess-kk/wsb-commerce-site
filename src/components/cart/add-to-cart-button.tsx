@@ -48,6 +48,7 @@ export function AddToCartButton({ options }: { options: Array<CartItem & { stock
           <button
             type="button"
             onClick={decrement}
+            disabled={quantity <= 1}
             aria-label="수량 감소"
             className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-300 text-stone-600 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green disabled:opacity-40"
           >
@@ -65,6 +66,7 @@ export function AddToCartButton({ options }: { options: Array<CartItem & { stock
           <button
             type="button"
             onClick={increment}
+            disabled={quantity >= maxQty}
             aria-label="수량 증가"
             className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-300 text-stone-600 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green disabled:opacity-40"
           >
