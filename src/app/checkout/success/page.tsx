@@ -2,6 +2,7 @@ import Link from "next/link";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { confirmTossPayment } from "@/lib/payments/toss";
+import { markCouponUsed } from "@/db/queries/coupons";
 import { formatKRW } from "@/lib/format";
 import { ClearCartOnMount } from "@/components/cart/clear-cart-on-mount";
 
@@ -44,12 +45,22 @@ export default async function SuccessPage({
 
       // 원자적 재고 차감: stock >= qty 조건으로 음수를 방지. 부족분은 차감하지 않고
       // 결제는 이미 승인됐으므로 운영자가 주문관리에서 처리한다.
+      // 쿠폰 소진도 같은 멱등 블록 안에서 1회만 호출한다.
       if (updated.length > 0) {
         const items = await tx.select().from(schema.orderItems).where(eq(schema.orderItems.orderId, order.id));
         for (const it of items) {
           await tx.update(schema.productVariants)
             .set({ stock: sql`${schema.productVariants.stock} - ${it.quantity}` })
             .where(and(eq(schema.productVariants.id, it.variantId), gte(schema.productVariants.stock, it.quantity)));
+        }
+
+        // Mark the coupon as used inside the transaction — commits/rolls back
+        // atomically with the paid-transition and stock decrement so the coupon
+        // is never orphaned as used against an unpaid order.
+        // markCouponUsed sets usedAt WHERE usedAt IS NULL, so a second call
+        // is a safe no-op.
+        if (order.couponCode && order.userId) {
+          await markCouponUsed(order.userId, order.couponCode, order.id, tx);
         }
       }
     });

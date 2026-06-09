@@ -15,5 +15,7 @@ export const orders = pgTable("orders", {
   totalAmount: integer("total_amount").notNull(),
   courier: varchar("courier", { length: 40 }),
   trackingNumber: varchar("tracking_number", { length: 60 }),
+  couponCode: varchar("coupon_code", { length: 40 }),
+  couponDiscount: integer("coupon_discount").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

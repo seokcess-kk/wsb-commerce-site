@@ -99,6 +99,20 @@ export default function SupportPage() {
         ))}
       </div>
 
+      {/* 1:1 문의 */}
+      <div className="mt-10 rounded-lg border border-wsb-green/20 bg-wsb-green/5 px-6 py-5">
+        <h2 className="text-base font-bold text-wsb-carbon">1:1 문의</h2>
+        <p className="mt-1 text-sm text-stone-600">
+          FAQ에서 해결되지 않은 문의는 1:1 문의를 이용해 주세요. 평일 10:00~17:00 내 순차 답변합니다.
+        </p>
+        <Link
+          href="/support/inquiry"
+          className="mt-3 inline-block rounded-md bg-wsb-green px-5 py-2 text-sm font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+        >
+          문의하기
+        </Link>
+      </div>
+
       {/* 정책 바로가기 */}
       <h2 className="mt-10 text-base font-bold text-wsb-carbon">정책 바로가기</h2>
       <ul className="mt-3 space-y-2 text-sm">

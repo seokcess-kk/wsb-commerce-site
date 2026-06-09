@@ -6,6 +6,10 @@ export const STATUS_LABEL: Record<OrderStatus, string> = {
   shipped: "발송 완료", delivered: "배송 완료", cancelled: "취소",
 };
 
+export function statusLabel(status: string): string {
+  return (STATUS_LABEL as Record<string, string>)[status] ?? status;
+}
+
 export function nextStatuses(current: string): OrderStatus[] {
   switch (current) {
     case "paid": return ["preparing", "cancelled"];

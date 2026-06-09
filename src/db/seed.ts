@@ -162,7 +162,131 @@ async function main() {
     }
   }
 
-  console.log(`seed 완료: categories=${cats.length}, products=${products.length}, banners=${BANNERS.length}, orders=${ORDERS.length}`);
+  // 6) 데모 쿠폰 (멱등 — code 기준 onConflictDoNothing)
+  const DEMO_COUPONS = [
+    {
+      code: "WELCOME3000",
+      name: "첫 구매 3,000원 할인",
+      discountType: "fixed",
+      discountValue: 3000,
+      minSubtotal: 0,
+      maxDiscount: null as number | null,
+      isActive: true,
+    },
+    {
+      code: "NUTRO10",
+      name: "NUTROGIN 10% 할인 (최대 5,000원)",
+      discountType: "percent",
+      discountValue: 10,
+      minSubtotal: 30000,
+      maxDiscount: 5000 as number | null,
+      isActive: true,
+    },
+  ];
+  await db.insert(schema.coupons).values(DEMO_COUPONS).onConflictDoNothing({ target: schema.coupons.code });
+
+  // 어드민 유저에게 두 쿠폰 모두 등록해 둠 (마이페이지 테스트용)
+  const welcome3000Rows = await db
+    .select({ id: schema.coupons.id })
+    .from(schema.coupons)
+    .where(eq(schema.coupons.code, "WELCOME3000"));
+  if (welcome3000Rows.length > 0) {
+    await db
+      .insert(schema.userCoupons)
+      .values({ couponId: welcome3000Rows[0].id, userId: ADMIN_USER_ID })
+      .onConflictDoNothing();
+  }
+
+  const nutro10Rows = await db
+    .select({ id: schema.coupons.id })
+    .from(schema.coupons)
+    .where(eq(schema.coupons.code, "NUTRO10"));
+  if (nutro10Rows.length > 0) {
+    await db
+      .insert(schema.userCoupons)
+      .values({ couponId: nutro10Rows[0].id, userId: ADMIN_USER_ID })
+      .onConflictDoNothing();
+  }
+
+  // 7) 데모 배송지 (ADMIN_USER_ID) — addresses에 자연 유니크 키 없음.
+  //    userId 기준으로 이미 존재하는 경우 skip해 멱등성 보장.
+  const existingAddresses = await db
+    .select({ id: schema.addresses.id })
+    .from(schema.addresses)
+    .where(eq(schema.addresses.userId, ADMIN_USER_ID));
+  if (existingAddresses.length === 0) {
+    await db.insert(schema.addresses).values([
+      {
+        userId: ADMIN_USER_ID,
+        label: "집",
+        recipient: "관리자",
+        phone: "010-1000-0001",
+        zipcode: "06133",
+        address1: "서울특별시 강남구 테헤란로 1",
+        address2: "WSB타워 5층",
+        isDefault: true,
+      },
+      {
+        userId: ADMIN_USER_ID,
+        label: "회사",
+        recipient: "관리자",
+        phone: "010-1000-0001",
+        zipcode: "03181",
+        address1: "서울특별시 종로구 청계천로 14",
+        address2: "3층 사무실",
+        isDefault: false,
+      },
+    ]);
+  }
+
+  // 8) 데모 리뷰 — ADMIN_USER_ID의 delivered 주문에 연결.
+  //    DEMO-0001 (nutrogin-focus)·DEMO-0010 (nutrogin-focus 2qty) 모두 delivered.
+  //    unique(orderId, productId) 기준 onConflictDoNothing.
+  const deliveredAdminOrders = await db
+    .select({ id: schema.orders.id, orderNumber: schema.orders.orderNumber })
+    .from(schema.orders)
+    .where(eq(schema.orders.userId, ADMIN_USER_ID));
+
+  const orderByNo = (no: string) => deliveredAdminOrders.find((o) => o.orderNumber === no);
+  const focusProduct = products.find((p) => p.slug === "nutrogin-focus");
+  const restProduct = products.find((p) => p.slug === "nutrogin-rest");
+
+  const order0001 = orderByNo("DEMO-0001");
+  const order0003 = orderByNo("DEMO-0003"); // shipped — 리뷰는 배송완료 주문 기준이 이상적이나 스키마에 status 제약 없음
+
+  // DEMO-0001: nutrogin-focus 리뷰
+  if (order0001 && focusProduct) {
+    await db
+      .insert(schema.reviews)
+      .values({
+        productId: focusProduct.id,
+        userId: ADMIN_USER_ID,
+        orderId: order0001.id,
+        rating: 5,
+        title: "집중력이 확실히 올라갔어요",
+        body: "한 달째 꾸준히 먹고 있는데 오후 집중력이 눈에 띄게 좋아졌습니다. 스틱 하나씩 챙겨 다니기도 편하고, 맛도 거부감 없이 부드러워서 만족합니다. 재구매 예정입니다.",
+        images: [],
+      })
+      .onConflictDoNothing();
+  }
+
+  // DEMO-0003: nutrogin-rest 리뷰 (shipped 주문이지만 스키마 제약 없음 — 데모용)
+  if (order0003 && restProduct) {
+    await db
+      .insert(schema.reviews)
+      .values({
+        productId: restProduct.id,
+        userId: ADMIN_USER_ID,
+        orderId: order0003.id,
+        rating: 4,
+        title: "수면 깊이가 달라진 느낌",
+        body: "취침 30분 전에 챙겨 먹으면 몸이 확실히 이완되는 느낌이에요. 아직 한 박스 다 먹지는 않았지만 체감 효과가 있어서 만족스럽습니다. 테아닌 성분 덕분인지 다음날 아침도 개운합니다.",
+        images: [],
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log(`seed 완료: categories=${cats.length}, products=${products.length}, banners=${BANNERS.length}, orders=${ORDERS.length}, coupons=${DEMO_COUPONS.length}`);
   process.exit(0);
 }
 

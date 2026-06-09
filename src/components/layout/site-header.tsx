@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, ShoppingBag } from "lucide-react";
+import { Search, ShoppingBag, Heart } from "lucide-react";
 import { MobileNav } from "./mobile-nav";
 import { CartBadge } from "@/components/cart/cart-badge";
 import { HeaderAuth } from "./header-auth";
@@ -62,6 +62,13 @@ export function SiteHeader() {
           <Search size={20} strokeWidth={1.75} aria-hidden />
         </Link>
         <HeaderAuth />
+        <Link
+          href="/account/wishlist"
+          aria-label="찜 목록"
+          className="relative flex items-center transition-colors hover:text-wsb-green rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+        >
+          <Heart size={20} strokeWidth={1.75} aria-hidden />
+        </Link>
         <Link
           href="/cart"
           aria-label="장바구니"

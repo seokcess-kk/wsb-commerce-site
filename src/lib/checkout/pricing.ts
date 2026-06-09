@@ -6,6 +6,12 @@ export function shippingFee(subtotal: number): number {
   return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : BASE_SHIPPING_FEE;
 }
 
-export function orderTotal(subtotal: number): number {
-  return subtotal + shippingFee(subtotal);
+export function orderTotal(subtotal: number, discount = 0): number {
+  const discounted = Math.max(0, subtotal - discount);
+  return discounted + shippingFee(discounted);
+}
+
+export function freeShippingProgress(subtotal: number): { qualified: boolean; remaining: number } {
+  if (subtotal >= FREE_SHIPPING_THRESHOLD) return { qualified: true, remaining: 0 };
+  return { qualified: false, remaining: FREE_SHIPPING_THRESHOLD - Math.max(0, subtotal) };
 }

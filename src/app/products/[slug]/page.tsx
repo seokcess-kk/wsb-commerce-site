@@ -4,8 +4,14 @@ import { getProductBySlug } from "@/db/queries/products";
 import { resolveVariantPriceLabel } from "@/lib/catalog/product-view";
 import { ComplianceNotice } from "@/components/catalog/compliance-notice";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { ProductGallery } from "@/components/catalog/product-gallery";
+import { WishlistButton } from "@/components/wishlist/wishlist-button";
+import { ReviewSummary } from "@/components/reviews/review-summary";
+import { ReviewList } from "@/components/reviews/review-list";
 import { buildProductJsonLd } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
+import { getCurrentUser } from "@/lib/auth/current-user";
+import { isWishlisted } from "@/db/queries/wishlists";
 
 export const dynamic = "force-dynamic";
 
@@ -26,8 +32,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const [product, user] = await Promise.all([
+    getProductBySlug(slug),
+    getCurrentUser(),
+  ]);
   if (!product) notFound();
+
+  const initialWishlisted = user
+    ? await isWishlisted(user.id, product.id)
+    : false;
 
   const jsonLd = buildProductJsonLd({
     name: product.name,
@@ -39,23 +52,26 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     availability: product.variants.some((v) => v.stock > 0),
   });
 
-  const zone = product.isNutrogin
-    ? "bg-ng-cobalt text-white border-t-2 border-ng-neon"
-    : "bg-stone-100 text-stone-400";
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <article className="mx-auto grid max-w-6xl gap-8 px-6 py-10 md:grid-cols-2">
-      <div className={`flex min-h-80 items-center justify-center rounded-lg ${zone}`}>
-        <span className={`font-mono text-sm${product.isNutrogin ? " text-ng-neon" : ""}`}>{product.name}</span>
-      </div>
+      <ProductGallery
+        images={product.images}
+        fallbackLabel={product.name}
+        isNutrogin={product.isNutrogin}
+      />
       <div>
         {product.isNutrogin && (
           <span className="font-mono text-xs font-bold tracking-wide text-ng-cobalt">NUTROGIN</span>
         )}
         <h1 className="mt-1 text-2xl font-extrabold text-wsb-carbon">{product.name}</h1>
+        <ReviewSummary productId={product.id} />
         {product.summary && <p className="mt-2 text-stone-600">{product.summary}</p>}
-        <p className="mt-4 text-2xl font-extrabold text-wsb-carbon">{product.priceLabel}</p>
+        <div className="mt-4 flex items-center gap-3">
+          <p className="text-2xl font-extrabold text-wsb-carbon">{product.priceLabel}</p>
+          <WishlistButton productId={product.id} initialActive={initialWishlisted} />
+        </div>
 
         <div className="mt-4 rounded-md border border-stone-200 p-3 text-sm">
           <p className="mb-2 font-semibold text-stone-700">옵션</p>
@@ -93,6 +109,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             functionality={product.functionality}
             intakeNotice={product.intakeNotice}
           />
+        </div>
+
+        <div className="mt-8">
+          <ReviewList productId={product.id} />
         </div>
       </div>
     </article>

@@ -17,6 +17,9 @@ export default async function LoginPage({
         </p>
       )}
       <AuthForm mode="login" />
+      <p className="mt-3 text-center text-sm">
+        <a href="/auth/reset" className="text-wsb-green hover:underline">비밀번호를 잊으셨나요?</a>
+      </p>
       <div className="my-6 flex items-center gap-3 text-xs text-stone-400"><span className="h-px flex-1 bg-stone-200" />또는<span className="h-px flex-1 bg-stone-200" /></div>
       <SocialButtons />
     </section>
