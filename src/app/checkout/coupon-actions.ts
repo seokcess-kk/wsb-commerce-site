@@ -3,6 +3,7 @@
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getApplicableCoupon, listUserCoupons } from "@/db/queries/coupons";
 import type { ApplyCouponResult, UserCouponWithDetails } from "@/db/queries/coupons";
+import { validateCoupon } from "@/lib/coupons/validate";
 
 export type ApplyCouponActionResult = ApplyCouponResult;
 
@@ -40,12 +41,12 @@ export async function listAvailableCouponsAction(
   const all = await listUserCoupons(user.id);
   const now = new Date();
 
+  // Reuse validateCoupon for isActive + date-window checks.
+  // Pass c.minSubtotal as the subtotal so the min-order check always passes here
+  // (listing shows all date-valid coupons regardless of current cart value).
   return all.filter((uc) => {
     if (uc.usedAt) return false;
     const c = uc.coupon;
-    if (!c.isActive) return false;
-    if (c.startsAt && now < c.startsAt) return false;
-    if (c.endsAt && now > c.endsAt) return false;
-    return true;
+    return validateCoupon(c, now, c.minSubtotal).ok;
   });
 }

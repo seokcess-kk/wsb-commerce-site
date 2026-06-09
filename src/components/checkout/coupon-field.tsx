@@ -3,21 +3,13 @@
 import { useState, useTransition } from "react";
 import { formatKRW } from "@/lib/format";
 import { applyCouponAction, listAvailableCouponsAction } from "@/app/checkout/coupon-actions";
+import { couponLabel } from "@/lib/coupons/coupon-label";
 import type { UserCouponWithDetails } from "@/db/queries/coupons";
 
 type Props = {
   subtotal: number;
   onApply: (discount: number, code: string) => void;
 };
-
-function couponQuickLabel(uc: UserCouponWithDetails): string {
-  const c = uc.coupon;
-  if (c.discountType === "percent") {
-    const label = `${c.discountValue}% 할인`;
-    return c.maxDiscount ? `${label} (최대 ${formatKRW(c.maxDiscount)})` : label;
-  }
-  return `${formatKRW(c.discountValue)} 할인`;
-}
 
 export function CouponField({ subtotal, onApply }: Props) {
   const [code, setCode] = useState("");
@@ -132,7 +124,7 @@ export function CouponField({ subtotal, onApply }: Props) {
                 className="flex w-full items-center justify-between rounded-md border border-stone-200 px-3 py-2 text-xs hover:border-wsb-green/50 hover:bg-wsb-green/5 disabled:opacity-50 text-left"
               >
                 <span className="font-semibold text-stone-700">{uc.coupon.name}</span>
-                <span className="text-wsb-green font-bold">{couponQuickLabel(uc)}</span>
+                <span className="text-wsb-green font-bold">{couponLabel(uc.coupon)}</span>
               </button>
             </li>
           ))}

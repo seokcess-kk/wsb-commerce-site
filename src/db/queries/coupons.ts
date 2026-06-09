@@ -94,6 +94,38 @@ export async function listUserCoupons(userId: string): Promise<UserCouponWithDet
   }));
 }
 
+// ── Pure decision helper ──────────────────────────────────────────────────────
+
+/**
+ * Pure function: given the results of the two DB ownership queries plus
+ * a pre-run validation result and computed discount, decide the final
+ * ApplyCouponResult. Extracted from getApplicableCoupon for unit-testability.
+ *
+ * @param unusedClaim  - truthy when the user has an unused claim for this coupon
+ * @param anyClaim     - truthy when the user has any claim (used or unused)
+ * @param validation   - result of validateCoupon (active/date/minSubtotal checks)
+ * @param discount     - pre-computed discount amount (only used on the ok path)
+ * @param code         - the canonical coupon code (only used on the ok path)
+ */
+export function decideApplicable(args: {
+  unusedClaim: boolean;
+  anyClaim: boolean;
+  validation: { ok: boolean; reason?: string };
+  discount: number;
+  code: string;
+}): ApplyCouponResult {
+  if (!args.unusedClaim) {
+    if (args.anyClaim) return { ok: false, reason: "이미 사용된 쿠폰입니다." };
+    return { ok: false, reason: "보유하지 않은 쿠폰입니다." };
+  }
+  if (!args.validation.ok) {
+    return { ok: false, reason: args.validation.reason ?? "사용할 수 없는 쿠폰입니다." };
+  }
+  return { ok: true, discount: args.discount, code: args.code };
+}
+
+// ── Queries ───────────────────────────────────────────────────────────────────
+
 /**
  * For checkout: verify the user has claimed this coupon, it's unused,
  * and validateCoupon passes. Returns discount amount on success.
@@ -110,7 +142,7 @@ export async function getApplicableCoupon(
   if (!coupon) return { ok: false, reason: "존재하지 않는 쿠폰 코드입니다." };
 
   // Check user has claimed this coupon and it's unused
-  const [userCoupon] = await db
+  const [unusedClaimRow] = await db
     .select()
     .from(schema.userCoupons)
     .where(
@@ -122,33 +154,31 @@ export async function getApplicableCoupon(
     )
     .limit(1);
 
-  if (!userCoupon) {
-    // Distinguish between "not claimed" and "already used"
-    const [anyClaim] = await db
-      .select({ id: schema.userCoupons.id })
-      .from(schema.userCoupons)
-      .where(
-        and(
-          eq(schema.userCoupons.userId, userId),
-          eq(schema.userCoupons.couponId, coupon.id),
-        ),
-      )
-      .limit(1);
+  // Distinguish between "not claimed" and "already used"
+  const [anyClaimRow] = unusedClaimRow
+    ? [{ id: unusedClaimRow.id }]
+    : await db
+        .select({ id: schema.userCoupons.id })
+        .from(schema.userCoupons)
+        .where(
+          and(
+            eq(schema.userCoupons.userId, userId),
+            eq(schema.userCoupons.couponId, coupon.id),
+          ),
+        )
+        .limit(1);
 
-    if (anyClaim) {
-      return { ok: false, reason: "이미 사용된 쿠폰입니다." };
-    }
-    return { ok: false, reason: "보유하지 않은 쿠폰입니다." };
-  }
-
-  // Validate date window and min subtotal
   const validation = validateCoupon(coupon, now, subtotal);
-  if (!validation.ok) return { ok: false, reason: validation.reason };
-
   const rule = couponRowToRule(coupon);
   const discount = couponDiscount(subtotal, rule);
 
-  return { ok: true, discount, code: coupon.code };
+  return decideApplicable({
+    unusedClaim: !!unusedClaimRow,
+    anyClaim: !!anyClaimRow,
+    validation,
+    discount,
+    code: coupon.code,
+  });
 }
 
 /**
