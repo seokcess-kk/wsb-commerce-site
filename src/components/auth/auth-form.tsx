@@ -34,7 +34,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             password,
             options: {
               emailRedirectTo: `${window.location.origin}/auth/callback`,
-              data: { marketing_consent: marketingAgreed },
+              data: {
+                marketing_consent: marketingAgreed,
+                terms_agreed: termsAgreed,
+                privacy_agreed: privacyAgreed,
+              },
             },
           });
     if (error) { setError(error.message); setLoading(false); return; }
@@ -91,7 +95,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         </div>
       )}
 
-      {error && <p className="text-sm text-rose-600">{error}</p>}
+      {error && <p className="text-sm text-rose-600" role="alert">{error}</p>}
       <button type="submit" disabled={loading || !canSubmit}
         className={`w-full rounded-md bg-wsb-green py-3 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}>
         {loading ? "처리 중…" : mode === "login" ? "로그인" : "회원가입"}

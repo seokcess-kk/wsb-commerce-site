@@ -82,7 +82,7 @@ describe("AuthForm — SIGNUP mode", () => {
     expect(screen.getByRole("button", { name: "회원가입" })).not.toBeDisabled();
   });
 
-  it("필수 동의 후 제출 시 signUp이 marketing_consent=false로 호출된다", async () => {
+  it("필수 동의 후 제출 시 signUp이 marketing_consent=false, 필수 동의 booleans와 함께 호출된다", async () => {
     mockSignUp.mockResolvedValue({ error: null });
     render(<AuthForm mode="signup" />);
     await userEvent.type(screen.getByPlaceholderText("이메일"), "user@example.com");
@@ -96,7 +96,7 @@ describe("AuthForm — SIGNUP mode", () => {
           email: "user@example.com",
           password: "password123",
           options: expect.objectContaining({
-            data: { marketing_consent: false },
+            data: { marketing_consent: false, terms_agreed: true, privacy_agreed: true },
           }),
         }),
       );
@@ -116,10 +116,19 @@ describe("AuthForm — SIGNUP mode", () => {
       expect(mockSignUp).toHaveBeenCalledWith(
         expect.objectContaining({
           options: expect.objectContaining({
-            data: { marketing_consent: true },
+            data: { marketing_consent: true, terms_agreed: true, privacy_agreed: true },
           }),
         }),
       );
     });
+  });
+
+  it("에러 시 role=alert인 에러 메시지를 표시한다", async () => {
+    mockSignIn.mockResolvedValue({ error: { message: "Invalid credentials" } });
+    render(<AuthForm mode="login" />);
+    await userEvent.type(screen.getByPlaceholderText("이메일"), "user@example.com");
+    await userEvent.type(screen.getByPlaceholderText("비밀번호"), "wrongpass");
+    await userEvent.click(screen.getByRole("button", { name: "로그인" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Invalid credentials");
   });
 });

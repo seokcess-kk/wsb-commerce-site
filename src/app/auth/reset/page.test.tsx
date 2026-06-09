@@ -32,7 +32,7 @@ describe("ResetPasswordPage", () => {
     await waitFor(() => {
       expect(mockResetPasswordForEmail).toHaveBeenCalledWith(
         "test@example.com",
-        expect.objectContaining({ redirectTo: expect.stringContaining("/auth/reset/confirm") }),
+        expect.objectContaining({ redirectTo: expect.stringContaining("/auth/callback?next=/auth/reset/confirm") }),
       );
     });
   });

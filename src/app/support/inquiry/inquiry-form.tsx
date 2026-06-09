@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { submitInquiry } from "./actions";
-
-const CATEGORIES = ["배송", "주문", "상품", "기타"] as const;
+import { INQUIRY_CATEGORIES } from "@/lib/inquiry/categories";
 
 export function InquiryForm({
   initialEmail,
@@ -55,7 +54,6 @@ export function InquiryForm({
           className={`w-full rounded-md border border-stone-300 px-3 py-2 text-sm ${
             isLoggedIn ? "bg-stone-100 text-stone-500 cursor-not-allowed" : ""
           } ${ring}`}
-          aria-label="이메일"
         />
       </div>
 
@@ -70,10 +68,9 @@ export function InquiryForm({
           onChange={(e) => setCategory(e.target.value)}
           required
           className={`w-full rounded-md border border-stone-300 px-3 py-2 text-sm ${ring}`}
-          aria-label="문의 유형"
         >
           <option value="">유형을 선택해 주세요</option>
-          {CATEGORIES.map((c) => (
+          {INQUIRY_CATEGORIES.map((c) => (
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
@@ -92,7 +89,6 @@ export function InquiryForm({
           onChange={(e) => setSubject(e.target.value)}
           placeholder="제목을 입력해 주세요"
           className={`w-full rounded-md border border-stone-300 px-3 py-2 text-sm ${ring}`}
-          aria-label="제목"
         />
       </div>
 
@@ -109,7 +105,6 @@ export function InquiryForm({
           placeholder="문의 내용을 입력해 주세요"
           rows={6}
           className={`w-full resize-none rounded-md border border-stone-300 px-3 py-2 text-sm ${ring}`}
-          aria-label="문의 내용"
         />
       </div>
 

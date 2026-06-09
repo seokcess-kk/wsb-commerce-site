@@ -3,8 +3,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { createInquiry } from "@/db/queries/inquiries";
-
-const CATEGORIES = ["배송", "주문", "상품", "기타"] as const;
+import { INQUIRY_CATEGORIES } from "@/lib/inquiry/categories";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -18,7 +17,7 @@ export async function submitInquiry(
   const body = (formData.get("body") as string | null)?.trim() ?? "";
   const emailInput = (formData.get("email") as string | null)?.trim() ?? "";
 
-  if (!CATEGORIES.includes(category as (typeof CATEGORIES)[number])) {
+  if (!INQUIRY_CATEGORIES.includes(category as (typeof INQUIRY_CATEGORIES)[number])) {
     return { error: "문의 유형을 선택해 주세요." };
   }
   if (!subject || subject.length < 2) {
