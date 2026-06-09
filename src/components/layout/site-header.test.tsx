@@ -31,7 +31,14 @@ describe("SiteHeader", () => {
     renderWithCart(<SiteHeader />);
     expect(screen.getByRole("link", { name: "검색" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "로그인" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "찜 목록" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "장바구니" })).toBeInTheDocument();
+  });
+
+  it("찜 목록 링크가 /account/wishlist로 이동한다", () => {
+    renderWithCart(<SiteHeader />);
+    const wishlistLink = screen.getByRole("link", { name: "찜 목록" });
+    expect(wishlistLink).toHaveAttribute("href", "/account/wishlist");
   });
 
   it("모바일 메뉴 트리거 버튼이 존재한다", () => {
