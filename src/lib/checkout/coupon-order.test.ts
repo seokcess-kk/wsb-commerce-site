@@ -68,6 +68,24 @@ describe("isCouponValid", () => {
   it("날짜 null이면 영구 유효 (isActive=true)", () => {
     expect(isCouponValid(baseRow, NOW)).toBe(true);
   });
+
+  // minSubtotal alignment — ensures isCouponValid agrees with validateCoupon
+  it("subtotal 미제공 시 minSubtotal 체크 생략 (undefined → skip)", () => {
+    const row: CouponRow = { ...baseRow, minSubtotal: 50000 };
+    // No subtotal passed — minSubtotal not checked, result is true
+    expect(isCouponValid(row, NOW)).toBe(true);
+  });
+
+  it("subtotal 제공 + minSubtotal 미달 → 무효", () => {
+    const row: CouponRow = { ...baseRow, minSubtotal: 50000 };
+    expect(isCouponValid(row, NOW, 30000)).toBe(false);
+  });
+
+  it("subtotal 제공 + minSubtotal 충족 → 유효", () => {
+    const row: CouponRow = { ...baseRow, minSubtotal: 50000 };
+    expect(isCouponValid(row, NOW, 50000)).toBe(true);
+    expect(isCouponValid(row, NOW, 80000)).toBe(true);
+  });
 });
 
 // ── computeOrderFigures ───────────────────────────────────────────────────────
