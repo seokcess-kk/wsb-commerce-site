@@ -1,6 +1,5 @@
 import { eq, desc, and, isNull, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
-import { aggregateRatings } from "@/lib/reviews/aggregate";
 
 export type ReviewRow = {
   id: string;
@@ -76,12 +75,16 @@ export async function listProductReviews(productId: string): Promise<ReviewRow[]
 
 export async function getRatingSummary(productId: string): Promise<RatingSummary> {
   const db = getDb();
-  const rows = await db
-    .select({ rating: schema.reviews.rating })
+  const [row] = await db
+    .select({
+      count: sql<number>`COUNT(*)::int`,
+      avg: sql<number>`COALESCE(AVG(${schema.reviews.rating}), 0)`,
+    })
     .from(schema.reviews)
     .where(eq(schema.reviews.productId, productId));
 
-  return aggregateRatings(rows.map((r) => r.rating));
+  if (!row || row.count === 0) return { count: 0, average: 0 };
+  return { count: row.count, average: Math.round(row.avg * 10) / 10 };
 }
 
 export type CreateReviewInput = {

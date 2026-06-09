@@ -3,13 +3,9 @@
 import { useState } from "react";
 import { StarRating } from "./star-rating";
 import type { ReviewRow } from "@/db/queries/reviews";
+import { formatDate } from "@/lib/format";
 
 type SortKey = "newest" | "highest";
-
-function formatDate(d: Date | string): string {
-  const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" });
-}
 
 export function ReviewListClient({ reviews }: { reviews: ReviewRow[] }) {
   const [sort, setSort] = useState<SortKey>("newest");
@@ -60,7 +56,7 @@ export function ReviewListClient({ reviews }: { reviews: ReviewRow[] }) {
                 <div className="flex items-center gap-2">
                   <StarRating value={review.rating} size={16} />
                   <span className="text-xs text-stone-400">{review.maskedAuthor}</span>
-                  <time className="text-xs text-stone-400" dateTime={String(review.createdAt)}>
+                  <time className="text-xs text-stone-400" dateTime={new Date(review.createdAt).toISOString()}>
                     {formatDate(review.createdAt)}
                   </time>
                 </div>

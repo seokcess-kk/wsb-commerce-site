@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getDb, schema } from "@/db/index";
 import { createReview } from "@/db/queries/reviews";
 import { canReview } from "@/lib/reviews/eligibility";
+import type { OrderStatus } from "@/lib/admin/order-status";
 
 export type SubmitReviewInput = {
   orderId: string;
@@ -23,7 +24,13 @@ export async function submitReview(
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/account/reviews");
 
-  const { orderId, productId, rating, title, body, images } = input;
+  const { orderId, productId, rating, title, body } = input;
+  // Normalise & sanitise images server-side: split comma-separated strings, trim, keep only https:// URLs
+  const rawImages = Array.isArray(input.images) ? input.images : [];
+  const images = rawImages
+    .flatMap((entry) => (typeof entry === "string" ? entry.split(",") : [entry]))
+    .map((s) => s.trim())
+    .filter((s) => s.startsWith("https://"));
 
   if (!rating || rating < 1 || rating > 5) {
     return { error: "별점은 1~5 사이여야 합니다." };
@@ -35,29 +42,33 @@ export async function submitReview(
   const db = getDb();
 
   // Server-side eligibility re-verification:
-  // 1. The order belongs to this user and has status "delivered"
-  const [order] = await db
-    .select({ id: schema.orders.id, status: schema.orders.status, userId: schema.orders.userId })
-    .from(schema.orders)
-    .where(and(eq(schema.orders.id, orderId), eq(schema.orders.userId, user.id)))
-    .limit(1);
+  // 1 & 2 are independent: run in parallel
+  const [orderResult, orderItemResult] = await Promise.all([
+    db
+      .select({ id: schema.orders.id, status: schema.orders.status, userId: schema.orders.userId })
+      .from(schema.orders)
+      .where(and(eq(schema.orders.id, orderId), eq(schema.orders.userId, user.id)))
+      .limit(1),
+    db
+      .select({ id: schema.orderItems.id })
+      .from(schema.orderItems)
+      .where(
+        and(
+          eq(schema.orderItems.orderId, orderId),
+          eq(schema.orderItems.productId, productId),
+        ),
+      )
+      .limit(1),
+  ]);
+
+  const [order] = orderResult;
+  const [orderItem] = orderItemResult;
 
   if (!order) {
     return { error: "주문을 찾을 수 없습니다." };
   }
 
   // 2. Verify the productId is actually a line item on this order (defense-in-depth)
-  const [orderItem] = await db
-    .select({ id: schema.orderItems.id })
-    .from(schema.orderItems)
-    .where(
-      and(
-        eq(schema.orderItems.orderId, orderId),
-        eq(schema.orderItems.productId, productId),
-      ),
-    )
-    .limit(1);
-
   if (!orderItem) {
     return { error: "해당 주문에 없는 상품입니다." };
   }
@@ -74,7 +85,7 @@ export async function submitReview(
     )
     .limit(1);
 
-  if (!canReview(order.status, !!existing)) {
+  if (!canReview(order.status as OrderStatus, !!existing)) {
     if (existing) return { error: "이미 작성된 리뷰입니다." };
     return { error: "구매확정된 주문에만 리뷰를 작성할 수 있습니다." };
   }

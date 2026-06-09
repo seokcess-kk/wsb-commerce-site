@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { listWritableOrderItems, listMyReviews } from "@/db/queries/reviews";
 import { StarRating } from "@/components/reviews/star-rating";
 import { WriteReviewButton } from "@/components/reviews/write-review-button";
+import { formatDate } from "@/lib/format";
 import { submitReview } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -13,15 +14,6 @@ export const metadata: Metadata = {
   title: "리뷰 관리",
   robots: { index: false },
 };
-
-function formatDate(d: Date | string): string {
-  const date = typeof d === "string" ? new Date(d) : d;
-  return date.toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-}
 
 export default async function ReviewsPage() {
   const user = await getCurrentUser();
@@ -98,7 +90,7 @@ export default async function ReviewsPage() {
                   </Link>
                   <div className="mt-1 flex items-center gap-2">
                     <StarRating value={review.rating} size={14} />
-                    <time className="text-xs text-stone-400">
+                    <time className="text-xs text-stone-400" dateTime={new Date(review.createdAt).toISOString()}>
                       {formatDate(review.createdAt)}
                     </time>
                   </div>
