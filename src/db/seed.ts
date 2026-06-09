@@ -186,14 +186,25 @@ async function main() {
   await db.insert(schema.coupons).values(DEMO_COUPONS).onConflictDoNothing({ target: schema.coupons.code });
 
   // 어드민 유저에게 두 쿠폰 모두 등록해 둠 (마이페이지 테스트용)
-  const insertedCoupons = await db
-    .select({ id: schema.coupons.id, code: schema.coupons.code })
+  const welcome3000Rows = await db
+    .select({ id: schema.coupons.id })
     .from(schema.coupons)
     .where(eq(schema.coupons.code, "WELCOME3000"));
-  if (insertedCoupons.length > 0) {
+  if (welcome3000Rows.length > 0) {
     await db
       .insert(schema.userCoupons)
-      .values({ couponId: insertedCoupons[0].id, userId: ADMIN_USER_ID })
+      .values({ couponId: welcome3000Rows[0].id, userId: ADMIN_USER_ID })
+      .onConflictDoNothing();
+  }
+
+  const nutro10Rows = await db
+    .select({ id: schema.coupons.id })
+    .from(schema.coupons)
+    .where(eq(schema.coupons.code, "NUTRO10"));
+  if (nutro10Rows.length > 0) {
+    await db
+      .insert(schema.userCoupons)
+      .values({ couponId: nutro10Rows[0].id, userId: ADMIN_USER_ID })
       .onConflictDoNothing();
   }
 

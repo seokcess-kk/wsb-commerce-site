@@ -40,8 +40,10 @@ export async function findCouponByCode(code: string): Promise<CouponRow | null> 
 /**
  * Claim a coupon for a user.
  * - Finds the coupon by code; returns error if missing or inactive.
- * - Inserts into userCoupons; unique(couponId, userId) constraint
- *   will block duplicates — caught and returned as friendly error.
+ * - Inserts into userCoupons with onConflictDoNothing; if the result set is
+ *   empty the unique(couponId, userId) constraint was triggered — return a
+ *   friendly duplicate message. No try/catch needed: onConflictDoNothing
+ *   suppresses the unique violation so no exception is thrown.
  */
 export async function claimCoupon(
   userId: string,
@@ -53,20 +55,16 @@ export async function claimCoupon(
   if (!coupon) return { ok: false, reason: "존재하지 않는 쿠폰 코드입니다." };
   if (!coupon.isActive) return { ok: false, reason: "사용할 수 없는 쿠폰입니다." };
 
-  try {
-    const result = await db
-      .insert(schema.userCoupons)
-      .values({ couponId: coupon.id, userId })
-      .onConflictDoNothing()
-      .returning({ id: schema.userCoupons.id });
+  const result = await db
+    .insert(schema.userCoupons)
+    .values({ couponId: coupon.id, userId })
+    .onConflictDoNothing()
+    .returning({ id: schema.userCoupons.id });
 
-    if (result.length === 0) {
-      return { ok: false, reason: "이미 등록된 쿠폰입니다." };
-    }
-    return { ok: true };
-  } catch {
+  if (result.length === 0) {
     return { ok: false, reason: "이미 등록된 쿠폰입니다." };
   }
+  return { ok: true };
 }
 
 /**
