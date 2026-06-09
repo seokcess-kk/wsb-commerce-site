@@ -42,6 +42,7 @@ describe("schema 형상", () => {
     expect(cols).toHaveProperty("title");
     expect(cols).toHaveProperty("body");
     expect(cols).toHaveProperty("images");
+    expect(cols).toHaveProperty("isHidden");
     expect(cols).toHaveProperty("createdAt");
   });
   it("wishlists 테이블 컬럼", () => {

@@ -59,7 +59,7 @@ export async function listProductReviews(productId: string): Promise<ReviewRow[]
       userId: schema.reviews.userId,
     })
     .from(schema.reviews)
-    .where(eq(schema.reviews.productId, productId))
+    .where(and(eq(schema.reviews.productId, productId), eq(schema.reviews.isHidden, false)))
     .orderBy(desc(schema.reviews.createdAt));
 
   return rows.map((r) => ({
@@ -81,7 +81,7 @@ export async function getRatingSummary(productId: string): Promise<RatingSummary
       avg: sql<number>`COALESCE(AVG(${schema.reviews.rating}), 0)`,
     })
     .from(schema.reviews)
-    .where(eq(schema.reviews.productId, productId));
+    .where(and(eq(schema.reviews.productId, productId), eq(schema.reviews.isHidden, false)));
 
   if (!row || row.count === 0) return { count: 0, average: 0 };
   return { count: row.count, average: Math.round(row.avg * 10) / 10 };
