@@ -8,6 +8,7 @@ import { ProductGallery } from "@/components/catalog/product-gallery";
 import { WishlistButton } from "@/components/wishlist/wishlist-button";
 import { ReviewSummary } from "@/components/reviews/review-summary";
 import { ReviewList } from "@/components/reviews/review-list";
+import { ProductDetailSection } from "@/components/catalog/product-detail-section";
 import { buildProductJsonLd } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -116,6 +117,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
     </article>
+
+    {/* 상세 정보 섹션 — 두 칸 레이아웃 아래 전체 너비 */}
+    <ProductDetailSection
+      description={product.description}
+      images={product.images}
+      functionality={product.functionality}
+      intakeNotice={product.intakeNotice}
+      ingredients={product.ingredients}
+      isNutrogin={product.isNutrogin}
+      productName={product.name}
+    />
     </>
   );
 }
