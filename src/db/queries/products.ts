@@ -1,7 +1,8 @@
-import { eq, desc, and, or, ilike } from "drizzle-orm";
+import { eq, desc, asc, and, or, ilike, gte, lte, SQL } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { toProductSummary, type ProductRow, type ProductSummary } from "@/lib/catalog/product-view";
 import { toLikePattern } from "@/lib/catalog/search";
+import type { SortKey } from "@/lib/catalog/sort";
 
 const { products, categories, productVariants } = schema;
 
@@ -23,14 +24,40 @@ function joinRowToProductRow(r: {
   };
 }
 
-export async function listPublishedProducts(): Promise<ProductSummary[]> {
+export type ListProductsOptions = {
+  sort?: SortKey;
+  minPrice?: number;
+  maxPrice?: number;
+  categorySlug?: string;
+};
+
+function buildProductOrderBy(sort: SortKey | undefined) {
+  switch (sort) {
+    case "price_asc":  return asc(products.basePrice);
+    case "price_desc": return desc(products.basePrice);
+    case "name":       return asc(products.name);
+    case "newest":
+    default:           return desc(products.createdAt);
+  }
+}
+
+export async function listPublishedProducts(opts: ListProductsOptions = {}): Promise<ProductSummary[]> {
   const db = getDb();
-  const rows = await db
+  const { sort, minPrice, maxPrice, categorySlug } = opts;
+
+  const conditions: SQL[] = [eq(products.isPublished, true)];
+  if (minPrice !== undefined) conditions.push(gte(products.basePrice, minPrice));
+  if (maxPrice !== undefined) conditions.push(lte(products.basePrice, maxPrice));
+  if (categorySlug !== undefined) conditions.push(eq(categories.slug, categorySlug));
+
+  const query = db
     .select({ product: products, category: categories })
     .from(products)
     .leftJoin(categories, eq(products.categoryId, categories.id))
-    .where(eq(products.isPublished, true))
-    .orderBy(desc(products.createdAt));
+    .where(and(...conditions))
+    .orderBy(buildProductOrderBy(sort));
+
+  const rows = await query;
   return rows.map(joinRowToProductRow).map(toProductSummary);
 }
 
