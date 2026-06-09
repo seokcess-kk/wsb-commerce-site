@@ -1,13 +1,17 @@
 import { getStatusCounts, getDailyRevenue, getTopProducts, getCustomerOrderCounts } from "@/db/queries/admin-analytics";
 import { summarizeCustomers } from "@/lib/admin/analytics-helpers";
 import { STATUS_LABEL } from "@/lib/admin/order-status";
+import { countOpenInquiries } from "@/db/queries/admin-inquiries";
+import { countRequestedCancellations } from "@/db/queries/admin-cancellations";
 import { formatKRW } from "@/lib/format";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const [statusCounts, daily, top, custRows] = await Promise.all([
+  const [statusCounts, daily, top, custRows, openInquiries, pendingCancellations] = await Promise.all([
     getStatusCounts(), getDailyRevenue(14), getTopProducts(5), getCustomerOrderCounts(),
+    countOpenInquiries(), countRequestedCancellations(),
   ]);
   const cust = summarizeCustomers(custRows);
   const revenueTotal = daily.reduce((s, d) => s + d.total, 0);
@@ -15,6 +19,14 @@ export default async function AdminDashboard() {
   return (
     <div>
       <h1 className="text-2xl font-extrabold text-wsb-carbon">대시보드</h1>
+
+      {(openInquiries > 0 || pendingCancellations > 0) && (
+        <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <Pending label="미답변 문의" value={openInquiries} href="/admin/inquiries?status=open" />
+          <Pending label="대기 취소/반품" value={pendingCancellations} href="/admin/orders/cancellations?status=requested" />
+        </div>
+      )}
+
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Kpi label="최근 14일 매출" value={formatKRW(revenueTotal)} />
         <Kpi label="결제완료 주문" value={`${statusCounts.paid ?? 0}건`} />
@@ -63,6 +75,14 @@ export default async function AdminDashboard() {
 
 function Kpi({ label, value }: { label: string; value: string }) {
   return <div className="rounded-lg border border-stone-200 p-4"><p className="font-mono text-[11px] uppercase tracking-wide text-stone-400">{label}</p><p className="mt-1 text-xl font-extrabold text-wsb-carbon">{value}</p></div>;
+}
+function Pending({ label, value, href }: { label: string; value: number; href: string }) {
+  return (
+    <Link href={href} className="rounded-lg border border-amber-300 bg-amber-50 p-4 transition hover:bg-amber-100">
+      <p className="font-mono text-[11px] uppercase tracking-wide text-amber-600">{label}</p>
+      <p className="mt-1 text-xl font-extrabold text-amber-700">{value}건 대기</p>
+    </Link>
+  );
 }
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return <div className="rounded-lg border border-stone-200 p-5"><h2 className="mb-3 text-sm font-bold text-wsb-carbon">{title}</h2>{children}</div>;

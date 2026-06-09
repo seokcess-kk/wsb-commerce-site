@@ -1,5 +1,15 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
+
+// 처리 대기(requested) 취소/반품 요청 수 — 대시보드 미처리 카드용.
+export async function countRequestedCancellations(): Promise<number> {
+  const db = getDb();
+  const [row] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(schema.orderCancellations)
+    .where(eq(schema.orderCancellations.status, "requested"));
+  return row?.c ?? 0;
+}
 
 // 취소/반품 요청 목록 (주문 정보 조인). statusFilter 가 주어지면 해당 상태만.
 export async function listCancellations(statusFilter?: string) {

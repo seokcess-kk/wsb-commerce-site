@@ -4,6 +4,7 @@ import { getOrderAdmin } from "@/db/queries/admin-orders";
 import { STATUS_LABEL, nextStatuses } from "@/lib/admin/order-status";
 import { updateOrderStatus, updateShipping } from "../actions";
 import { formatKRW } from "@/lib/format";
+import { trackingUrl, SUPPORTED_COURIERS } from "@/lib/orders/tracking";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export default async function AdminOrderDetail({
   if (!detail) notFound();
   const { order, items } = detail;
   const next = nextStatuses(order.status);
+  const trackUrl = trackingUrl(order.courier, order.trackingNumber);
 
   return (
     <div>
@@ -78,8 +80,14 @@ export default async function AdminOrderDetail({
           <input
             name="courier"
             defaultValue={order.courier ?? ""}
+            list="courier-list"
             className="mt-1 block rounded-md border border-stone-300 px-2 py-1 text-sm"
           />
+          <datalist id="courier-list">
+            {SUPPORTED_COURIERS.map((c) => (
+              <option key={c} value={c} />
+            ))}
+          </datalist>
         </label>
         <label className="text-sm">
           송장번호
@@ -93,6 +101,26 @@ export default async function AdminOrderDetail({
           송장 저장
         </button>
       </form>
+
+      {order.trackingNumber && (
+        <p className="mt-3 text-sm text-stone-600">
+          배송조회:{" "}
+          {trackUrl ? (
+            <a
+              href={trackUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-wsb-green hover:underline"
+            >
+              {order.courier} {order.trackingNumber} ↗
+            </a>
+          ) : (
+            <span className="font-mono text-stone-500">
+              {order.courier} {order.trackingNumber}
+            </span>
+          )}
+        </p>
+      )}
     </div>
   );
 }
