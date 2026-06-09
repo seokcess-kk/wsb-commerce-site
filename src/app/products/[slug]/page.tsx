@@ -5,6 +5,9 @@ import { resolveVariantPriceLabel } from "@/lib/catalog/product-view";
 import { ComplianceNotice } from "@/components/catalog/compliance-notice";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { ProductGallery } from "@/components/catalog/product-gallery";
+import { WishlistButton } from "@/components/wishlist/wishlist-button";
+import { ReviewSummary } from "@/components/reviews/review-summary";
+import { ReviewList } from "@/components/reviews/review-list";
 import { buildProductJsonLd } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
 
@@ -54,8 +57,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           <span className="font-mono text-xs font-bold tracking-wide text-ng-cobalt">NUTROGIN</span>
         )}
         <h1 className="mt-1 text-2xl font-extrabold text-wsb-carbon">{product.name}</h1>
+        <ReviewSummary productId={product.id} />
         {product.summary && <p className="mt-2 text-stone-600">{product.summary}</p>}
-        <p className="mt-4 text-2xl font-extrabold text-wsb-carbon">{product.priceLabel}</p>
+        <div className="mt-4 flex items-center gap-3">
+          <p className="text-2xl font-extrabold text-wsb-carbon">{product.priceLabel}</p>
+          <WishlistButton productId={product.id} />
+        </div>
 
         <div className="mt-4 rounded-md border border-stone-200 p-3 text-sm">
           <p className="mb-2 font-semibold text-stone-700">옵션</p>
@@ -93,6 +100,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             functionality={product.functionality}
             intakeNotice={product.intakeNotice}
           />
+        </div>
+
+        <div className="mt-8">
+          <ReviewList productId={product.id} />
         </div>
       </div>
     </article>
