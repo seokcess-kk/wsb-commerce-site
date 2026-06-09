@@ -30,7 +30,8 @@ export function sortProductSummaries(items: ProductSummary[], key: SortKey): Pro
 }
 
 /**
- * Filters items by price range (inclusive bounds). Undefined = open.
+ * 반개구간 [min, max)로 필터: 하한 포함, 상한 배타. Undefined = 개방.
+ * 상한을 배타로 두어 인접 가격대 프리셋이 경계값에서 중복되지 않게 한다.
  */
 export function filterByPrice(
   items: ProductSummary[],
@@ -39,7 +40,7 @@ export function filterByPrice(
 ): ProductSummary[] {
   return items.filter((item) => {
     if (min !== undefined && item.basePrice < min) return false;
-    if (max !== undefined && item.basePrice > max) return false;
+    if (max !== undefined && item.basePrice >= max) return false;
     return true;
   });
 }

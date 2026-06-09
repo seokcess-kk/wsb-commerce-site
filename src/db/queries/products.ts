@@ -1,4 +1,4 @@
-import { eq, desc, asc, and, or, ilike, gte, lte, SQL } from "drizzle-orm";
+import { eq, desc, asc, and, or, ilike, gte, lt, SQL } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { toProductSummary, type ProductRow, type ProductSummary } from "@/lib/catalog/product-view";
 import { toLikePattern } from "@/lib/catalog/search";
@@ -46,8 +46,9 @@ export async function listPublishedProducts(opts: ListProductsOptions = {}): Pro
   const { sort, minPrice, maxPrice, categorySlug } = opts;
 
   const conditions: SQL[] = [eq(products.isPublished, true)];
+  // 반개구간 [minPrice, maxPrice): 상한은 배타 — 인접 프리셋(예: "1~3만"/"3만~")의 경계 중복 방지.
   if (minPrice !== undefined) conditions.push(gte(products.basePrice, minPrice));
-  if (maxPrice !== undefined) conditions.push(lte(products.basePrice, maxPrice));
+  if (maxPrice !== undefined) conditions.push(lt(products.basePrice, maxPrice));
   if (categorySlug !== undefined) conditions.push(eq(categories.slug, categorySlug));
 
   const query = db

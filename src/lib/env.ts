@@ -9,6 +9,9 @@ const envSchema = z.object({
   ADMIN_EMAILS: z.string().optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
   NEXT_PUBLIC_PAYMENTS_ENABLED: z.string().optional(),
+  // DB 커넥션 풀 상한(선택). 미설정 시 db/index.ts의 기본값 사용.
+  // Supabase 세션 모드 풀러(한도 15) 사용 시 낮게, 트랜잭션 모드 풀러(6543)면 여유롭게.
+  DB_POOL_MAX: z.coerce.number().int().positive().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
