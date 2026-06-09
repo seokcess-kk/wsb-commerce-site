@@ -4,6 +4,7 @@ import { getProductBySlug } from "@/db/queries/products";
 import { resolveVariantPriceLabel } from "@/lib/catalog/product-view";
 import { ComplianceNotice } from "@/components/catalog/compliance-notice";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { ProductGallery } from "@/components/catalog/product-gallery";
 import { buildProductJsonLd } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
 
@@ -39,16 +40,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     availability: product.variants.some((v) => v.stock > 0),
   });
 
-  const zone = product.isNutrogin
-    ? "bg-ng-cobalt text-white border-t-2 border-ng-neon"
-    : "bg-stone-100 text-stone-400";
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <article className="mx-auto grid max-w-6xl gap-8 px-6 py-10 md:grid-cols-2">
-      <div className={`flex min-h-80 items-center justify-center rounded-lg ${zone}`}>
-        <span className={`font-mono text-sm${product.isNutrogin ? " text-ng-neon" : ""}`}>{product.name}</span>
-      </div>
+      <ProductGallery
+        images={product.images}
+        fallbackLabel={product.name}
+        isNutrogin={product.isNutrogin}
+      />
       <div>
         {product.isNutrogin && (
           <span className="font-mono text-xs font-bold tracking-wide text-ng-cobalt">NUTROGIN</span>
