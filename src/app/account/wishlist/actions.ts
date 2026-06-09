@@ -1,13 +1,14 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { toggleWishlist } from "@/db/queries/wishlists";
 
-export async function toggleWishlistAction(productId: string): Promise<{ active: boolean }> {
+export async function toggleWishlistAction(
+  productId: string,
+): Promise<{ active: boolean } | { unauthorized: true }> {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) return { unauthorized: true };
 
   const active = await toggleWishlist(user.id, productId);
   revalidatePath("/account/wishlist");

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { CheckoutAddress } from "@/lib/account/address-types";
 
 type SavedAddress = {
@@ -14,31 +15,53 @@ type SavedAddress = {
   isDefault: boolean;
 };
 
+type FetchState =
+  | { status: "loading" }
+  | { status: "unauthorized" }
+  | { status: "loaded"; addresses: SavedAddress[] };
+
 export function AddressSelector({ onSelect }: { onSelect: (a: CheckoutAddress) => void }) {
-  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [state, setState] = useState<FetchState>({ status: "loading" });
 
   useEffect(() => {
     fetch("/api/addresses")
-      .then((r) => (r.ok ? r.json() : Promise.resolve([])))
-      .then((data: SavedAddress[]) => {
-        setAddresses(data);
-        setLoaded(true);
+      .then(async (r) => {
+        if (r.status === 401) {
+          setState({ status: "unauthorized" });
+          return;
+        }
+        if (!r.ok) {
+          setState({ status: "loaded", addresses: [] });
+          return;
+        }
+        const data: SavedAddress[] = await r.json();
+        setState({ status: "loaded", addresses: data });
       })
-      .catch(() => setLoaded(true));
+      .catch(() => setState({ status: "loaded", addresses: [] }));
   }, []);
 
-  if (!loaded) {
+  if (state.status === "loading") {
     return <p className="text-sm text-stone-400">배송지 불러오는 중…</p>;
   }
 
-  if (addresses.length === 0) {
+  if (state.status === "unauthorized") {
+    return (
+      <p className="text-sm text-stone-400">
+        <Link href="/login" className="underline hover:text-wsb-green">
+          로그인
+        </Link>
+        하면 저장된 배송지를 사용할 수 있어요
+      </p>
+    );
+  }
+
+  if (state.addresses.length === 0) {
     return <p className="text-sm text-stone-400">저장된 배송지 없음</p>;
   }
 
   return (
     <ul className="space-y-2">
-      {addresses.map((addr) => (
+      {state.addresses.map((addr) => (
         <li key={addr.id}>
           <button
             type="button"

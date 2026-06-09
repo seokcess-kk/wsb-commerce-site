@@ -1,7 +1,14 @@
+import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AddressSelector } from "./address-selector";
+
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...rest }: { href: string; children: React.ReactNode; [key: string]: unknown }) => (
+    <a href={href} {...rest}>{children}</a>
+  ),
+}));
 
 const mockOnSelect = vi.fn();
 
@@ -93,5 +100,20 @@ describe("AddressSelector", () => {
     await waitFor(() => {
       expect(screen.getByText(/저장된 배송지 없음/)).toBeInTheDocument();
     });
+  });
+
+  it("401 응답 시 로그인 안내 문구를 표시하고 저장된 배송지 없음 메시지는 없다", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: "unauthorized" }),
+    }));
+
+    render(<AddressSelector onSelect={mockOnSelect} />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/저장된 배송지를 사용할 수 있어요/)).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/저장된 배송지 없음/)).not.toBeInTheDocument();
   });
 });

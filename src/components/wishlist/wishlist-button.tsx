@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toggleWishlistAction } from "@/app/account/wishlist/actions";
 
 export function WishlistButton({
@@ -12,6 +13,7 @@ export function WishlistButton({
 }) {
   const [active, setActive] = useState(initialActive);
   const [, startTransition] = useTransition();
+  const router = useRouter();
 
   function handleClick() {
     const optimistic = !active;
@@ -20,6 +22,11 @@ export function WishlistButton({
     startTransition(async () => {
       try {
         const result = await toggleWishlistAction(productId);
+        if ("unauthorized" in result) {
+          setActive(active); // roll back optimistic state
+          router.push("/login");
+          return;
+        }
         setActive(result.active); // reconcile with server
       } catch {
         setActive(!optimistic); // rollback on error
