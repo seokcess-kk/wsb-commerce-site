@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
-import { inArray } from "drizzle-orm";
+import { inArray, eq } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
-import { shippingFee } from "@/lib/checkout/pricing";
 import { buildOrderNumber } from "@/lib/checkout/order-number";
 import { parseQuantity } from "@/lib/checkout/quantity";
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { computeOrderFigures, type CouponRow } from "@/lib/checkout/coupon-order";
 
 type IncomingItem = { variantId: string; quantity: unknown };
 type Body = {
   items: IncomingItem[];
   customer: { name: string; phone: string; email: string; address: string; zipcode?: string };
+  couponCode?: string;
 };
 
 export async function POST(req: Request) {
@@ -55,15 +56,47 @@ export async function POST(req: Request) {
       itemRows.push({ productId: p.id, variantId: v.id, productName: p.name, variantName: v.name, unitPrice, quantity: qty, lineTotal });
     }
 
-    const ship = shippingFee(subtotal);
-    const totalAmount = subtotal + ship;
+    // ── Coupon lookup & server-side recompute ────────────────────────────────
+    // NEVER trust a client-sent discount amount — always recompute from DB.
+    let appliedCouponCode: string | null = null;
+    let couponRow: CouponRow | null = null;
+
+    if (body.couponCode) {
+      const [row] = await db
+        .select()
+        .from(schema.coupons)
+        .where(eq(schema.coupons.code, body.couponCode))
+        .limit(1);
+
+      if (row) {
+        couponRow = {
+          discountType: row.discountType,
+          discountValue: row.discountValue,
+          minSubtotal: row.minSubtotal,
+          maxDiscount: row.maxDiscount ?? null,
+          startsAt: row.startsAt ?? null,
+          endsAt: row.endsAt ?? null,
+          isActive: row.isActive,
+        };
+        appliedCouponCode = row.code;
+      }
+      // If coupon not found — silently ignore (discount = 0), order proceeds.
+    }
+
+    const { discount, total: totalAmount } = computeOrderFigures(subtotal, couponRow);
+    const ship = totalAmount - Math.max(0, subtotal - discount);
+
     const orderNumber = buildOrderNumber(new Date(), Math.random().toString(36).slice(2, 6));
 
     const [order] = await db.insert(schema.orders).values({
       orderNumber, status: "pending",
       customerName: name, customerPhone: phone, customerEmail: email,
       shippingAddress: address, shippingZipcode: body.customer.zipcode ?? null,
-      itemsSubtotal: subtotal, shippingFee: ship, totalAmount,
+      itemsSubtotal: subtotal,
+      shippingFee: ship,
+      totalAmount,
+      couponCode: appliedCouponCode,
+      couponDiscount: discount,
       userId: user?.id ?? null,
     }).returning();
 
