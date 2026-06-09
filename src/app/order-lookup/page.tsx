@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { getGuestOrder } from "@/db/queries/orders";
 import { formatKRW } from "@/lib/format";
-import { STATUS_LABEL } from "@/lib/admin/order-status";
+import { statusLabel } from "@/lib/admin/order-status";
 import { trackingUrl } from "@/lib/orders/courier";
 
 export const dynamic = "force-dynamic";
-
-const statusLabel = (s: string) => (STATUS_LABEL as Record<string, string>)[s] ?? s;
 
 export default async function OrderLookupPage({
   searchParams,
@@ -17,7 +15,7 @@ export default async function OrderLookupPage({
 
   const result =
     orderNumber && email
-      ? await getGuestOrder(orderNumber.trim(), email.trim().toLowerCase())
+      ? await getGuestOrder(orderNumber.trim(), email.trim())
       : null;
 
   const notFound = orderNumber && email && result === null;
@@ -103,6 +101,7 @@ export default async function OrderLookupPage({
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={`${result.order.trackingNumber} (새 탭에서 열림)`}
                       className="font-mono text-wsb-green underline underline-offset-2"
                     >
                       {result.order.trackingNumber}

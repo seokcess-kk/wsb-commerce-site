@@ -55,7 +55,11 @@ export async function getReorderItems(
     })
     .from(schema.orderItems)
     .innerJoin(schema.products, eq(schema.orderItems.productId, schema.products.id))
-    .where(eq(schema.orderItems.orderId, order.id));
+    .innerJoin(schema.productVariants, eq(schema.orderItems.variantId, schema.productVariants.id))
+    .where(and(
+      eq(schema.orderItems.orderId, order.id),
+      eq(schema.products.isPublished, true),
+    ));
 
   return rows;
 }
@@ -68,7 +72,7 @@ export async function getGuestOrder(
   const [order] = await db.select().from(schema.orders)
     .where(and(
       eq(schema.orders.orderNumber, orderNumber),
-      eq(schema.orders.customerEmail, email),
+      sql`lower(${schema.orders.customerEmail}) = lower(${email})`,
     ))
     .limit(1);
   if (!order) return null;

@@ -13,14 +13,16 @@ export function ReorderButton({ items }: Props) {
   const router = useRouter();
 
   function handleReorder() {
+    if (items.length === 0) {
+      alert("재주문 가능한 상품이 없습니다.");
+      return;
+    }
     const cartItems = orderItemsToCartItems(items);
     for (const item of cartItems) {
       add(item);
     }
     router.push("/cart");
   }
-
-  if (items.length === 0) return null;
 
   return (
     <button

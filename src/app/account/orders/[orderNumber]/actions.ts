@@ -37,6 +37,27 @@ export async function requestCancellation(
     return { error: `현재 상태(${order.status})에서는 ${type} 요청이 불가합니다.` };
   }
 
+  if (reason.trim().length < 5) {
+    return { error: "사유를 5자 이상 입력해 주세요." };
+  }
+
+  // Prevent duplicate requests: check for existing pending request of same type
+  const [existing] = await db
+    .select({ id: schema.orderCancellations.id })
+    .from(schema.orderCancellations)
+    .where(
+      and(
+        eq(schema.orderCancellations.orderId, order.id),
+        eq(schema.orderCancellations.type, type),
+        eq(schema.orderCancellations.status, "requested"),
+      ),
+    )
+    .limit(1);
+
+  if (existing) {
+    return { error: "이미 접수된 요청이 있습니다." };
+  }
+
   await db.insert(schema.orderCancellations).values({
     orderId: order.id,
     userId: user.id,

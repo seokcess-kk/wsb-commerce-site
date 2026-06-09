@@ -5,15 +5,13 @@ import { getOrderDetailForUser, getReorderItems } from "@/db/queries/orders";
 import { getDb, schema } from "@/db/index";
 import { eq } from "drizzle-orm";
 import { formatKRW } from "@/lib/format";
-import { STATUS_LABEL } from "@/lib/admin/order-status";
+import { statusLabel } from "@/lib/admin/order-status";
 import { availableRequestTypes, REQUEST_TYPE_LABEL } from "@/lib/orders/cancellation";
 import { trackingUrl } from "@/lib/orders/courier";
 import { ReorderButton } from "@/components/account/reorder-button";
 import { requestCancellation } from "./actions";
 
 export const dynamic = "force-dynamic";
-
-const statusLabel = (s: string) => (STATUS_LABEL as Record<string, string>)[s] ?? s;
 
 const CANCELLATION_STATUS_LABEL: Record<string, string> = {
   requested: "접수",
@@ -69,6 +67,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
                 href={trackingLink}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`${order.trackingNumber} (새 탭에서 열림)`}
                 className="font-mono text-wsb-green underline underline-offset-2"
               >
                 {order.trackingNumber}
@@ -159,7 +158,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
             {allowedTypes.length === 1 && (
               <input type="hidden" name="type" value={allowedTypes[0]} />
             )}
+            <label htmlFor="reason" className="block text-sm font-medium text-wsb-carbon">
+              사유
+            </label>
             <textarea
+              id="reason"
               name="reason"
               placeholder="사유를 입력해 주세요 (필수)"
               required
