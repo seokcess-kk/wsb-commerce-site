@@ -43,6 +43,13 @@
       "when": 1780303557460,
       "tag": "0005_lazy_queen_noir",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780984326626,
+      "tag": "0006_solid_junta",
+      "breakpoints": true
     }
   ]
 }
