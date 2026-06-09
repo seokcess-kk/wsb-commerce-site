@@ -5,6 +5,7 @@ import { buildOrderNumber } from "@/lib/checkout/order-number";
 import { parseQuantity } from "@/lib/checkout/quantity";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { computeOrderFigures, type CouponRow } from "@/lib/checkout/coupon-order";
+import { shippingFee } from "@/lib/checkout/pricing";
 
 type IncomingItem = { variantId: string; quantity: unknown };
 type Body = {
@@ -84,7 +85,8 @@ export async function POST(req: Request) {
     }
 
     const { discount, total: totalAmount } = computeOrderFigures(subtotal, couponRow);
-    const ship = totalAmount - Math.max(0, subtotal - discount);
+    const discountedSubtotal = Math.max(0, subtotal - discount);
+    const ship = shippingFee(discountedSubtotal);
 
     const orderNumber = buildOrderNumber(new Date(), Math.random().toString(36).slice(2, 6));
 

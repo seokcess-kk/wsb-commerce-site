@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { loadTossPayments, ANONYMOUS } from "@tosspayments/tosspayments-sdk";
 import { useCart } from "@/lib/cart/cart-context";
-import { orderTotal, freeShippingProgress, shippingFee } from "@/lib/checkout/pricing";
+import { orderTotal, freeShippingProgress, shippingFee, FREE_SHIPPING_THRESHOLD } from "@/lib/checkout/pricing";
 import { formatKRW } from "@/lib/format";
 import { getTossClientKey } from "@/lib/payments/toss";
 import { isPaymentsEnabled } from "@/lib/payments/toggle";
@@ -218,7 +218,7 @@ export default function CheckoutPage() {
                 <div
                   className="h-full rounded-full bg-wsb-green transition-all"
                   style={{
-                    width: `${Math.min(100, ((subtotal / 50000) * 100))}%`,
+                    width: `${Math.min(100, ((subtotal / FREE_SHIPPING_THRESHOLD) * 100))}%`,
                   }}
                 />
               </div>
