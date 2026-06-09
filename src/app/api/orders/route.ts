@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { inArray, eq } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { buildOrderNumber } from "@/lib/checkout/order-number";
 import { parseQuantity } from "@/lib/checkout/quantity";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { computeOrderFigures, type CouponRow } from "@/lib/checkout/coupon-order";
-import { shippingFee } from "@/lib/checkout/pricing";
+import { getApplicableCoupon } from "@/db/queries/coupons";
+import { orderTotal, shippingFee } from "@/lib/checkout/pricing";
 
 type IncomingItem = { variantId: string; quantity: unknown };
 type Body = {
@@ -59,32 +59,23 @@ export async function POST(req: Request) {
 
     // ── Coupon lookup & server-side recompute ────────────────────────────────
     // NEVER trust a client-sent discount amount — always recompute from DB.
+    // Coupons require ownership verification: only logged-in users who have
+    // claimed the coupon and not yet used it may apply it (guests: discount=0).
     let appliedCouponCode: string | null = null;
-    let couponRow: CouponRow | null = null;
+    let discount = 0;
 
-    if (body.couponCode) {
-      const [row] = await db
-        .select()
-        .from(schema.coupons)
-        .where(eq(schema.coupons.code, body.couponCode))
-        .limit(1);
-
-      if (row) {
-        couponRow = {
-          discountType: row.discountType,
-          discountValue: row.discountValue,
-          minSubtotal: row.minSubtotal,
-          maxDiscount: row.maxDiscount ?? null,
-          startsAt: row.startsAt ?? null,
-          endsAt: row.endsAt ?? null,
-          isActive: row.isActive,
-        };
-        appliedCouponCode = row.code;
+    if (body.couponCode && user) {
+      const result = await getApplicableCoupon(user.id, body.couponCode, subtotal, new Date());
+      if (result.ok) {
+        discount = result.discount;
+        appliedCouponCode = result.code;
       }
-      // If coupon not found — silently ignore (discount = 0), order proceeds.
+      // If not ok (not owned, already used, invalid, min subtotal) — silently
+      // ignore the coupon and proceed with discount=0. Order still succeeds.
     }
+    // Guest checkout: couponCode ignored entirely (discount remains 0).
 
-    const { discount, total: totalAmount } = computeOrderFigures(subtotal, couponRow);
+    const totalAmount = orderTotal(subtotal, discount);
     const discountedSubtotal = Math.max(0, subtotal - discount);
     const ship = shippingFee(discountedSubtotal);
 
