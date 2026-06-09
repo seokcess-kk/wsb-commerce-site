@@ -51,11 +51,13 @@ npm run db:seed      # 시드 데이터 (src/db/seed.ts)
 
 ### 결제 흐름 (토스페이먼츠)
 
-1. `POST /api/orders` — variant/product 조회로 서버에서 가격·배송비 재계산(클라이언트 금액 신뢰 안 함), `status: "pending"` 주문 생성, `orderNumber` 반환. **재고는 best-effort 체크만 — 원자적 차감/예약은 미구현(TODO).**
+1. `POST /api/orders` — variant/product 조회로 서버에서 가격·배송비 재계산(클라이언트 금액 신뢰 안 함), `status: "pending"` 주문 생성, `orderNumber` 반환. 주문 생성 시점의 재고 검사는 **best-effort 가드만**(`stock <= 0` 품절 차단, 동시성 안전하지 않음) — 실제 차감은 아래 결제 승인 트랜잭션에서.
 2. 클라이언트가 토스 SDK로 결제 → `/checkout/success` 로 리다이렉트.
-3. `/checkout/success` (force-dynamic) 에서 `confirmTossPayment()` 로 서버 승인, 금액 일치 검증 후 트랜잭션으로 payment insert + order를 `paid`로 전이. 멱등 처리(`onConflictDoNothing`, 이미 `paid`면 재승인 안 함).
+3. `/checkout/success` (force-dynamic) 에서 `confirmTossPayment()` 로 서버 승인, 금액 일치 검증 후 **하나의 트랜잭션**으로 ① payment insert(`onConflictDoNothing`, paymentKey 유니크) ② `pending→paid` 조건부 전이(이미 `paid`면 재승인·재차감 안 함) ③ **원자적 재고 차감**(`stock = stock - qty` + `stock >= qty` 가드로 음수 방지). 멱등성은 `pending→paid` 전이가 1회만 성공하는 데서 보장 — 차감도 결제당 정확히 1회. 재고 부족분은 차감하지 않고 운영자가 주문관리에서 처리.
 
 `shippingFee()`(`src/lib/checkout/pricing.ts`): 기본 3,000원 / 5만원 이상 무료.
+
+**결제 레이어 ON/OFF 컨틴전시:** `isPaymentsEnabled()`(`src/lib/payments/toggle.ts`) + `NEXT_PUBLIC_PAYMENTS_ENABLED` 로 PG 승인 지연 시 소프트오픈(결제 비활성) 전환. 기본 ON, 명시적 `"false"` 일 때만 OFF (스펙 §0).
 
 ### 장바구니
 
