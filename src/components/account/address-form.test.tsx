@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AddressForm } from "./address-form";
 
@@ -53,5 +53,37 @@ describe("AddressForm", () => {
     );
     expect(screen.getByLabelText(/수령인/)).toHaveValue("홍길동");
     expect(screen.getByLabelText(/우편번호/)).toHaveValue("99999");
+  });
+
+  it("기본 배송지 체크박스를 선택하면 onSubmit이 isDefault: true로 호출된다", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(
+      <AddressForm
+        onSubmit={onSubmit}
+        onCancel={noop}
+        initial={{
+          recipient: "김철수",
+          phone: "010-1234-5678",
+          zipcode: "54321",
+          address1: "서울시 중구 을지로 1",
+          isDefault: false,
+        }}
+      />,
+    );
+
+    // Check the isDefault checkbox
+    const checkbox = screen.getByRole("checkbox", { name: /기본 배송지/ });
+    await userEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
+
+    // Submit the form
+    const submitBtn = screen.getByRole("button", { name: /저장/ });
+    await userEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ isDefault: true }),
+      );
+    });
   });
 });

@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import {
-  listAddresses,
   createAddress,
   updateAddress,
   deleteAddress,
@@ -16,11 +15,6 @@ async function getAuthUser() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/account/addresses");
   return user;
-}
-
-export async function listAddressesAction() {
-  const user = await getAuthUser();
-  return listAddresses(user.id);
 }
 
 export async function createAddressAction(data: AddressInsert): Promise<{ error?: string }> {
@@ -50,7 +44,14 @@ export async function deleteAddressAction(id: string): Promise<{ error?: string 
 
 export async function setDefaultAddressAction(id: string): Promise<{ error?: string }> {
   const user = await getAuthUser();
-  await setDefaultAddress(user.id, id);
+  try {
+    await setDefaultAddress(user.id, id);
+  } catch (err) {
+    if (err instanceof Error && err.message === "ADDRESS_NOT_FOUND") {
+      return { error: "주소를 찾을 수 없습니다." };
+    }
+    throw err;
+  }
   revalidatePath("/account/addresses");
   return {};
 }

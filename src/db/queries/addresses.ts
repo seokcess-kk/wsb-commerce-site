@@ -53,16 +53,23 @@ export async function updateAddress(
 ): Promise<AddressRow | null> {
   const db = getDb();
   if (data.isDefault) {
-    const [updated] = await db.transaction(async (tx) => {
+    const updated = await db.transaction(async (tx) => {
       await tx
         .update(schema.addresses)
         .set({ isDefault: false })
         .where(eq(schema.addresses.userId, userId));
-      return tx
+      const rows = await tx
         .update(schema.addresses)
         .set(data)
         .where(and(eq(schema.addresses.id, id), eq(schema.addresses.userId, userId)))
         .returning();
+      if (rows.length === 0) {
+        throw new Error("ADDRESS_NOT_FOUND");
+      }
+      return rows[0];
+    }).catch((err: unknown) => {
+      if (err instanceof Error && err.message === "ADDRESS_NOT_FOUND") return null;
+      throw err;
     });
     return updated ?? null;
   }
@@ -88,9 +95,13 @@ export async function setDefaultAddress(userId: string, id: string): Promise<voi
       .update(schema.addresses)
       .set({ isDefault: false })
       .where(eq(schema.addresses.userId, userId));
-    await tx
+    const rows = await tx
       .update(schema.addresses)
       .set({ isDefault: true })
-      .where(and(eq(schema.addresses.id, id), eq(schema.addresses.userId, userId)));
+      .where(and(eq(schema.addresses.id, id), eq(schema.addresses.userId, userId)))
+      .returning({ id: schema.addresses.id });
+    if (rows.length === 0) {
+      throw new Error("ADDRESS_NOT_FOUND");
+    }
   });
 }

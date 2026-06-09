@@ -23,7 +23,7 @@ export function WishlistButton({
       try {
         const result = await toggleWishlistAction(productId);
         if ("unauthorized" in result) {
-          setActive(active); // roll back optimistic state
+          setActive(!optimistic); // roll back optimistic state
           router.push("/login");
           return;
         }

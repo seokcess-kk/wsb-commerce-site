@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AddressForm, type AddressFormData } from "@/components/account/address-form";
 import {
   createAddressAction,
@@ -13,6 +14,7 @@ import type { AddressRow } from "@/db/queries/addresses";
 type Props = { initialAddresses: AddressRow[] };
 
 export function AddressesClient({ initialAddresses }: Props) {
+  const router = useRouter();
   const [addresses, setAddresses] = useState(initialAddresses);
   const [mode, setMode] = useState<"list" | "add" | { edit: AddressRow }>("list");
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function AddressesClient({ initialAddresses }: Props) {
       setError(res.error);
       return;
     }
-    window.location.reload();
+    router.refresh();
   }
 
   async function handleUpdate(id: string, data: AddressFormData) {
@@ -32,7 +34,7 @@ export function AddressesClient({ initialAddresses }: Props) {
       setError(res.error);
       return;
     }
-    window.location.reload();
+    router.refresh();
   }
 
   async function handleDelete(id: string) {
@@ -123,6 +125,7 @@ export function AddressesClient({ initialAddresses }: Props) {
                   {!addr.isDefault && (
                     <button
                       onClick={() => handleSetDefault(addr.id)}
+                      aria-label={`${addr.recipient} 배송지 기본으로 설정`}
                       className="text-xs text-wsb-green hover:underline"
                     >
                       기본으로 설정
@@ -133,12 +136,14 @@ export function AddressesClient({ initialAddresses }: Props) {
                       setError(null);
                       setMode({ edit: addr });
                     }}
+                    aria-label={`${addr.recipient} 배송지 수정`}
                     className="text-xs text-stone-500 hover:underline"
                   >
                     수정
                   </button>
                   <button
                     onClick={() => handleDelete(addr.id)}
+                    aria-label={`${addr.recipient} 배송지 삭제`}
                     className="text-xs text-rose-500 hover:underline"
                   >
                     삭제
