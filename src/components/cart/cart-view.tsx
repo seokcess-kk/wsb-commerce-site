@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { CartItem } from "@/lib/cart/cart-logic";
 import { formatKRW } from "@/lib/format";
-import { shippingFee, orderTotal } from "@/lib/checkout/pricing";
+import { shippingFee, orderTotal, freeShippingProgress, FREE_SHIPPING_THRESHOLD } from "@/lib/checkout/pricing";
 
 export function CartView({
   items, subtotal, onSetQty, onRemove,
@@ -20,6 +20,8 @@ export function CartView({
     );
   }
   const ship = shippingFee(subtotal);
+  const progress = freeShippingProgress(subtotal);
+  const progressPct = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
   return (
     <div className="grid gap-8 md:grid-cols-[1fr_320px]">
       <ul className="divide-y divide-stone-200">
@@ -42,6 +44,33 @@ export function CartView({
         ))}
       </ul>
       <aside className="h-fit rounded-lg border border-stone-200 p-5">
+        {/* 무료배송 프로그레스 */}
+        {progress.qualified ? (
+          <div className="mb-4 rounded-md bg-wsb-green/10 px-3 py-2 text-center text-xs font-semibold text-wsb-green">
+            무료배송
+          </div>
+        ) : (
+          <div className="mb-4 space-y-1.5">
+            <p className="text-xs text-stone-500">
+              <span className="font-semibold text-wsb-green">{formatKRW(progress.remaining)}</span>
+              {" "}더 담으면 무료배송
+            </p>
+            <div
+              className="h-1.5 w-full overflow-hidden rounded-full bg-stone-200"
+              role="progressbar"
+              aria-valuenow={progressPct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="무료배송까지 진행률"
+            >
+              <div
+                className="h-full rounded-full bg-wsb-green transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between"><dt className="text-stone-500">소계</dt><dd className="font-mono">{formatKRW(subtotal)}</dd></div>
           <div className="flex justify-between"><dt className="text-stone-500">배송비</dt><dd className="font-mono">{formatKRW(ship)}</dd></div>
