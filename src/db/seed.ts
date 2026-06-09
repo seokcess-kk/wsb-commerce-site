@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-import { eq, like, sql } from "drizzle-orm";
+import { eq, like, or, sql } from "drizzle-orm";
 import { getDb, schema } from "./index";
 
 const NOTICE = "본 제품은 질병의 예방 및 치료를 위한 것이 아닙니다.";
@@ -31,6 +31,16 @@ const CUST = {
   kim: "11111111-1111-4111-8111-111111111111",
   lee: "22222222-2222-4222-8222-222222222222",
   park: "33333333-3333-4333-8333-333333333333",
+};
+
+// 리뷰 전용 가상 리뷰어 — PDP 리뷰 탭을 채우기 위한 합성 사용자 (FK 없음)
+const REVIEWERS = {
+  r1: "aaaa1111-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+  r2: "bbbb2222-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  r3: "cccc3333-cccc-4ccc-8ccc-cccccccccccc",
+  r4: "dddd4444-dddd-4ddd-8ddd-dddddddddddd",
+  r5: "eeee5555-eeee-4eee-8eee-eeeeeeeeeeee",
+  r6: "ffff6666-ffff-4fff-8fff-ffffffffffff",
 };
 
 const BANNERS = [
@@ -243,6 +253,78 @@ const ORDERS: DemoOrder[] = [
   { no: "DEMO-0019", status: "delivered", days: 18, userId: DEMO_USER_ID, name: "관리자", phone: "010-1000-0001", email: "admin@glitzy.kr", addr: "서울특별시 강남구 테헤란로 1", zip: "06133", items: [{ slug: "wsb-lutein-eye", v: 0, qty: 1 }], courier: CJ, tracking: "640012345019" },
 ];
 
+// REV 주문 — 리뷰어별 가상 배송완료 주문 (각 리뷰어가 여러 상품 포함)
+// 이 주문들은 PDP 리뷰를 채우기 위한 합성 데이터
+const REV_ORDERS: DemoOrder[] = [
+  {
+    no: "REV-0001", status: "delivered", days: 30, userId: REVIEWERS.r1,
+    name: "리뷰어1", phone: "010-9001-0001", email: "rev1@example.com",
+    addr: "서울특별시 서초구 강남대로 100", zip: "06545",
+    items: [
+      { slug: "nutrogin-focus", v: 0, qty: 1 },
+      { slug: "nutrogin-clear", v: 0, qty: 1 },
+      { slug: "wsb-omega3", v: 0, qty: 1 },
+    ],
+    courier: CJ, tracking: "rev0001track01",
+  },
+  {
+    no: "REV-0002", status: "delivered", days: 28, userId: REVIEWERS.r2,
+    name: "리뷰어2", phone: "010-9002-0002", email: "rev2@example.com",
+    addr: "경기도 수원시 영통구 월드컵로 200", zip: "16690",
+    items: [
+      { slug: "nutrogin-rest", v: 0, qty: 1 },
+      { slug: "wsb-sleep-therapy", v: 0, qty: 1 },
+      { slug: "wsb-vita-day", v: 0, qty: 1 },
+    ],
+    courier: CJ, tracking: "rev0002track02",
+  },
+  {
+    no: "REV-0003", status: "delivered", days: 25, userId: REVIEWERS.r3,
+    name: "리뷰어3", phone: "010-9003-0003", email: "rev3@example.com",
+    addr: "부산광역시 사하구 낙동대로 300", zip: "49311",
+    items: [
+      { slug: "wsb-immune-balance", v: 0, qty: 1 },
+      { slug: "wsb-propolis-guard", v: 0, qty: 1 },
+      { slug: "wsb-probiotics", v: 0, qty: 1 },
+    ],
+    courier: CJ, tracking: "rev0003track03",
+  },
+  {
+    no: "REV-0004", status: "delivered", days: 22, userId: REVIEWERS.r4,
+    name: "리뷰어4", phone: "010-9004-0004", email: "rev4@example.com",
+    addr: "인천광역시 남동구 소래로 400", zip: "21565",
+    items: [
+      { slug: "wsb-lutein-eye", v: 0, qty: 1 },
+      { slug: "wsb-omega3", v: 0, qty: 1 },
+      { slug: "nutrogin-focus", v: 0, qty: 1 },
+    ],
+    courier: CJ, tracking: "rev0004track04",
+  },
+  {
+    no: "REV-0005", status: "delivered", days: 19, userId: REVIEWERS.r5,
+    name: "리뷰어5", phone: "010-9005-0005", email: "rev5@example.com",
+    addr: "대구광역시 달서구 달구벌대로 500", zip: "42709",
+    items: [
+      { slug: "nutrogin-clear", v: 0, qty: 1 },
+      { slug: "wsb-sleep-therapy", v: 0, qty: 1 },
+      { slug: "wsb-immune-balance", v: 0, qty: 1 },
+    ],
+    courier: CJ, tracking: "rev0005track05",
+  },
+  {
+    no: "REV-0006", status: "delivered", days: 16, userId: REVIEWERS.r6,
+    name: "리뷰어6", phone: "010-9006-0006", email: "rev6@example.com",
+    addr: "광주광역시 북구 첨단과기로 600", zip: "61009",
+    items: [
+      { slug: "wsb-probiotics", v: 0, qty: 1 },
+      { slug: "wsb-vita-day", v: 0, qty: 1 },
+      { slug: "wsb-propolis-guard", v: 0, qty: 1 },
+      { slug: "nutrogin-rest", v: 0, qty: 1 },
+    ],
+    courier: CJ, tracking: "rev0006track06",
+  },
+];
+
 async function main() {
   const db = getDb();
 
@@ -291,47 +373,64 @@ async function main() {
   await db.delete(schema.banners);
   await db.insert(schema.banners).values(BANNERS);
 
-  // 5) 데모 주문 — DEMO-% 네임스페이스 멱등 재생성 (order_items·payments는 cascade 삭제)
-  await db.delete(schema.orders).where(like(schema.orders.orderNumber, "DEMO-%"));
+  // 5) 데모 주문 — DEMO-% 및 REV-% 네임스페이스 멱등 재생성 (order_items·payments는 cascade 삭제)
+  await db.delete(schema.orders).where(
+    or(
+      like(schema.orders.orderNumber, "DEMO-%"),
+      like(schema.orders.orderNumber, "REV-%"),
+    ),
+  );
 
   const variants = await db.select().from(schema.productVariants);
   const bySlug = (slug: string) => products.find((p) => p.slug === slug)!;
   const variantsOf = (pid: string) => variants.filter((v) => v.productId === pid).sort((a, b) => a.sortOrder - b.sortOrder);
 
-  for (const o of ORDERS) {
-    const itemRows = o.items.map((it) => {
-      const p = bySlug(it.slug);
-      const vs = variantsOf(p.id);
-      const v = vs[it.v] ?? vs[0];
-      const unitPrice = p.basePrice + v.priceDelta;
-      return { productId: p.id, variantId: v.id, productName: p.name, variantName: v.name, unitPrice, quantity: it.qty, lineTotal: unitPrice * it.qty };
-    });
-    const subtotal = itemRows.reduce((s, r) => s + r.lineTotal, 0);
-    const ship = subtotal >= 50000 ? 0 : 3000;
-    const total = subtotal + ship;
-    const createdAt = daysAgo(o.days);
-
-    const [order] = await db
-      .insert(schema.orders)
-      .values({
-        orderNumber: o.no, status: o.status, userId: o.userId,
-        customerName: o.name, customerPhone: o.phone, customerEmail: o.email,
-        shippingAddress: o.addr, shippingZipcode: o.zip,
-        itemsSubtotal: subtotal, shippingFee: ship, totalAmount: total,
-        courier: o.courier ?? null, trackingNumber: o.tracking ?? null,
-        createdAt,
-      })
-      .returning();
-
-    await db.insert(schema.orderItems).values(itemRows.map((r) => ({ ...r, orderId: order.id, createdAt })));
-
-    if (PAID_LIKE.includes(o.status)) {
-      await db.insert(schema.payments).values({
-        orderId: order.id, provider: "toss", paymentKey: `demo_pay_${o.no}`,
-        method: "카드", amount: total, status: "DONE", approvedAt: createdAt, createdAt,
+  // 헬퍼: 주문 배열 삽입
+  async function insertOrders(orderList: DemoOrder[]) {
+    const inserted: Array<{ no: string; id: string }> = [];
+    for (const o of orderList) {
+      const itemRows = o.items.map((it) => {
+        const p = bySlug(it.slug);
+        const vs = variantsOf(p.id);
+        const v = vs[it.v] ?? vs[0];
+        const unitPrice = p.basePrice + v.priceDelta;
+        return { productId: p.id, variantId: v.id, productName: p.name, variantName: v.name, unitPrice, quantity: it.qty, lineTotal: unitPrice * it.qty };
       });
+      const subtotal = itemRows.reduce((s, r) => s + r.lineTotal, 0);
+      const ship = subtotal >= 50000 ? 0 : 3000;
+      const total = subtotal + ship;
+      const createdAt = daysAgo(o.days);
+
+      const [order] = await db
+        .insert(schema.orders)
+        .values({
+          orderNumber: o.no, status: o.status, userId: o.userId,
+          customerName: o.name, customerPhone: o.phone, customerEmail: o.email,
+          shippingAddress: o.addr, shippingZipcode: o.zip,
+          itemsSubtotal: subtotal, shippingFee: ship, totalAmount: total,
+          courier: o.courier ?? null, trackingNumber: o.tracking ?? null,
+          createdAt,
+        })
+        .returning();
+
+      await db.insert(schema.orderItems).values(itemRows.map((r) => ({ ...r, orderId: order.id, createdAt })));
+
+      if (PAID_LIKE.includes(o.status)) {
+        await db.insert(schema.payments).values({
+          orderId: order.id, provider: "toss", paymentKey: `demo_pay_${o.no}`,
+          method: "카드", amount: total, status: "DONE", approvedAt: createdAt, createdAt,
+        });
+      }
+      inserted.push({ no: o.no, id: order.id });
     }
+    return inserted;
   }
+
+  const demoInserted = await insertOrders(ORDERS);
+  const revInserted = await insertOrders(REV_ORDERS);
+
+  const allInserted = [...demoInserted, ...revInserted];
+  const orderIdByNo = (no: string) => allInserted.find((o) => o.no === no)?.id;
 
   // 6) 데모 쿠폰 (멱등 — code 기준 onConflictDoNothing)
   const DEMO_COUPONS = [
@@ -382,12 +481,8 @@ async function main() {
   // NUTRO10 쿠폰을 사용 완료 상태로 표시 — 쿠폰함 "사용완료" 탭 데모용
   // DEMO-0001(delivered) 주문 ID를 연결
   if (nutro10Rows.length > 0) {
-    const order0001 = await db
-      .select({ id: schema.orders.id })
-      .from(schema.orders)
-      .where(eq(schema.orders.orderNumber, "DEMO-0001"))
-      .limit(1);
-    if (order0001.length > 0) {
+    const order0001Id = orderIdByNo("DEMO-0001");
+    if (order0001Id) {
       // usedAt이 없는 NUTRO10 user_coupon만 갱신 (멱등)
       const uc = await db
         .select()
@@ -397,7 +492,7 @@ async function main() {
       if (uc.length > 0 && !uc[0].usedAt) {
         await db
           .update(schema.userCoupons)
-          .set({ usedAt: daysAgo(13), orderId: order0001[0].id })
+          .set({ usedAt: daysAgo(13), orderId: order0001Id })
           .where(eq(schema.userCoupons.id, uc[0].id));
       }
     }
@@ -448,32 +543,25 @@ async function main() {
 
   // 9) 데모 리뷰 — DEMO_USER_ID의 delivered 주문에 연결.
   //    unique(orderId, productId) 기준 onConflictDoNothing.
-  const demoUserOrders = await db
-    .select({ id: schema.orders.id, orderNumber: schema.orders.orderNumber })
-    .from(schema.orders)
-    .where(eq(schema.orders.userId, DEMO_USER_ID));
-
-  const orderByNo = (no: string) => demoUserOrders.find((o) => o.orderNumber === no);
-
   const focusProduct = products.find((p) => p.slug === "nutrogin-focus");
   const restProduct = products.find((p) => p.slug === "nutrogin-rest");
   const immuneProduct = products.find((p) => p.slug === "wsb-immune-balance");
   const propProduct = products.find((p) => p.slug === "wsb-propolis-guard");
   const luteinProduct = products.find((p) => p.slug === "wsb-lutein-eye");
 
-  const order0001 = orderByNo("DEMO-0001");  // delivered, nutrogin-focus v:1
-  const order0003 = orderByNo("DEMO-0003");  // shipped — nutrogin-rest 포함 (스키마 상 status 제약 없음)
-  const order0018 = orderByNo("DEMO-0018");  // delivered, immune-balance + propolis-guard
-  const order0019 = orderByNo("DEMO-0019");  // delivered, lutein-eye
+  const order0001Id = orderIdByNo("DEMO-0001");
+  const order0003Id = orderIdByNo("DEMO-0003");
+  const order0018Id = orderIdByNo("DEMO-0018");
+  const order0019Id = orderIdByNo("DEMO-0019");
 
   // DEMO-0001: nutrogin-focus 리뷰 (이미지 포함)
-  if (order0001 && focusProduct) {
+  if (order0001Id && focusProduct) {
     await db
       .insert(schema.reviews)
       .values({
         productId: focusProduct.id,
         userId: DEMO_USER_ID,
-        orderId: order0001.id,
+        orderId: order0001Id,
         rating: 5,
         title: "집중력이 확실히 올라갔어요",
         body: "한 달째 꾸준히 먹고 있는데 오후 집중력이 눈에 띄게 좋아졌습니다. 스틱 하나씩 챙겨 다니기도 편하고, 맛도 거부감 없이 부드러워서 만족합니다. 재구매 예정입니다.",
@@ -483,13 +571,13 @@ async function main() {
   }
 
   // DEMO-0003: nutrogin-rest 리뷰
-  if (order0003 && restProduct) {
+  if (order0003Id && restProduct) {
     await db
       .insert(schema.reviews)
       .values({
         productId: restProduct.id,
         userId: DEMO_USER_ID,
-        orderId: order0003.id,
+        orderId: order0003Id,
         rating: 4,
         title: "수면 깊이가 달라진 느낌",
         body: "취침 30분 전에 챙겨 먹으면 몸이 확실히 이완되는 느낌이에요. 아직 한 박스 다 먹지는 않았지만 체감 효과가 있어서 만족스럽습니다. 테아닌 성분 덕분인지 다음날 아침도 개운합니다.",
@@ -499,13 +587,13 @@ async function main() {
   }
 
   // DEMO-0018: wsb-immune-balance 리뷰
-  if (order0018 && immuneProduct) {
+  if (order0018Id && immuneProduct) {
     await db
       .insert(schema.reviews)
       .values({
         productId: immuneProduct.id,
         userId: DEMO_USER_ID,
-        orderId: order0018.id,
+        orderId: order0018Id,
         rating: 4,
         title: "환절기마다 챙기는 필수템",
         body: "환절기 때마다 감기를 달고 살았는데, 3개월째 복용 중 한 번도 안 걸렸어요. 아연과 비타민C 조합이 확실히 효과가 있는 것 같습니다. 가격 대비 성분 구성도 알차고 만족합니다.",
@@ -515,13 +603,13 @@ async function main() {
   }
 
   // DEMO-0018: wsb-propolis-guard 리뷰 (같은 주문)
-  if (order0018 && propProduct) {
+  if (order0018Id && propProduct) {
     await db
       .insert(schema.reviews)
       .values({
         productId: propProduct.id,
         userId: DEMO_USER_ID,
-        orderId: order0018.id,
+        orderId: order0018Id,
         rating: 3,
         title: "효과는 좋은데 향이 강한 편",
         body: "프로폴리스 특유의 향이 강해서 처음엔 적응이 필요했어요. 그래도 목이 간질간질할 때 먹으면 금방 나아지는 느낌이라 계속 먹고 있습니다. 향에 민감하신 분은 주의하세요.",
@@ -531,13 +619,13 @@ async function main() {
   }
 
   // DEMO-0019: wsb-lutein-eye 리뷰
-  if (order0019 && luteinProduct) {
+  if (order0019Id && luteinProduct) {
     await db
       .insert(schema.reviews)
       .values({
         productId: luteinProduct.id,
         userId: DEMO_USER_ID,
-        orderId: order0019.id,
+        orderId: order0019Id,
         rating: 5,
         title: "눈 피로에 탁월해요",
         body: "하루 10시간 이상 모니터를 보는데, 한 달 복용 후 눈의 피로감이 눈에 띄게 줄었습니다. 루테인 함량도 충분하고 캡슐이 작아서 삼키기도 편합니다. 장기 복용 계획입니다.",
@@ -545,6 +633,171 @@ async function main() {
       })
       .onConflictDoNothing();
   }
+
+  // 9b) 리뷰어 합성 리뷰 — REV 주문에 연결, onConflictDoNothing으로 멱등
+  // 헬퍼: 리뷰 삽입
+  async function insertReview(opts: {
+    ordNo: string; slug: string; userId: string;
+    rating: number; title: string; body: string; images?: string[];
+  }) {
+    const ordId = orderIdByNo(opts.ordNo);
+    const prod = products.find((p) => p.slug === opts.slug);
+    if (!ordId || !prod) return;
+    await db.insert(schema.reviews).values({
+      productId: prod.id,
+      userId: opts.userId,
+      orderId: ordId,
+      rating: opts.rating,
+      title: opts.title,
+      body: opts.body,
+      images: opts.images ?? [],
+    }).onConflictDoNothing();
+  }
+
+  // REV-0001 (r1): nutrogin-focus, nutrogin-clear, wsb-omega3
+  await insertReview({
+    ordNo: "REV-0001", slug: "nutrogin-focus", userId: REVIEWERS.r1,
+    rating: 5,
+    title: "두뇌 혈류 케어, 업무 집중도 향상",
+    body: "진세노사이드 함량이 높아서 그런지 오전 업무 집중력이 이전과 다르게 느껴집니다. 특히 오후 2~4시 슬럼프 타임에 현저히 덜 졸리고 머리가 맑은 느낌이에요. 홍삼 특유의 쓴맛이 없어서 매일 부담 없이 챙겨먹을 수 있습니다. 3박스 세트로 주문해서 꾸준히 먹을 예정입니다.",
+    images: ["https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&q=80"],
+  });
+  await insertReview({
+    ordNo: "REV-0001", slug: "nutrogin-clear", userId: REVIEWERS.r1,
+    rating: 4,
+    title: "피로 회복에 확실히 도움",
+    body: "야근이 잦은 편인데 카페인 없이 맑은 정신을 유지하는 게 힘들었어요. CLEAR 스틱을 점심 후에 챙겨먹으니 오후 내내 졸리지 않고 맑은 상태가 유지됩니다. 아연 100% 기준치 충족이라 면역도 함께 챙겨지는 것 같아 만족합니다.",
+    images: [],
+  });
+  await insertReview({
+    ordNo: "REV-0001", slug: "wsb-omega3", userId: REVIEWERS.r1,
+    rating: 5,
+    title: "rTG 타입이라 흡수가 정말 다르네요",
+    body: "오메가3를 몇 년째 먹어왔는데 이번에 rTG 타입으로 바꾸고 혈액검사 수치가 개선됐습니다. 물고기 비린내가 거의 없어서 아침에 먹어도 역류감이 없어요. 비타민E까지 들어있어서 산화 걱정 없이 안심하고 복용 중입니다.",
+    images: [],
+  });
+
+  // REV-0002 (r2): nutrogin-rest, wsb-sleep-therapy, wsb-vita-day
+  await insertReview({
+    ordNo: "REV-0002", slug: "nutrogin-rest", userId: REVIEWERS.r2,
+    rating: 5,
+    title: "테아닌+락티움 조합이 진짜예요",
+    body: "수면 보조제를 여러 가지 써봤는데 이게 제일 자연스럽게 잠드는 느낌입니다. 락티움 성분이 스트레스 호르몬을 조절해준다더니 평소 잠자리에서 뒤척이는 시간이 30분 이상 줄었습니다. 다음날 아침에 멍함이 없고 개운하게 일어나지는 게 가장 마음에 듭니다.",
+    images: ["https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=600&q=80"],
+  });
+  await insertReview({
+    ordNo: "REV-0002", slug: "wsb-sleep-therapy", userId: REVIEWERS.r2,
+    rating: 4,
+    title: "감태+GABA 복합 포뮬러, 깊은 잠 가능",
+    body: "처음 2주 정도는 큰 변화를 못 느꼈는데 3주째부터 확실히 수면 질이 올라갔습니다. 서파 수면이 늘었는지 꿈을 덜 꾸고 아침에 몸이 가볍습니다. 취침 30분 전 물 한 컵과 함께 루틴화하고 나서 더 효과가 좋아진 것 같아요.",
+    images: [],
+  });
+  await insertReview({
+    ordNo: "REV-0002", slug: "wsb-vita-day", userId: REVIEWERS.r2,
+    rating: 4,
+    title: "비타민 B군이 확실히 에너지에 도움",
+    body: "비건 식단을 하다 보니 B12가 부족했는데, 비타 데이 한 포로 B군 전체를 채울 수 있어서 좋습니다. 복용 2주차부터 오전 피로감이 줄어드는 느낌이에요. 1일 1포라 관리도 편하고 가격 대비 성분이 알찹니다.",
+    images: [],
+  });
+
+  // REV-0003 (r3): wsb-immune-balance, wsb-propolis-guard, wsb-probiotics
+  await insertReview({
+    ordNo: "REV-0003", slug: "wsb-immune-balance", userId: REVIEWERS.r3,
+    rating: 5,
+    title: "삼중 면역 케어가 진짜 체감됩니다",
+    body: "아연·비타민C·홍삼 조합이라 면역에 특화된 제품이라는 게 느껴집니다. 스트레스받는 시기에 집중해서 먹었더니 한 달 내내 컨디션 유지가 잘 됐어요. 환절기 전에 미리 챙기면 더 효과적일 것 같아서 정기 구매로 전환했습니다.",
+    images: ["https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&q=80"],
+  });
+  await insertReview({
+    ordNo: "REV-0003", slug: "wsb-propolis-guard", userId: REVIEWERS.r3,
+    rating: 4,
+    title: "목감기 초기 증상에 효과 빠름",
+    body: "환절기에 목이 칼칼해지는 느낌이 들 때마다 챙겨먹으면 다음날 훨씬 나아지는 것 같습니다. 브라질산 그린 프로폴리스라 품질도 믿을 수 있고, 꿀 향이 나서 먹기도 좋아요. 유일한 단점은 특유의 향이지만 익숙해지면 괜찮습니다.",
+    images: [],
+  });
+  await insertReview({
+    ordNo: "REV-0003", slug: "wsb-probiotics", userId: REVIEWERS.r3,
+    rating: 5,
+    title: "장내 환경이 바뀐 게 느껴져요",
+    body: "19종 유산균 100억 CFU라는 수치가 말해주듯 효과가 확실합니다. 항생제 치료 후 망가진 장 환경을 회복하려고 시작했는데, 2주 만에 배변 주기가 정상으로 돌아왔어요. 마이크로캡슐 코팅이라 장까지 살아서 도달한다는 설명이 맞는 것 같습니다.",
+    images: [],
+  });
+
+  // REV-0004 (r4): wsb-lutein-eye, wsb-omega3, nutrogin-focus
+  await insertReview({
+    ordNo: "REV-0004", slug: "wsb-lutein-eye", userId: REVIEWERS.r4,
+    rating: 5,
+    title: "블루라이트 노출 많은 분께 강추",
+    body: "재택근무로 하루 13시간 이상 모니터 앞에 있는데, 한 달 복용 후 눈 충혈이 확실히 줄었습니다. 루테인 20mg + 지아잔틴 4mg 구성이 황반 보호에 딱 맞는 용량이라고 알고 있어요. 지용성이라 식사와 함께 먹으면 흡수가 잘 된다고 해서 아침밥 후에 챙겨먹고 있습니다.",
+    images: ["https://images.unsplash.com/photo-1585842378054-ee2e52f94ba2?w=600&q=80"],
+  });
+  await insertReview({
+    ordNo: "REV-0004", slug: "wsb-omega3", userId: REVIEWERS.r4,
+    rating: 4,
+    title: "혈행 개선 목적으로 꾸준히 복용 중",
+    body: "콜레스테롤 관리 차원에서 오메가3를 먹기 시작했습니다. rTG 타입이라 EE 타입보다 흡수율이 높다는 설명이 납득됩니다. 3개월 복용 후 검진에서 중성지방 수치가 개선돼서 계속 먹을 예정입니다. 캡슐 크기도 적당하고 비린내도 없어서 편하게 복용 중입니다.",
+    images: [],
+  });
+  await insertReview({
+    ordNo: "REV-0004", slug: "nutrogin-focus", userId: REVIEWERS.r4,
+    rating: 4,
+    title: "기억력 케어 목적으로 복용 시작",
+    body: "40대 이후 건망증이 심해져서 인지능력 케어 차원에서 시작했습니다. 2개월 복용했는데 회의 중 내용이 더 잘 정리되는 느낌이에요. 진세노사이드 나노에멀전 공법으로 흡수율이 높다는 게 실감납니다. 맛도 좋아서 매일 아침 루틴으로 자리잡았습니다.",
+    images: [],
+  });
+
+  // REV-0005 (r5): nutrogin-clear, wsb-sleep-therapy, wsb-immune-balance
+  await insertReview({
+    ordNo: "REV-0005", slug: "nutrogin-clear", userId: REVIEWERS.r5,
+    rating: 3,
+    title: "효과는 있지만 가격이 좀 아쉬워요",
+    body: "홍삼+아연 조합이라 피로 회복에 도움이 되는 건 사실입니다. 카페인 없이 오후를 버티는 데 도움이 되고요. 다만 박스당 가격을 생각하면 비용 대비 효과가 조금 아쉽습니다. 성분은 좋은데 좀 더 가성비 있는 용량이 나오면 좋겠습니다. 재구매는 할인 행사 때 할 것 같아요.",
+    images: [],
+  });
+  await insertReview({
+    ordNo: "REV-0005", slug: "wsb-sleep-therapy", userId: REVIEWERS.r5,
+    rating: 5,
+    title: "수면 루틴 완성, 이제 없으면 불안해요",
+    body: "감태·GABA·테아닌 3중 복합이 시너지를 내는 게 느껴집니다. 처음 복용 첫날부터 잠드는 시간이 달라졌어요. 약 의존성이 없다는 게 가장 마음에 들고, 자연스럽게 졸리면서 깊은 잠에 빠져듭니다. 2박스째 구매 중이고 앞으로도 계속 쓸 것 같습니다.",
+    images: ["https://images.unsplash.com/photo-1512632578888-169bbbc64f33?w=600&q=80"],
+  });
+  await insertReview({
+    ordNo: "REV-0005", slug: "wsb-immune-balance", userId: REVIEWERS.r5,
+    rating: 4,
+    title: "아연·비타민C 함량이 알찬 면역 제품",
+    body: "아연 기준치 100%에 비타민C까지 들어있어서 면역 케어로는 이것 하나로 충분한 것 같습니다. 홍삼 성분까지 추가되어 있어서 삼중 케어가 실감나요. 환절기에 특히 효과적이고 알레르기 반응도 없어서 꾸준히 복용 중입니다.",
+    images: [],
+  });
+
+  // REV-0006 (r6): wsb-probiotics, wsb-vita-day, wsb-propolis-guard, nutrogin-rest
+  await insertReview({
+    ordNo: "REV-0006", slug: "wsb-probiotics", userId: REVIEWERS.r6,
+    rating: 4,
+    title: "장 건강 확실히 챙겨주는 유산균",
+    body: "19종 복합 유산균이라 그런지 처음부터 장에 변화가 느껴졌습니다. 변비로 고생했는데 2주 만에 배변이 규칙적으로 바뀌었어요. 마이크로캡슐 코팅으로 위산에도 살아서 도달한다는 게 효과에서 증명되는 것 같습니다. 냉장 보관 없이 상온에서 보관 가능한 것도 편리합니다.",
+    images: [],
+  });
+  await insertReview({
+    ordNo: "REV-0006", slug: "wsb-vita-day", userId: REVIEWERS.r6,
+    rating: 5,
+    title: "아침 루틴의 필수품이 되었어요",
+    body: "B군 복합체 덕분에 아침에 확실히 에너지가 올라오는 느낌입니다. 비타민D까지 포함되어 있어서 실내 생활이 많은 저한테 딱 맞는 제품이에요. 불규칙한 식단 보완에 이만한 제품이 없습니다. 한 포씩 포장되어 있어서 가방에 넣고 다니기도 편합니다.",
+    images: ["https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=600&q=80"],
+  });
+  await insertReview({
+    ordNo: "REV-0006", slug: "wsb-propolis-guard", userId: REVIEWERS.r6,
+    rating: 4,
+    title: "구내염에 직방, 항균 효과 체감",
+    body: "구내염이 자주 생기는 체질인데 프로폴리스 가드를 먹고 나서 확연히 줄었습니다. 브라질 그린 프로폴리스 플라보노이드 8% 이상이라는 고함량이 실력 발휘를 하는 것 같아요. 꿀 향이 은은해서 먹기도 좋고, 1일 1포 관리가 편합니다. 어린아이도 먹을 수 있다고 해서 온 가족이 함께 먹고 있습니다.",
+    images: [],
+  });
+  await insertReview({
+    ordNo: "REV-0006", slug: "nutrogin-rest", userId: REVIEWERS.r6,
+    rating: 5,
+    title: "의존성 없는 수면 케어의 정석",
+    body: "수면제 대신 찾게 된 자연 성분 수면 케어입니다. L-테아닌 200mg 고용량이라 알파파 유도가 빠릅니다. 락티움(Lactium®) 성분이 코르티솔을 낮춰준다는 게 취침 전 불안감 감소에서 확실히 느껴집니다. 6주째 복용 중인데 의존성이 없어서 안심하고 계속 먹고 있습니다.",
+    images: [],
+  });
 
   // 10) 문의 — DEMO_USER_ID, 자연 유니크 키 없으므로 count 확인으로 멱등
   const existingInquiries = await db
@@ -576,16 +829,16 @@ async function main() {
 
   // 11) 주문 취소/반품 신청 — DEMO_USER_ID의 delivered 주문에 연결
   //     orderCancellations에 자연 유니크 키 없으므로 userId+orderId 기준 count 확인으로 멱등
-  const targetDeliveredOrder = orderByNo("DEMO-0018");
-  if (targetDeliveredOrder) {
+  const targetOrderId = orderIdByNo("DEMO-0018");
+  if (targetOrderId) {
     const existingCancellations = await db
       .select({ id: schema.orderCancellations.id })
       .from(schema.orderCancellations)
-      .where(eq(schema.orderCancellations.orderId, targetDeliveredOrder.id));
+      .where(eq(schema.orderCancellations.orderId, targetOrderId));
 
     if (existingCancellations.length === 0) {
       await db.insert(schema.orderCancellations).values({
-        orderId: targetDeliveredOrder.id,
+        orderId: targetOrderId,
         userId: DEMO_USER_ID,
         type: "return",
         reason: "상품이 기대와 달리 제 체질에 맞지 않아 반품 신청합니다. 미개봉 상태로 보관 중입니다.",
@@ -595,7 +848,7 @@ async function main() {
     }
   }
 
-  console.log(`seed 완료: categories=${cats.length}, products=${products.length}, banners=${BANNERS.length}, orders=${ORDERS.length}, coupons=${DEMO_COUPONS.length}`);
+  console.log(`seed 완료: categories=${cats.length}, products=${products.length}, banners=${BANNERS.length}, orders=${ORDERS.length + REV_ORDERS.length} (DEMO=${ORDERS.length}, REV=${REV_ORDERS.length}), coupons=${DEMO_COUPONS.length}`);
   process.exit(0);
 }
 
