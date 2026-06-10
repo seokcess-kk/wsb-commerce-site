@@ -2,18 +2,14 @@ import Link from "next/link";
 import { listReviewsAdmin } from "@/db/queries/admin-reviews";
 import { formatDate } from "@/lib/format";
 import { hideReview, unhideReview, deleteReview } from "./actions";
+import { DataTable, TH, TD, ROW } from "@/components/admin/ui/data-table";
+import { StatusBadge } from "@/components/admin/ui/status-badge";
+import { AdminButton } from "@/components/admin/ui/controls";
 
 export const dynamic = "force-dynamic";
 
-const FILTERS = [
-  { value: "", label: "전체" },
-  { value: "visible", label: "노출" },
-  { value: "hidden", label: "숨김" },
-] as const;
-
-function maskUser(userId: string): string {
-  return `회원 ${userId.replace(/-/g, "").slice(0, 6)}`;
-}
+const FILTERS = [{ value: "", label: "전체" }, { value: "visible", label: "노출" }, { value: "hidden", label: "숨김" }];
+const maskUser = (id: string) => `회원 ${id.replace(/-/g, "").slice(0, 6)}`;
 
 export default async function AdminReviewsPage({
   searchParams,
@@ -27,127 +23,57 @@ export default async function AdminReviewsPage({
   const { rows, total } = await listReviewsAdmin({ hidden }, page, pageSize);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  const toolbar = (
+    <div className="flex gap-1">
+      {FILTERS.map((f) => {
+        const on = (view ?? "") === f.value;
+        return (
+          <Link key={f.value} href={f.value ? `/admin/reviews?view=${f.value}` : "/admin/reviews"}
+            className={on ? "rounded-lg bg-[var(--ad-accent)] px-3 py-1.5 text-sm font-semibold text-white" : "rounded-lg px-3 py-1.5 text-sm font-semibold text-[var(--ad-mut)] hover:bg-[var(--ad-line-2)]"}>
+            {f.label}
+          </Link>
+        );
+      })}
+    </div>
+  );
+
+  const pagination = totalPages > 1 ? Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+    <Link key={p} href={`/admin/reviews?${view ? `view=${view}&` : ""}page=${p}`}
+      className={p === page ? "rounded-lg bg-[var(--ad-accent)] px-3 py-1.5 text-sm font-semibold text-white" : "rounded-lg border border-[var(--ad-line)] px-3 py-1.5 text-sm text-[var(--ad-mut)]"}>{p}</Link>
+  )) : null;
+
   return (
     <div>
-      <h1 className="text-2xl font-extrabold text-wsb-carbon">리뷰관리</h1>
-      <p className="mt-1 text-sm text-stone-500">숨긴 리뷰는 상품 페이지의 평점·목록에서 제외됩니다.</p>
-
-      <nav className="mt-4 flex gap-1 text-sm">
-        {FILTERS.map((f) => {
-          const active = (view ?? "") === f.value;
+      <h1 className="text-[22px] font-extrabold text-[var(--ad-ink)]">리뷰관리</h1>
+      <p className="mb-4 mt-0.5 text-[12.5px] text-[var(--ad-mut)]">숨긴 리뷰는 상품 페이지의 평점·목록에서 제외됩니다.</p>
+      <DataTable
+        toolbar={toolbar}
+        empty={rows.length === 0}
+        pagination={pagination}
+        head={<><th className={TH}>상품</th><th className={TH}>평점</th><th className={TH}>내용</th><th className={TH}>작성자</th><th className={TH}>상태</th><th className={TH}>작성일</th><th className={`${TH} text-right`}>관리</th></>}
+      >
+        {rows.map((r) => {
+          async function onHide() { "use server"; await hideReview(r.id); }
+          async function onUnhide() { "use server"; await unhideReview(r.id); }
+          async function onDelete() { "use server"; await deleteReview(r.id); }
           return (
-            <Link
-              key={f.value}
-              href={f.value ? `/admin/reviews?view=${f.value}` : "/admin/reviews"}
-              className={
-                active
-                  ? "rounded-md bg-wsb-green px-3 py-1.5 font-semibold text-white"
-                  : "rounded-md px-3 py-1.5 font-semibold text-stone-500 hover:bg-stone-100"
-              }
-            >
-              {f.label}
-            </Link>
+            <tr key={r.id} className={`${ROW} align-top`}>
+              <td className={`${TD} max-w-[10rem] truncate font-semibold`}><Link href={`/products/${r.productSlug}`} className="hover:underline">{r.productName}</Link></td>
+              <td className={`${TD} font-mono text-[var(--ad-accent)]`}>{"★".repeat(r.rating)}</td>
+              <td className={`${TD} max-w-[20rem] text-[var(--ad-mut)]`}>{r.title && <b className="text-[var(--ad-ink)]">{r.title} · </b>}<span className="line-clamp-2">{r.body}</span><span className="ml-1 font-mono text-[10px] text-[var(--ad-mut-2)]">({r.imageCount}장)</span></td>
+              <td className={`${TD} font-mono text-xs text-[var(--ad-mut)]`}>{maskUser(r.userId)}</td>
+              <td className={TD}><StatusBadge value={r.isHidden ? "hidden" : "visible"} /></td>
+              <td className={`${TD} font-mono text-xs text-[var(--ad-mut)]`}>{formatDate(r.createdAt)}</td>
+              <td className={`${TD} text-right`}>
+                <div className="flex items-center justify-end gap-2">
+                  {r.isHidden ? <form action={onUnhide}><AdminButton variant="ghost" className="!py-1 !text-xs">복원</AdminButton></form> : <form action={onHide}><AdminButton variant="ghost" className="!py-1 !text-xs">숨기기</AdminButton></form>}
+                  <form action={onDelete}><AdminButton variant="danger" className="!py-1 !text-xs">삭제</AdminButton></form>
+                </div>
+              </td>
+            </tr>
           );
         })}
-      </nav>
-
-      <table className="mt-4 w-full text-sm">
-        <thead>
-          <tr className="border-b border-stone-200 text-left text-stone-500">
-            <th className="py-2">상품</th>
-            <th>평점</th>
-            <th>내용</th>
-            <th>이미지</th>
-            <th>작성자</th>
-            <th>상태</th>
-            <th>작성일</th>
-            <th className="text-right">관리</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => {
-            async function handleHide() {
-              "use server";
-              await hideReview(r.id);
-            }
-            async function handleUnhide() {
-              "use server";
-              await unhideReview(r.id);
-            }
-            async function handleDelete() {
-              "use server";
-              await deleteReview(r.id);
-            }
-            return (
-              <tr key={r.id} className="border-b border-stone-100 align-top">
-                <td className="max-w-[10rem] truncate py-3 font-semibold text-wsb-carbon">
-                  <Link href={`/products/${r.productSlug}`} className="hover:underline">
-                    {r.productName}
-                  </Link>
-                </td>
-                <td className="py-3 font-mono">{"★".repeat(r.rating)}</td>
-                <td className="max-w-[18rem] py-3 text-stone-600">
-                  {r.title && <span className="font-semibold">{r.title} · </span>}
-                  <span className="line-clamp-2">{r.body}</span>
-                </td>
-                <td className="py-3 font-mono text-xs">{r.imageCount}장</td>
-                <td className="py-3 font-mono text-xs text-stone-500">{maskUser(r.userId)}</td>
-                <td className="py-3">
-                  {r.isHidden ? (
-                    <span className="text-stone-400">숨김</span>
-                  ) : (
-                    <span className="text-wsb-green">노출</span>
-                  )}
-                </td>
-                <td className="py-3 font-mono text-xs text-stone-500">{formatDate(r.createdAt)}</td>
-                <td className="py-3 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    {r.isHidden ? (
-                      <form action={handleUnhide}>
-                        <button className="rounded-md border border-wsb-green px-2 py-1 text-xs font-semibold text-wsb-green hover:bg-wsb-green/5">
-                          복원
-                        </button>
-                      </form>
-                    ) : (
-                      <form action={handleHide}>
-                        <button className="rounded-md border border-stone-300 px-2 py-1 text-xs font-semibold text-stone-600 hover:bg-stone-50">
-                          숨기기
-                        </button>
-                      </form>
-                    )}
-                    <form action={handleDelete}>
-                      <button className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-500 hover:bg-red-50">
-                        삭제
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      {rows.length === 0 && (
-        <p className="py-10 text-center text-sm text-stone-400">리뷰가 없습니다.</p>
-      )}
-
-      {totalPages > 1 && (
-        <div className="mt-5 flex items-center justify-center gap-2 text-sm">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <Link
-              key={p}
-              href={`/admin/reviews?${view ? `view=${view}&` : ""}page=${p}`}
-              className={
-                p === page
-                  ? "rounded-md bg-wsb-green px-3 py-1.5 font-semibold text-white"
-                  : "rounded-md border border-stone-200 px-3 py-1.5 text-stone-600 hover:bg-stone-50"
-              }
-            >
-              {p}
-            </Link>
-          ))}
-        </div>
-      )}
+      </DataTable>
     </div>
   );
 }
