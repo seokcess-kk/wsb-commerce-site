@@ -33,7 +33,7 @@ export function CancellationActions({ id }: { id: string }) {
           type="button"
           onClick={onApprove}
           disabled={pending}
-          className="rounded-md bg-wsb-green px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+          className="rounded-md bg-[var(--ad-accent)] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
         >
           {pending ? "처리 중…" : "승인·환불"}
         </button>
@@ -41,7 +41,7 @@ export function CancellationActions({ id }: { id: string }) {
           type="button"
           onClick={() => setRejecting((v) => !v)}
           disabled={pending}
-          className="rounded-md border border-stone-300 px-3 py-1.5 text-xs font-semibold text-stone-600 hover:bg-stone-50 disabled:opacity-50"
+          className="rounded-md border border-[var(--ad-line)] px-3 py-1.5 text-xs font-semibold text-[var(--ad-mut)] hover:bg-[var(--ad-line-2)] disabled:opacity-50"
         >
           반려
         </button>
@@ -52,19 +52,19 @@ export function CancellationActions({ id }: { id: string }) {
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="반려 사유(선택)"
-            className="rounded-md border border-stone-300 px-2 py-1 text-xs"
+            className="rounded-md border border-[var(--ad-line)] px-2 py-1 text-xs"
           />
           <button
             type="button"
             onClick={onReject}
             disabled={pending}
-            className="rounded-md bg-stone-700 px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+            className="rounded-md bg-[var(--ad-ink)] px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
           >
             반려 확정
           </button>
         </div>
       )}
-      {error && <p className="text-xs text-rose-600">{error}</p>}
+      {error && <p className="text-xs text-[var(--ad-neg)]">{error}</p>}
     </div>
   );
 }

@@ -107,21 +107,21 @@ export function ProductForm({ categories, initial }: Props) {
   }
 
   const inputCls =
-    "w-full rounded-md border border-stone-200 px-3 py-2 text-sm text-wsb-carbon placeholder-stone-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-1";
-  const labelCls = "mb-1 block text-xs font-semibold text-stone-500";
+    "w-full rounded-md border border-[var(--ad-line)] px-3 py-2 text-sm text-[var(--ad-ink)] placeholder-[var(--ad-mut-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ad-accent)] focus-visible:ring-offset-1";
+  const labelCls = "mb-1 block text-xs font-semibold text-[var(--ad-mut)]";
   const fieldCls = "flex flex-col";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-md border border-[var(--ad-neg)] bg-[var(--ad-neg)]/5 px-4 py-3 text-sm text-[var(--ad-neg)]">
           {error}
         </div>
       )}
 
       {/* 기본 정보 */}
       <section className="space-y-4">
-        <h2 className="text-sm font-extrabold uppercase tracking-widest text-stone-400">기본 정보</h2>
+        <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--ad-mut-2)]">기본 정보</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className={fieldCls}>
             <label className={labelCls}>슬러그 *</label>
@@ -215,7 +215,7 @@ export function ProductForm({ categories, initial }: Props) {
 
       {/* 건강기능식품 표시정보 */}
       <section className="space-y-4">
-        <h2 className="text-sm font-extrabold uppercase tracking-widest text-stone-400">
+        <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--ad-mut-2)]">
           건강기능식품 표시정보
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -284,7 +284,7 @@ export function ProductForm({ categories, initial }: Props) {
 
       {/* 옵션(Variants) 편집기 */}
       <section className="space-y-4">
-        <h2 className="text-sm font-extrabold uppercase tracking-widest text-stone-400">옵션 (Variants)</h2>
+        <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--ad-mut-2)]">옵션 (Variants)</h2>
         <div className="space-y-2">
           {variants.map((v, i) => (
             <div key={i} className="flex items-center gap-2">
@@ -296,7 +296,7 @@ export function ProductForm({ categories, initial }: Props) {
                 className={`${inputCls} flex-1`}
               />
               <div className="flex flex-col">
-                <span className="mb-0.5 text-xs text-stone-400">추가금(원)</span>
+                <span className="mb-0.5 text-xs text-[var(--ad-mut-2)]">추가금(원)</span>
                 <input
                   type="number"
                   value={v.priceDelta}
@@ -305,7 +305,7 @@ export function ProductForm({ categories, initial }: Props) {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="mb-0.5 text-xs text-stone-400">재고</span>
+                <span className="mb-0.5 text-xs text-[var(--ad-mut-2)]">재고</span>
                 <input
                   type="number"
                   min={0}
@@ -317,7 +317,7 @@ export function ProductForm({ categories, initial }: Props) {
               <button
                 type="button"
                 onClick={() => removeVariant(i)}
-                className="mt-4 rounded-md border border-stone-200 px-3 py-2 text-xs text-stone-500 hover:border-red-200 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-1"
+                className="mt-4 rounded-md border border-[var(--ad-line)] px-3 py-2 text-xs text-[var(--ad-mut)] hover:border-[var(--ad-neg)] hover:text-[var(--ad-neg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ad-accent)] focus-visible:ring-offset-1"
               >
                 행 삭제
               </button>
@@ -327,7 +327,7 @@ export function ProductForm({ categories, initial }: Props) {
         <button
           type="button"
           onClick={addVariant}
-          className="rounded-md border border-wsb-green px-4 py-2 text-sm font-semibold text-wsb-green hover:bg-wsb-green/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-1"
+          className="rounded-md border border-[var(--ad-accent)] px-4 py-2 text-sm font-semibold text-[var(--ad-accent)] hover:bg-[var(--ad-accent)]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ad-accent)] focus-visible:ring-offset-1"
         >
           + 옵션 추가
         </button>
@@ -340,25 +340,25 @@ export function ProductForm({ categories, initial }: Props) {
           type="checkbox"
           checked={isPublished}
           onChange={(e) => setIsPublished(e.target.checked)}
-          className="h-4 w-4 rounded border-stone-300 text-wsb-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-1"
+          className="h-4 w-4 rounded border-[var(--ad-line)] text-[var(--ad-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ad-accent)] focus-visible:ring-offset-1"
         />
-        <label htmlFor="isPublished" className="text-sm font-semibold text-wsb-carbon">
+        <label htmlFor="isPublished" className="text-sm font-semibold text-[var(--ad-ink)]">
           상품 노출 (isPublished)
         </label>
       </section>
 
       {/* 제출 버튼 */}
-      <div className="flex items-center gap-4 border-t border-stone-100 pt-6">
+      <div className="flex items-center gap-4 border-t border-[var(--ad-line)] pt-6">
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-wsb-green px-6 py-2.5 text-sm font-bold text-white hover:bg-wsb-green/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2 disabled:opacity-50"
+          className="rounded-md bg-[var(--ad-accent)] px-6 py-2.5 text-sm font-bold text-white hover:bg-[var(--ad-accent)]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ad-accent)] focus-visible:ring-offset-2 disabled:opacity-50"
         >
           {isPending ? "저장 중..." : initial?.id ? "수정 저장" : "상품 등록"}
         </button>
         <Link
           href="/admin/products"
-          className="text-sm font-semibold text-stone-400 hover:text-wsb-carbon"
+          className="text-sm font-semibold text-[var(--ad-mut-2)] hover:text-[var(--ad-ink)]"
         >
           취소
         </Link>

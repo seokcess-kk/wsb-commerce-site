@@ -21,11 +21,11 @@ export function CouponDeleteButton({ id }: { id: string }) {
         type="button"
         onClick={onDelete}
         disabled={pending}
-        className="rounded-md border border-red-300 px-2 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 disabled:opacity-50"
+        className="rounded-md border border-[var(--ad-neg)] px-2 py-1 text-xs font-semibold text-[var(--ad-neg)] hover:bg-[var(--ad-neg)]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ad-neg)] disabled:opacity-50"
       >
         삭제
       </button>
-      {error && <span className="mt-1 max-w-[12rem] text-right text-[11px] text-rose-600">{error}</span>}
+      {error && <span className="mt-1 max-w-[12rem] text-right text-[11px] text-[var(--ad-neg)]">{error}</span>}
     </span>
   );
 }
