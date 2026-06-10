@@ -1,34 +1,22 @@
-import Link from "next/link";
+import { cookies } from "next/headers";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { AdminShell } from "@/components/admin/shell/admin-shell";
+import { countOpenInquiries } from "@/db/queries/admin-inquiries";
+import { countRequestedCancellations } from "@/db/queries/admin-cancellations";
 
 export const dynamic = "force-dynamic";
 
-const NAV = [
-  { href: "/admin", label: "대시보드" },
-  { href: "/admin/products", label: "상품관리" },
-  { href: "/admin/orders", label: "주문관리" },
-  { href: "/admin/orders/cancellations", label: "취소/반품" },
-  { href: "/admin/coupons", label: "쿠폰관리" },
-  { href: "/admin/inquiries", label: "문의관리" },
-  { href: "/admin/reviews", label: "리뷰관리" },
-  { href: "/admin/banners", label: "배너관리" },
-];
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("admin-theme")?.value === "dark" ? "dark" : "light";
+  const [inquiries, cancellations] = await Promise.all([
+    countOpenInquiries(),
+    countRequestedCancellations(),
+  ]);
   return (
-    <div className="mx-auto flex max-w-6xl gap-6 px-6 py-8">
-      <aside className="w-44 shrink-0">
-        <p className="mb-3 font-mono text-xs uppercase tracking-widest text-stone-400">WSB Admin</p>
-        <nav className="flex flex-col gap-1 text-sm">
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="rounded-md px-3 py-2 font-semibold text-wsb-carbon hover:bg-wsb-green/5 hover:text-wsb-green">
-              {n.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-      <main className="min-w-0 flex-1">{children}</main>
-    </div>
+    <AdminShell theme={theme} badges={{ inquiries, cancellations }} crumb="대시보드">
+      {children}
+    </AdminShell>
   );
 }
