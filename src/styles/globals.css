@@ -138,6 +138,24 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ── 어드민 전용 테마 (shadcn .dark 와 분리된 data-admin-theme 스코프) ── */
+[data-admin-theme] {
+  --ad-bg: #F6F7F4; --ad-panel: #FFFFFF; --ad-panel-2: #FBFCFA;
+  --ad-line: #E7E9E2; --ad-line-2: #EFF1EB;
+  --ad-ink: #1A201C; --ad-mut: #6B756E; --ad-mut-2: #9AA39C;
+  --ad-accent: #177A4B; --ad-accent-2: #2FB36B; --ad-neon: #C9D400;
+  --ad-pos: #2FB36B; --ad-neg: #D9803F;
+  --ad-sidebar: #0E1A14; --ad-sidebar-ink: #9FB3A8;
+}
+[data-admin-theme="dark"] {
+  --ad-bg: #0B0F0D; --ad-panel: #121A16; --ad-panel-2: #0F1512;
+  --ad-line: #1E2A24; --ad-line-2: #19231E;
+  --ad-ink: #E8EFEA; --ad-mut: #7E908A; --ad-mut-2: #566159;
+  --ad-accent: #3DDC84; --ad-accent-2: #86F7B0; --ad-neon: #E8FF00;
+  --ad-pos: #3DDC84; --ad-neg: #F19B7A;
+  --ad-sidebar: #0A0F0C; --ad-sidebar-ink: #7E908A;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
