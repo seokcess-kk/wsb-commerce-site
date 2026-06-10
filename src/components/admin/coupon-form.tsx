@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { createCoupon, updateCoupon } from "@/app/admin/coupons/actions";
+import { AdminInput, AdminSelect, AdminButton, AdminCheckbox } from "@/components/admin/ui/controls";
 
 export type CouponFormInitial = {
   id: string;
@@ -23,9 +24,6 @@ function toLocalInput(d: Date | null): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-
-const inputCls =
-  "mt-1 rounded-md border border-stone-300 px-2 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green";
 
 export function CouponForm({ initial }: { initial?: CouponFormInitial }) {
   const router = useRouter();
@@ -53,57 +51,53 @@ export function CouponForm({ initial }: { initial?: CouponFormInitial }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="rounded-lg border border-stone-200 p-4">
-      <h2 className="mb-3 font-semibold text-wsb-carbon">{initial ? "쿠폰 수정" : "새 쿠폰 발급"}</h2>
+    <form onSubmit={onSubmit} className="rounded-lg border border-[var(--ad-line)] p-4">
+      <h2 className="mb-3 font-semibold text-[var(--ad-ink)]">{initial ? "쿠폰 수정" : "새 쿠폰 발급"}</h2>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <label className="flex flex-col text-sm text-stone-600">
-          코드 <span className="text-xs text-wsb-green">필수</span>
-          <input name="code" required defaultValue={initial?.code} placeholder="WELCOME10" className={inputCls} />
+        <label className="flex flex-col text-sm text-[var(--ad-mut)]">
+          코드 <span className="text-xs text-[var(--ad-accent)]">필수</span>
+          <AdminInput name="code" required defaultValue={initial?.code} placeholder="WELCOME10" />
         </label>
-        <label className="flex flex-col text-sm text-stone-600">
-          이름 <span className="text-xs text-wsb-green">필수</span>
-          <input name="name" required defaultValue={initial?.name} placeholder="신규 가입 쿠폰" className={inputCls} />
+        <label className="flex flex-col text-sm text-[var(--ad-mut)]">
+          이름 <span className="text-xs text-[var(--ad-accent)]">필수</span>
+          <AdminInput name="name" required defaultValue={initial?.name} placeholder="신규 가입 쿠폰" />
         </label>
-        <label className="flex flex-col text-sm text-stone-600">
+        <label className="flex flex-col text-sm text-[var(--ad-mut)]">
           할인 유형
-          <select name="discountType" defaultValue={initial?.discountType ?? "rate"} className={inputCls}>
+          <AdminSelect name="discountType" defaultValue={initial?.discountType ?? "rate"}>
             <option value="rate">정률(%)</option>
             <option value="amount">정액(원)</option>
-          </select>
+          </AdminSelect>
         </label>
-        <label className="flex flex-col text-sm text-stone-600">
+        <label className="flex flex-col text-sm text-[var(--ad-mut)]">
           할인 값
-          <input name="discountValue" type="number" required defaultValue={initial?.discountValue ?? 10} className={inputCls} />
+          <AdminInput name="discountValue" type="number" required defaultValue={initial?.discountValue ?? 10} />
         </label>
-        <label className="flex flex-col text-sm text-stone-600">
+        <label className="flex flex-col text-sm text-[var(--ad-mut)]">
           최소 주문금액(원)
-          <input name="minSubtotal" type="number" defaultValue={initial?.minSubtotal ?? 0} className={inputCls} />
+          <AdminInput name="minSubtotal" type="number" defaultValue={initial?.minSubtotal ?? 0} />
         </label>
-        <label className="flex flex-col text-sm text-stone-600">
+        <label className="flex flex-col text-sm text-[var(--ad-mut)]">
           최대 할인금액(원, 선택)
-          <input name="maxDiscount" type="number" defaultValue={initial?.maxDiscount ?? ""} placeholder="제한 없음" className={inputCls} />
+          <AdminInput name="maxDiscount" type="number" defaultValue={initial?.maxDiscount ?? ""} placeholder="제한 없음" />
         </label>
-        <label className="flex flex-col text-sm text-stone-600">
+        <label className="flex flex-col text-sm text-[var(--ad-mut)]">
           시작일(선택)
-          <input name="startsAt" type="datetime-local" defaultValue={toLocalInput(initial?.startsAt ?? null)} className={inputCls} />
+          <AdminInput name="startsAt" type="datetime-local" defaultValue={toLocalInput(initial?.startsAt ?? null)} />
         </label>
-        <label className="flex flex-col text-sm text-stone-600">
+        <label className="flex flex-col text-sm text-[var(--ad-mut)]">
           종료일(선택)
-          <input name="endsAt" type="datetime-local" defaultValue={toLocalInput(initial?.endsAt ?? null)} className={inputCls} />
+          <AdminInput name="endsAt" type="datetime-local" defaultValue={toLocalInput(initial?.endsAt ?? null)} />
         </label>
-        <label className="mt-6 flex items-center gap-2 text-sm text-stone-600">
-          <input name="isActive" type="checkbox" defaultChecked={initial ? initial.isActive : true} className="size-4" />
+        <label className="mt-6 flex items-center gap-2 text-sm text-[var(--ad-mut)]">
+          <AdminCheckbox name="isActive" defaultChecked={initial ? initial.isActive : true} />
           활성
         </label>
       </div>
-      {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="mt-3 rounded-md bg-wsb-green px-4 py-2 text-sm font-bold text-white hover:bg-wsb-green/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2 disabled:opacity-50"
-      >
+      {error && <p className="mt-3 text-sm text-[var(--ad-neg)]">{error}</p>}
+      <AdminButton type="submit" disabled={pending} className="mt-3">
         {pending ? "저장 중…" : initial ? "수정 저장" : "쿠폰 생성"}
-      </button>
+      </AdminButton>
     </form>
   );
 }

@@ -5,6 +5,9 @@ import { STATUS_LABEL, nextStatuses } from "@/lib/admin/order-status";
 import { updateOrderStatus, updateShipping } from "../actions";
 import { formatKRW } from "@/lib/format";
 import { trackingUrl, SUPPORTED_COURIERS } from "@/lib/orders/tracking";
+import { AdminCard } from "@/components/admin/ui/card";
+import { StatusBadge } from "@/components/admin/ui/status-badge";
+import { AdminInput, AdminButton } from "@/components/admin/ui/controls";
 
 export const dynamic = "force-dynamic";
 
@@ -22,32 +25,34 @@ export default async function AdminOrderDetail({
 
   return (
     <div>
-      <Link href="/admin/orders" className="text-sm text-wsb-green">
+      <Link href="/admin/orders" className="text-sm text-[var(--ad-accent)]">
         ← 주문관리
       </Link>
-      <h1 className="mt-2 font-mono text-xl font-extrabold text-wsb-carbon">
+      <h1 className="mt-2 font-mono text-xl font-extrabold text-[var(--ad-ink)]">
         {order.orderNumber}
       </h1>
-      <p className="mt-1 text-sm text-stone-500">
+      <p className="mt-1 text-sm text-[var(--ad-mut)]">
         현재 상태:{" "}
-        <strong>{STATUS_LABEL[order.status as keyof typeof STATUS_LABEL] ?? order.status}</strong>
+        <StatusBadge value={order.status} />
       </p>
 
-      <ul className="mt-5 divide-y divide-stone-200 rounded-lg border border-stone-200">
-        {items.map((it) => (
-          <li key={it.id} className="flex justify-between p-3 text-sm">
-            <span>
-              {it.productName} / {it.variantName} × {it.quantity}
-            </span>
-            <span className="font-mono">{formatKRW(it.lineTotal)}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-2 text-right text-sm">
-        총 결제 <strong className="font-mono">{formatKRW(order.totalAmount)}</strong>
-      </p>
+      <AdminCard className="mt-5">
+        <ul className="divide-y divide-[var(--ad-line)]">
+          {items.map((it) => (
+            <li key={it.id} className="flex justify-between p-3 text-sm">
+              <span>
+                {it.productName} / {it.variantName} × {it.quantity}
+              </span>
+              <span className="font-mono">{formatKRW(it.lineTotal)}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-right text-sm">
+          총 결제 <strong className="font-mono">{formatKRW(order.totalAmount)}</strong>
+        </p>
+      </AdminCard>
 
-      <div className="mt-4 text-sm text-stone-600">
+      <div className="mt-4 text-sm text-[var(--ad-mut)]">
         <p>
           받는 분: {order.customerName} ({order.customerPhone})
         </p>
@@ -62,60 +67,60 @@ export default async function AdminOrderDetail({
           }
           return (
             <form key={s} action={changeStatus}>
-              <button className="rounded-md border border-wsb-green px-3 py-1.5 text-sm font-semibold text-wsb-green hover:bg-wsb-green/5">
+              <AdminButton variant="ghost">
                 {STATUS_LABEL[s]}로 변경
-              </button>
+              </AdminButton>
             </form>
           );
         })}
         {next.length === 0 && (
-          <span className="text-sm text-stone-400">변경 가능한 상태가 없습니다.</span>
+          <span className="text-sm text-[var(--ad-mut-2)]">변경 가능한 상태가 없습니다.</span>
         )}
       </div>
 
-      <form action={updateShipping} className="mt-6 flex flex-wrap items-end gap-2 border-t border-stone-200 pt-4">
-        <input type="hidden" name="orderNumber" value={order.orderNumber} />
-        <label className="text-sm">
-          택배사
-          <input
-            name="courier"
-            defaultValue={order.courier ?? ""}
-            list="courier-list"
-            className="mt-1 block rounded-md border border-stone-300 px-2 py-1 text-sm"
-          />
-          <datalist id="courier-list">
-            {SUPPORTED_COURIERS.map((c) => (
-              <option key={c} value={c} />
-            ))}
-          </datalist>
-        </label>
-        <label className="text-sm">
-          송장번호
-          <input
-            name="trackingNumber"
-            defaultValue={order.trackingNumber ?? ""}
-            className="mt-1 block rounded-md border border-stone-300 px-2 py-1 text-sm"
-          />
-        </label>
-        <button className="rounded-md bg-wsb-green px-3 py-2 text-sm font-bold text-white">
-          송장 저장
-        </button>
-      </form>
+      <AdminCard className="mt-6">
+        <form action={updateShipping} className="flex flex-wrap items-end gap-2">
+          <input type="hidden" name="orderNumber" value={order.orderNumber} />
+          <label className="text-sm text-[var(--ad-mut)]">
+            택배사
+            <AdminInput
+              name="courier"
+              defaultValue={order.courier ?? ""}
+              list="courier-list"
+              className="mt-1 block"
+            />
+            <datalist id="courier-list">
+              {SUPPORTED_COURIERS.map((c) => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
+          </label>
+          <label className="text-sm text-[var(--ad-mut)]">
+            송장번호
+            <AdminInput
+              name="trackingNumber"
+              defaultValue={order.trackingNumber ?? ""}
+              className="mt-1 block"
+            />
+          </label>
+          <AdminButton type="submit">송장 저장</AdminButton>
+        </form>
+      </AdminCard>
 
       {order.trackingNumber && (
-        <p className="mt-3 text-sm text-stone-600">
+        <p className="mt-3 text-sm text-[var(--ad-mut)]">
           배송조회:{" "}
           {trackUrl ? (
             <a
               href={trackUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-wsb-green hover:underline"
+              className="text-[var(--ad-accent)] hover:underline font-mono"
             >
               {order.courier} {order.trackingNumber} ↗
             </a>
           ) : (
-            <span className="font-mono text-stone-500">
+            <span className="font-mono text-[var(--ad-mut-2)]">
               {order.courier} {order.trackingNumber}
             </span>
           )}
