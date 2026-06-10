@@ -5,12 +5,12 @@ import userEvent from "@testing-library/user-event";
 import { CouponField } from "./coupon-field";
 
 // Mock the server actions
-vi.mock("@/app/checkout/coupon-actions", () => ({
+vi.mock("@/app/(storefront)/checkout/coupon-actions", () => ({
   applyCouponAction: vi.fn(),
   listAvailableCouponsAction: vi.fn().mockResolvedValue([]),
 }));
 
-import { applyCouponAction, listAvailableCouponsAction } from "@/app/checkout/coupon-actions";
+import { applyCouponAction, listAvailableCouponsAction } from "@/app/(storefront)/checkout/coupon-actions";
 
 const mockApply = vi.mocked(applyCouponAction);
 const mockList = vi.mocked(listAvailableCouponsAction);

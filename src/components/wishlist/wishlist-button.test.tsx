@@ -6,7 +6,7 @@ import { WishlistButton } from "./wishlist-button";
 const mockToggle = vi.fn();
 const mockPush = vi.fn();
 
-vi.mock("@/app/account/wishlist/actions", () => ({
+vi.mock("@/app/(storefront)/account/wishlist/actions", () => ({
   toggleWishlistAction: (...args: unknown[]) => mockToggle(...args),
 }));
 

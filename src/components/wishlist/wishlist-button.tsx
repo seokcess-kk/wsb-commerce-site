@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { toggleWishlistAction } from "@/app/account/wishlist/actions";
+import { toggleWishlistAction } from "@/app/(storefront)/account/wishlist/actions";
 
 export function WishlistButton({
   productId,

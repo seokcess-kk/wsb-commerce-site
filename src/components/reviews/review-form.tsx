@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { StarRating } from "./star-rating";
-import type { SubmitReviewInput } from "@/app/account/reviews/actions";
+import type { SubmitReviewInput } from "@/app/(storefront)/account/reviews/actions";
 
 export type ReviewFormProps = {
   orderId: string;

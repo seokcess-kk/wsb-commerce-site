@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ReviewForm } from "./review-form";
-import type { SubmitReviewInput } from "@/app/account/reviews/actions";
+import type { SubmitReviewInput } from "@/app/(storefront)/account/reviews/actions";
 
 type Props = {
   orderId: string;

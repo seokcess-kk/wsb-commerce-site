@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { formatKRW } from "@/lib/format";
-import { applyCouponAction, listAvailableCouponsAction } from "@/app/checkout/coupon-actions";
+import { applyCouponAction, listAvailableCouponsAction } from "@/app/(storefront)/checkout/coupon-actions";
 import { couponLabel } from "@/lib/coupons/coupon-label";
 import type { UserCouponWithDetails } from "@/db/queries/coupons";
 
