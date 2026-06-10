@@ -16,10 +16,10 @@ export default async function AdminCouponEditPage({
 
   return (
     <div>
-      <Link href="/admin/coupons" className="text-sm text-wsb-green">
+      <Link href="/admin/coupons" className="text-sm text-[var(--ad-accent)]">
         ← 쿠폰관리
       </Link>
-      <h1 className="mt-2 text-2xl font-extrabold text-wsb-carbon">쿠폰 수정</h1>
+      <h1 className="mt-2 text-2xl font-extrabold text-[var(--ad-ink)]">쿠폰 수정</h1>
       <div className="mt-5">
         <CouponForm
           initial={{

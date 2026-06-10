@@ -7,7 +7,7 @@ export default async function NewProductPage() {
   const categories = await listCategoriesAdmin();
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-extrabold text-wsb-carbon">상품 등록</h1>
+      <h1 className="mb-6 text-2xl font-extrabold text-[var(--ad-ink)]">상품 등록</h1>
       <ProductForm categories={categories} />
     </div>
   );

@@ -46,7 +46,7 @@ export default async function EditProductPage({ params }: Props) {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-extrabold text-wsb-carbon">상품 수정</h1>
+      <h1 className="mb-6 text-2xl font-extrabold text-[var(--ad-ink)]">상품 수정</h1>
       <ProductForm categories={categories} initial={initial} />
     </div>
   );
