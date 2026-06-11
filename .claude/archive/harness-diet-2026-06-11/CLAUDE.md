@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 @AGENTS.md
 
 > **Next.js 16 + React 19 — 학습 데이터와 다를 수 있음.** API를 쓰기 전 `node_modules/next/dist/docs/` 의 해당 가이드를 먼저 확인할 것 (AGENTS.md 참조).
