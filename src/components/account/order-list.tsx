@@ -42,7 +42,7 @@ export function OrderList({ orders, activeStatus = "", baseHref = "/account" }: 
               className={[
                 "whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-wsb-green text-white"
+                  ? "bg-ng-cobalt text-white"
                   : "bg-stone-100 text-stone-600 hover:bg-stone-200",
               ].join(" ")}
             >
@@ -61,13 +61,13 @@ export function OrderList({ orders, activeStatus = "", baseHref = "/account" }: 
             <li key={order.id}>
               <Link
                 href={`/account/orders/${order.orderNumber}`}
-                className="block rounded-lg border border-stone-200 p-4 transition-colors hover:border-wsb-green/40 hover:bg-wsb-green/5"
+                className="block rounded-lg border border-stone-200 p-4 transition-colors hover:border-ng-cobalt/40 hover:bg-ng-cobalt/5"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm font-bold text-wsb-carbon">
+                  <span className="font-mono text-sm font-bold text-ng-charcoal">
                     {order.orderNumber}
                   </span>
-                  <span className="rounded-full bg-wsb-green/10 px-2.5 py-0.5 text-xs font-semibold text-wsb-green">
+                  <span className="rounded-full bg-ng-cobalt/10 px-2.5 py-0.5 text-xs font-semibold text-ng-cobalt">
                     {statusLabel(order.status)}
                   </span>
                 </div>
@@ -75,7 +75,7 @@ export function OrderList({ orders, activeStatus = "", baseHref = "/account" }: 
                   <span>
                     {formatDate(order.createdAt)}
                   </span>
-                  <span className="font-mono font-semibold text-wsb-carbon">
+                  <span className="font-mono font-semibold text-ng-charcoal">
                     {formatKRW(order.totalAmount)}
                   </span>
                 </div>

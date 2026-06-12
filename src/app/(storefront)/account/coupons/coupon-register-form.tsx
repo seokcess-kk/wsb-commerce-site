@@ -36,12 +36,12 @@ export function CouponRegisterForm() {
           onChange={(e) => setCode(e.target.value.toUpperCase())}
           placeholder="쿠폰 코드 입력"
           aria-label="쿠폰 코드"
-          className="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm font-mono uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green"
+          className="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm font-mono uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt"
         />
         <button
           type="submit"
           disabled={isPending}
-          className="rounded-md bg-wsb-green px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green"
+          className="rounded-md bg-ng-cobalt px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt"
         >
           {isPending ? "…" : "등록"}
         </button>
@@ -49,7 +49,7 @@ export function CouponRegisterForm() {
       {message && (
         <p
           role="alert"
-          className={`text-xs ${message.ok ? "text-wsb-green font-semibold" : "text-rose-600"}`}
+          className={`text-xs ${message.ok ? "text-ng-cobalt font-semibold" : "text-rose-600"}`}
         >
           {message.text}
         </p>

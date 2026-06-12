@@ -8,14 +8,14 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-extrabold text-wsb-carbon">개인정보처리방침</h1>
+      <h1 className="text-2xl font-extrabold text-ng-charcoal">개인정보처리방침</h1>
 
       <p className="mt-4 text-sm leading-relaxed text-stone-600">
         (주)우리스마트바이오(이하 “회사”)는 개인정보 보호법 및 관련 법령에 따라 이용자의 개인정보를
         보호하고 이와 관련한 고충을 신속하게 처리하기 위하여 다음과 같이 개인정보처리방침을 수립·공개합니다.
       </p>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제1조 수집하는 개인정보 항목
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">
@@ -34,7 +34,7 @@ export default function PrivacyPage() {
         </li>
       </ul>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제2조 개인정보의 수집·이용 목적
       </h2>
       <ul className="list-disc pl-5 text-sm leading-relaxed text-stone-600">
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
         <li>전자상거래법 등 관련 법령상 의무 이행</li>
       </ul>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제3조 개인정보의 보유 및 이용 기간
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
         <li>소비자 불만 또는 분쟁처리에 관한 기록: 3년</li>
       </ul>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제4조 개인정보의 제3자 제공
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
         다만, 배송 업무를 위해 택배사에 수령인의 성명, 연락처, 배송지 주소 등 최소한의 정보를 제공합니다.
       </p>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제5조 개인정보 처리위탁
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
         <li>서비스 인프라 운영: Supabase, Vercel</li>
       </ul>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제6조 정보주체의 권리
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">
@@ -86,7 +86,7 @@ export default function PrivacyPage() {
         조치합니다.
       </p>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제7조 만 14세 미만 아동
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
         부득이하게 만 14세 미만 아동의 개인정보를 수집하는 경우에는 법정대리인의 동의를 받습니다.
       </p>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제8조 쿠키(Cookie) 사용
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">
@@ -103,7 +103,7 @@ export default function PrivacyPage() {
         있을 수 있습니다.
       </p>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제9조 개인정보 보호책임자(CPO)
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">
@@ -114,7 +114,7 @@ export default function PrivacyPage() {
         <li>연락처: ○○○</li>
       </ul>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
         제10조 개인정보의 파기 절차 및 방법
       </h2>
       <p className="text-sm leading-relaxed text-stone-600">

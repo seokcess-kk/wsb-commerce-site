@@ -55,7 +55,7 @@ export function ReviewForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-      <p className="text-sm font-semibold text-wsb-carbon">{productName}</p>
+      <p className="text-sm font-semibold text-ng-charcoal">{productName}</p>
 
       {/* Star rating */}
       <div>
@@ -75,7 +75,7 @@ export function ReviewForm({
           onChange={(e) => setTitle(e.target.value)}
           maxLength={120}
           placeholder="리뷰 제목을 입력해 주세요"
-          className="w-full rounded-md border border-stone-200 px-3 py-2 text-sm focus:border-wsb-green focus:outline-none"
+          className="w-full rounded-md border border-stone-200 px-3 py-2 text-sm focus:border-ng-cobalt focus:outline-none"
         />
       </div>
 
@@ -90,7 +90,7 @@ export function ReviewForm({
           onChange={(e) => setBody(e.target.value)}
           rows={4}
           placeholder="상품 사용 후기를 작성해 주세요 (5자 이상)"
-          className="w-full rounded-md border border-stone-200 px-3 py-2 text-sm focus:border-wsb-green focus:outline-none"
+          className="w-full rounded-md border border-stone-200 px-3 py-2 text-sm focus:border-ng-cobalt focus:outline-none"
         />
       </div>
 
@@ -105,7 +105,7 @@ export function ReviewForm({
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
           placeholder="https://example.com/photo.jpg"
-          className="w-full rounded-md border border-stone-200 px-3 py-2 text-sm focus:border-wsb-green focus:outline-none"
+          className="w-full rounded-md border border-stone-200 px-3 py-2 text-sm focus:border-ng-cobalt focus:outline-none"
         />
       </div>
 
@@ -118,7 +118,7 @@ export function ReviewForm({
       <button
         type="submit"
         disabled={isPending}
-        className="rounded-full bg-wsb-green px-6 py-2.5 text-sm font-semibold text-white hover:bg-wsb-green/90 disabled:opacity-50"
+        className="rounded-full bg-ng-cobalt px-6 py-2.5 text-sm font-semibold text-white hover:bg-ng-cobalt/90 disabled:opacity-50"
       >
         {isPending ? "제출 중..." : "리뷰 등록"}
       </button>

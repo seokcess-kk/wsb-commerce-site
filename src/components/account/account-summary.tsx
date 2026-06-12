@@ -24,7 +24,7 @@ export function AccountSummary({ recentOrder, wishlistCount, couponCount = 0 }: 
           <div className="mt-1">
             <Link
               href={`/account/orders/${recentOrder.orderNumber}`}
-              className="block font-mono text-sm font-semibold text-wsb-green hover:underline"
+              className="block font-mono text-sm font-semibold text-ng-cobalt hover:underline"
             >
               {recentOrder.orderNumber}
             </Link>
@@ -38,13 +38,13 @@ export function AccountSummary({ recentOrder, wishlistCount, couponCount = 0 }: 
       {/* Wishlist count */}
       <Link href="/account/wishlist" className="block p-4 hover:bg-stone-50">
         <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">찜</p>
-        <p className="mt-1 text-2xl font-extrabold text-wsb-carbon">{wishlistCount}</p>
+        <p className="mt-1 text-2xl font-extrabold text-ng-charcoal">{wishlistCount}</p>
       </Link>
 
       {/* Coupon count (slot — Stream F will supply real value) */}
       <Link href="/account/coupons" className="block p-4 hover:bg-stone-50">
         <p className="text-xs font-semibold uppercase tracking-wide text-stone-400">쿠폰</p>
-        <p className="mt-1 text-2xl font-extrabold text-wsb-carbon">{couponCount}</p>
+        <p className="mt-1 text-2xl font-extrabold text-ng-charcoal">{couponCount}</p>
       </Link>
     </div>
   );

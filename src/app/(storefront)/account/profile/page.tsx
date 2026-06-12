@@ -17,8 +17,8 @@ export default async function ProfilePage() {
 
   return (
     <section className="mx-auto max-w-md px-6 py-10">
-      <Link href="/account" className="text-sm text-wsb-green">← 마이페이지</Link>
-      <h1 className="mt-2 text-2xl font-extrabold text-wsb-carbon">회원정보 수정</h1>
+      <Link href="/account" className="text-sm text-ng-cobalt">← 마이페이지</Link>
+      <h1 className="mt-2 text-2xl font-extrabold text-ng-charcoal">회원정보 수정</h1>
       <ProfileForm email={user.email} />
     </section>
   );

@@ -16,7 +16,7 @@ export function WriteReviewButton({ orderId, productId, productName, onSubmit }:
   const [submitted, setSubmitted] = useState(false);
 
   if (submitted) {
-    return <span className="text-xs text-wsb-green font-medium">리뷰 등록 완료</span>;
+    return <span className="text-xs text-ng-cobalt font-medium">리뷰 등록 완료</span>;
   }
 
   return (
@@ -25,7 +25,7 @@ export function WriteReviewButton({ orderId, productId, productName, onSubmit }:
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-full border border-wsb-green px-3 py-1.5 text-xs font-semibold text-wsb-green hover:bg-wsb-green hover:text-white transition-colors"
+          className="rounded-full border border-ng-cobalt px-3 py-1.5 text-xs font-semibold text-ng-cobalt hover:bg-ng-cobalt hover:text-white transition-colors"
         >
           리뷰 작성
         </button>

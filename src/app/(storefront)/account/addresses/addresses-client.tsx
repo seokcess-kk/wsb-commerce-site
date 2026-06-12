@@ -59,7 +59,7 @@ export function AddressesClient({ initialAddresses }: Props) {
   if (mode === "add") {
     return (
       <div className="mt-6">
-        <h2 className="mb-4 text-lg font-bold text-wsb-carbon">새 배송지 추가</h2>
+        <h2 className="mb-4 text-lg font-bold text-ng-charcoal">새 배송지 추가</h2>
         <AddressForm
           onSubmit={handleCreate}
           onCancel={() => setMode("list")}
@@ -73,7 +73,7 @@ export function AddressesClient({ initialAddresses }: Props) {
     const addr = mode.edit;
     return (
       <div className="mt-6">
-        <h2 className="mb-4 text-lg font-bold text-wsb-carbon">배송지 수정</h2>
+        <h2 className="mb-4 text-lg font-bold text-ng-charcoal">배송지 수정</h2>
         <AddressForm
           initial={{ ...addr, label: addr.label ?? undefined, address2: addr.address2 ?? undefined }}
           onSubmit={(data) => handleUpdate(addr.id, data)}
@@ -92,7 +92,7 @@ export function AddressesClient({ initialAddresses }: Props) {
           setError(null);
           setMode("add");
         }}
-        className="mb-6 rounded-md border border-wsb-green px-4 py-2 text-sm font-semibold text-wsb-green hover:bg-wsb-green hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+        className="mb-6 rounded-md border border-ng-cobalt px-4 py-2 text-sm font-semibold text-ng-cobalt hover:bg-ng-cobalt hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-2"
       >
         + 새 배송지 추가
       </button>
@@ -109,12 +109,12 @@ export function AddressesClient({ initialAddresses }: Props) {
                       <span className="text-xs font-semibold text-stone-500">{addr.label}</span>
                     )}
                     {addr.isDefault && (
-                      <span className="rounded-full bg-wsb-green px-2 py-0.5 text-xs font-bold text-white">
+                      <span className="rounded-full bg-ng-cobalt px-2 py-0.5 text-xs font-bold text-white">
                         기본
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 font-semibold text-wsb-carbon">{addr.recipient}</p>
+                  <p className="mt-1 font-semibold text-ng-charcoal">{addr.recipient}</p>
                   <p className="text-sm text-stone-600">{addr.phone}</p>
                   <p className="text-sm text-stone-600">
                     [{addr.zipcode}] {addr.address1}
@@ -126,7 +126,7 @@ export function AddressesClient({ initialAddresses }: Props) {
                     <button
                       onClick={() => handleSetDefault(addr.id)}
                       aria-label={`${addr.recipient} 배송지 기본으로 설정`}
-                      className="text-xs text-wsb-green hover:underline"
+                      className="text-xs text-ng-cobalt hover:underline"
                     >
                       기본으로 설정
                     </button>

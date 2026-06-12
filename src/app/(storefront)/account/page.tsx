@@ -58,10 +58,10 @@ export default async function AccountPage({
     <section className="mx-auto max-w-4xl px-6 py-10">
       {/* Header row */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-extrabold text-wsb-carbon">마이페이지</h1>
+        <h1 className="text-2xl font-extrabold text-ng-charcoal">마이페이지</h1>
         <Link
           href="/account/profile"
-          className="text-sm font-semibold text-wsb-green hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2 rounded-sm"
+          className="text-sm font-semibold text-ng-cobalt hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-2 rounded-sm"
         >
           회원정보 수정
         </Link>
@@ -86,9 +86,9 @@ export default async function AccountPage({
           <Link
             key={href}
             href={href}
-            className="flex flex-col items-center gap-1.5 rounded-lg border border-stone-200 px-2 py-4 text-center text-xs font-medium text-stone-600 transition-colors hover:border-wsb-green/40 hover:bg-wsb-green/5 hover:text-wsb-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+            className="flex flex-col items-center gap-1.5 rounded-lg border border-stone-200 px-2 py-4 text-center text-xs font-medium text-stone-600 transition-colors hover:border-ng-cobalt/40 hover:bg-ng-cobalt/5 hover:text-ng-cobalt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-2"
           >
-            <Icon size={20} strokeWidth={1.75} className="text-wsb-carbon" aria-hidden />
+            <Icon size={20} strokeWidth={1.75} className="text-ng-charcoal" aria-hidden />
             <span className="leading-tight">{label}</span>
           </Link>
         ))}
@@ -96,7 +96,7 @@ export default async function AccountPage({
 
       {/* Order list section */}
       <div className="mt-8">
-        <h2 className="mb-3 text-lg font-bold text-wsb-carbon">주문 내역</h2>
+        <h2 className="mb-3 text-lg font-bold text-ng-charcoal">주문 내역</h2>
         <OrderList orders={orders} activeStatus={status ?? ""} />
       </div>
     </section>

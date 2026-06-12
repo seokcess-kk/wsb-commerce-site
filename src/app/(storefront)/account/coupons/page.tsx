@@ -24,22 +24,22 @@ export default async function CouponsPage() {
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-10">
-      <Link href="/account" className="text-sm text-wsb-green">
+      <Link href="/account" className="text-sm text-ng-cobalt">
         ← 마이페이지
       </Link>
-      <h1 className="mt-2 text-2xl font-extrabold text-wsb-carbon">쿠폰함</h1>
+      <h1 className="mt-2 text-2xl font-extrabold text-ng-charcoal">쿠폰함</h1>
 
       {/* Registration form */}
       <div className="mt-6 rounded-lg border border-stone-200 p-4">
-        <h2 className="mb-3 text-sm font-bold text-wsb-carbon">쿠폰 코드 등록</h2>
+        <h2 className="mb-3 text-sm font-bold text-ng-charcoal">쿠폰 코드 등록</h2>
         <CouponRegisterForm />
       </div>
 
       {/* Available coupons */}
-      <h2 className="mt-8 mb-3 text-lg font-bold text-wsb-carbon">
+      <h2 className="mt-8 mb-3 text-lg font-bold text-ng-charcoal">
         사용 가능한 쿠폰
         {available.length > 0 && (
-          <span className="ml-2 text-base font-normal text-wsb-green">({available.length})</span>
+          <span className="ml-2 text-base font-normal text-ng-cobalt">({available.length})</span>
         )}
       </h2>
 
@@ -56,8 +56,8 @@ export default async function CouponsPage() {
               <li key={uc.userCouponId} className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-semibold text-wsb-carbon truncate">{c.name}</p>
-                    <p className="mt-0.5 text-sm font-bold text-wsb-green">{label}</p>
+                    <p className="font-semibold text-ng-charcoal truncate">{c.name}</p>
+                    <p className="mt-0.5 text-sm font-bold text-ng-cobalt">{label}</p>
                     {c.minSubtotal > 0 && (
                       <p className="mt-0.5 text-xs text-stone-400">
                         최소 주문금액 ₩{c.minSubtotal.toLocaleString("ko-KR")}
@@ -84,7 +84,7 @@ export default async function CouponsPage() {
       {/* Used coupons */}
       {used.length > 0 && (
         <>
-          <h2 className="mt-10 mb-3 text-lg font-bold text-wsb-carbon">사용된 쿠폰</h2>
+          <h2 className="mt-10 mb-3 text-lg font-bold text-ng-charcoal">사용된 쿠폰</h2>
           <ul className="divide-y divide-stone-100 rounded-lg border border-stone-100">
             {used.map((uc) => {
               const c = uc.coupon;

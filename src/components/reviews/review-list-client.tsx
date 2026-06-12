@@ -38,8 +38,8 @@ export function ReviewListClient({ reviews }: { reviews: ReviewRow[] }) {
             aria-pressed={sort === key}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
               sort === key
-                ? "border-wsb-green bg-wsb-green text-white"
-                : "border-stone-200 bg-white text-stone-600 hover:border-wsb-green"
+                ? "border-ng-cobalt bg-ng-cobalt text-white"
+                : "border-stone-200 bg-white text-stone-600 hover:border-ng-cobalt"
             }`}
           >
             {key === "newest" ? "최신순" : "높은 별점순"}
@@ -61,7 +61,7 @@ export function ReviewListClient({ reviews }: { reviews: ReviewRow[] }) {
                   </time>
                 </div>
                 {review.title && (
-                  <p className="text-sm font-semibold text-wsb-carbon">{review.title}</p>
+                  <p className="text-sm font-semibold text-ng-charcoal">{review.title}</p>
                 )}
                 <p className="whitespace-pre-line text-sm text-stone-700">{review.body}</p>
               </div>

@@ -12,7 +12,7 @@ export default function ResetConfirmPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green";
+  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,7 +39,7 @@ export default function ResetConfirmPage() {
 
   return (
     <section className="mx-auto max-w-sm px-6 py-16">
-      <h1 className="mb-2 text-2xl font-extrabold text-wsb-carbon">새 비밀번호 설정</h1>
+      <h1 className="mb-2 text-2xl font-extrabold text-ng-charcoal">새 비밀번호 설정</h1>
       <p className="mb-6 text-sm text-stone-500">새로 사용할 비밀번호를 입력해 주세요.</p>
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
@@ -64,7 +64,7 @@ export default function ResetConfirmPage() {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full rounded-md bg-wsb-green py-3 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}
+          className={`w-full rounded-md bg-ng-cobalt py-3 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}
         >
           {loading ? "처리 중…" : "비밀번호 변경"}
         </button>

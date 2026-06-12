@@ -23,11 +23,11 @@ export function ProfileForm({ email }: { email: string | null }) {
     setMsg({ ok: true, text: "비밀번호가 변경되었습니다." });
   }
 
-  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green";
+  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt";
   return (
     <div className="mt-6 space-y-8">
       <div>
-        <label className="block text-sm font-semibold text-wsb-carbon">이메일</label>
+        <label className="block text-sm font-semibold text-ng-charcoal">이메일</label>
         <input
           type="email"
           value={email ?? ""}
@@ -39,7 +39,7 @@ export function ProfileForm({ email }: { email: string | null }) {
       </div>
 
       <form onSubmit={submit} className="space-y-3">
-        <h2 className="text-sm font-semibold text-wsb-carbon">비밀번호 변경</h2>
+        <h2 className="text-sm font-semibold text-ng-charcoal">비밀번호 변경</h2>
         <input
           type="password"
           placeholder="새 비밀번호 (8자 이상)"
@@ -56,11 +56,11 @@ export function ProfileForm({ email }: { email: string | null }) {
           autoComplete="new-password"
           className={`w-full rounded-md border border-stone-300 px-3 py-2 text-sm ${ring}`}
         />
-        {msg && <p className={`text-sm ${msg.ok ? "text-wsb-green" : "text-rose-600"}`}>{msg.text}</p>}
+        {msg && <p className={`text-sm ${msg.ok ? "text-ng-cobalt" : "text-rose-600"}`}>{msg.text}</p>}
         <button
           type="submit"
           disabled={loading}
-          className={`rounded-md bg-wsb-green px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}
+          className={`rounded-md bg-ng-cobalt px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}
         >
           {loading ? "변경 중…" : "비밀번호 변경"}
         </button>

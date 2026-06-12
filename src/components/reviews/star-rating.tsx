@@ -31,7 +31,7 @@ export function StarRating({ value, onChange, size = 20 }: StarRatingProps) {
                   onChange(n);
                 }
               }}
-              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green rounded-sm"
+              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt rounded-sm"
             >
               <StarIcon filled={filled} size={size} />
             </button>

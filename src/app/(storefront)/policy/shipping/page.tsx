@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 export default function ShippingPage() {
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="text-2xl font-extrabold text-wsb-carbon">배송/교환/환불 안내</h1>
+      <h1 className="text-2xl font-extrabold text-ng-charcoal">배송/교환/환불 안내</h1>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">배송 안내</h2>
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">배송 안내</h2>
       <ul className="list-disc pl-5 text-sm leading-relaxed text-stone-600">
         <li>배송 방법: 택배 배송</li>
         <li>기본 배송비: 3,000원</li>
@@ -20,7 +20,7 @@ export default function ShippingPage() {
         <li>결제 확인 후 영업일 기준 ○일 이내 발송을 원칙으로 합니다(주말·공휴일 제외).</li>
       </ul>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">교환/반품 안내</h2>
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">교환/반품 안내</h2>
       <p className="text-sm leading-relaxed text-stone-600">
         상품 수령 후 7일 이내에 청약철회(반품·교환)를 신청할 수 있습니다.
       </p>
@@ -40,13 +40,13 @@ export default function ShippingPage() {
         <li>개봉 또는 사용으로 상품 가치가 현저히 감소한 경우</li>
       </ul>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">환불 안내</h2>
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">환불 안내</h2>
       <p className="text-sm leading-relaxed text-stone-600">
         반품 상품 도착 및 상태 확인 후 영업일 기준 ○일 이내에 결제하신 수단으로 환불 처리됩니다.
         카드 결제의 경우 카드사 정책에 따라 실제 취소 반영까지 영업일 기준 3~5일이 소요될 수 있습니다.
       </p>
 
-      <h2 className="mb-2 mt-8 text-base font-bold text-wsb-carbon">신청 방법</h2>
+      <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">신청 방법</h2>
       <p className="text-sm leading-relaxed text-stone-600">
         교환·반품·환불 신청은{" "}
         <Link

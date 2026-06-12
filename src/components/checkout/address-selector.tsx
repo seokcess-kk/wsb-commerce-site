@@ -47,7 +47,7 @@ export function AddressSelector({ onSelect }: { onSelect: (a: CheckoutAddress) =
   if (state.status === "unauthorized") {
     return (
       <p className="text-sm text-stone-400">
-        <Link href="/login" className="underline hover:text-wsb-green">
+        <Link href="/login" className="underline hover:text-ng-cobalt">
           로그인
         </Link>
         하면 저장된 배송지를 사용할 수 있어요
@@ -74,19 +74,19 @@ export function AddressSelector({ onSelect }: { onSelect: (a: CheckoutAddress) =
                 address2: addr.address2,
               })
             }
-            className="w-full rounded-md border border-stone-200 px-4 py-3 text-left hover:border-wsb-green focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-1"
+            className="w-full rounded-md border border-stone-200 px-4 py-3 text-left hover:border-ng-cobalt focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-1"
           >
             <div className="flex items-center gap-2">
               {addr.label && (
                 <span className="text-xs text-stone-500">{addr.label}</span>
               )}
               {addr.isDefault && (
-                <span className="rounded-full bg-wsb-green px-2 py-0.5 text-xs font-bold text-white">
+                <span className="rounded-full bg-ng-cobalt px-2 py-0.5 text-xs font-bold text-white">
                   기본
                 </span>
               )}
             </div>
-            <p className="mt-0.5 font-semibold text-wsb-carbon">{addr.recipient}</p>
+            <p className="mt-0.5 font-semibold text-ng-charcoal">{addr.recipient}</p>
             <p className="text-sm text-stone-600">{addr.phone}</p>
             <p className="text-sm text-stone-500">
               [{addr.zipcode}] {addr.address1}

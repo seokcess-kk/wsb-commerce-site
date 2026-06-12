@@ -21,7 +21,7 @@ type Props = {
 };
 
 const ring =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2";
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-2";
 const inputCls = `w-full rounded-md border border-stone-300 px-3 py-2 text-sm ${ring}`;
 const readonlyCls =
   "w-full rounded-md border border-stone-200 bg-stone-100 px-3 py-2 text-sm text-stone-500 cursor-not-allowed";
@@ -73,7 +73,7 @@ export function AddressForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label
-          className="mb-1 block text-sm font-semibold text-wsb-carbon"
+          className="mb-1 block text-sm font-semibold text-ng-charcoal"
           htmlFor="af-label"
         >
           레이블 (선택)
@@ -89,7 +89,7 @@ export function AddressForm({
       </div>
       <div>
         <label
-          className="mb-1 block text-sm font-semibold text-wsb-carbon"
+          className="mb-1 block text-sm font-semibold text-ng-charcoal"
           htmlFor="af-recipient"
         >
           수령인 *
@@ -105,7 +105,7 @@ export function AddressForm({
       </div>
       <div>
         <label
-          className="mb-1 block text-sm font-semibold text-wsb-carbon"
+          className="mb-1 block text-sm font-semibold text-ng-charcoal"
           htmlFor="af-phone"
         >
           연락처 *
@@ -123,7 +123,7 @@ export function AddressForm({
         <div className="flex items-end gap-2">
           <div className="flex-1">
             <label
-              className="mb-1 block text-sm font-semibold text-wsb-carbon"
+              className="mb-1 block text-sm font-semibold text-ng-charcoal"
               htmlFor="af-zipcode"
             >
               우편번호
@@ -141,7 +141,7 @@ export function AddressForm({
       </div>
       <div>
         <label
-          className="mb-1 block text-sm font-semibold text-wsb-carbon"
+          className="mb-1 block text-sm font-semibold text-ng-charcoal"
           htmlFor="af-address1"
         >
           기본 주소
@@ -156,7 +156,7 @@ export function AddressForm({
       </div>
       <div>
         <label
-          className="mb-1 block text-sm font-semibold text-wsb-carbon"
+          className="mb-1 block text-sm font-semibold text-ng-charcoal"
           htmlFor="af-address2"
         >
           상세 주소
@@ -176,9 +176,9 @@ export function AddressForm({
           type="checkbox"
           checked={isDefault}
           onChange={(e) => setIsDefault(e.target.checked)}
-          className="h-4 w-4 rounded border-stone-300 text-wsb-green"
+          className="h-4 w-4 rounded border-stone-300 text-ng-cobalt"
         />
-        <label htmlFor="af-isdefault" className="text-sm text-wsb-carbon">
+        <label htmlFor="af-isdefault" className="text-sm text-ng-charcoal">
           기본 배송지로 설정
         </label>
       </div>
@@ -187,14 +187,14 @@ export function AddressForm({
         <button
           type="submit"
           disabled={loading}
-          className={`flex-1 rounded-md bg-wsb-green px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40 ${ring}`}
+          className={`flex-1 rounded-md bg-ng-cobalt px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40 ${ring}`}
         >
           {loading ? "저장 중…" : submitLabel}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className={`flex-1 rounded-md border border-stone-300 px-5 py-2.5 text-sm font-semibold text-wsb-carbon ${ring}`}
+          className={`flex-1 rounded-md border border-stone-300 px-5 py-2.5 text-sm font-semibold text-ng-charcoal ${ring}`}
         >
           취소
         </button>

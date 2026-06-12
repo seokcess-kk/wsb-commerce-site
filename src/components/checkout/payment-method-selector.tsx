@@ -21,7 +21,7 @@ export function PaymentMethodSelector({
 }) {
   return (
     <fieldset>
-      <legend className="mb-3 text-sm font-bold text-wsb-carbon">결제수단</legend>
+      <legend className="mb-3 text-sm font-bold text-ng-charcoal">결제수단</legend>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" role="radiogroup" aria-label="결제수단 선택">
         {PAYMENT_METHODS.map((m) => {
           const selected = m.code === value;
@@ -30,7 +30,7 @@ export function PaymentMethodSelector({
               key={m.code}
               className={`flex cursor-pointer flex-col rounded-md border px-3 py-2.5 text-sm transition-colors ${
                 selected
-                  ? "border-wsb-green bg-wsb-green/5 ring-1 ring-wsb-green"
+                  ? "border-ng-cobalt bg-ng-cobalt/5 ring-1 ring-ng-cobalt"
                   : "border-stone-300 hover:border-stone-400"
               }`}
             >
@@ -42,7 +42,7 @@ export function PaymentMethodSelector({
                 onChange={() => onChange(m.code)}
                 className="sr-only"
               />
-              <span className={`font-semibold ${selected ? "text-wsb-green" : "text-wsb-carbon"}`}>
+              <span className={`font-semibold ${selected ? "text-ng-cobalt" : "text-ng-charcoal"}`}>
                 {m.label}
               </span>
               <span className="mt-0.5 text-xs text-stone-400">{m.hint}</span>

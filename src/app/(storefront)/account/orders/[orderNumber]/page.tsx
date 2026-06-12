@@ -44,10 +44,10 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-10">
-      <Link href="/account" className="text-sm text-wsb-green">← 마이페이지</Link>
+      <Link href="/account" className="text-sm text-ng-cobalt">← 마이페이지</Link>
       <div className="mt-2 flex items-center gap-3">
-        <h1 className="font-mono text-xl font-extrabold text-wsb-carbon">{order.orderNumber}</h1>
-        <span className="rounded-full bg-wsb-green/10 px-2.5 py-0.5 text-xs font-semibold text-wsb-green">{statusLabel(order.status)}</span>
+        <h1 className="font-mono text-xl font-extrabold text-ng-charcoal">{order.orderNumber}</h1>
+        <span className="rounded-full bg-ng-cobalt/10 px-2.5 py-0.5 text-xs font-semibold text-ng-cobalt">{statusLabel(order.status)}</span>
         <div className="ml-auto">
           <ReorderButton items={reorderItems} />
         </div>
@@ -56,7 +56,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
       {/* Tracking block */}
       {order.trackingNumber ? (
         <div className="mt-5 rounded-lg border border-stone-200 bg-stone-50 p-4 text-sm">
-          <p className="font-semibold text-wsb-carbon">배송 정보</p>
+          <p className="font-semibold text-ng-charcoal">배송 정보</p>
           <div className="mt-2 flex justify-between text-stone-600">
             <span>택배사</span><span>{order.courier ?? "-"}</span>
           </div>
@@ -68,7 +68,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`${order.trackingNumber} (새 탭에서 열림)`}
-                className="font-mono text-wsb-green underline underline-offset-2"
+                className="font-mono text-ng-cobalt underline underline-offset-2"
               >
                 {order.trackingNumber}
               </a>
@@ -107,7 +107,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
       {/* Existing cancellation requests */}
       {cancellations.length > 0 && (
         <div className="mt-8">
-          <h2 className="font-semibold text-wsb-carbon">요청 내역</h2>
+          <h2 className="font-semibold text-ng-charcoal">요청 내역</h2>
           <ul className="mt-3 space-y-2">
             {cancellations.map((c) => (
               <li
@@ -115,7 +115,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
                 className="rounded-lg border border-stone-200 p-3 text-sm"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-wsb-carbon">
+                  <span className="font-semibold text-ng-charcoal">
                     {REQUEST_TYPE_LABEL[c.type as keyof typeof REQUEST_TYPE_LABEL] ?? c.type}
                   </span>
                   <span className="text-xs text-stone-500">
@@ -132,7 +132,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
       {/* Cancellation/exchange/return request form */}
       {allowedTypes.length > 0 && (
         <div className="mt-8">
-          <h2 className="font-semibold text-wsb-carbon">
+          <h2 className="font-semibold text-ng-charcoal">
             {allowedTypes.includes("cancel") ? "취소 신청" : "교환/반품 신청"}
           </h2>
           <form
@@ -158,7 +158,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
             {allowedTypes.length === 1 && (
               <input type="hidden" name="type" value={allowedTypes[0]} />
             )}
-            <label htmlFor="reason" className="block text-sm font-medium text-wsb-carbon">
+            <label htmlFor="reason" className="block text-sm font-medium text-ng-charcoal">
               사유
             </label>
             <textarea
@@ -167,11 +167,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
               placeholder="사유를 입력해 주세요 (필수)"
               required
               rows={3}
-              className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-wsb-green focus:ring-1 focus:ring-wsb-green"
+              className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-ng-cobalt focus:ring-1 focus:ring-ng-cobalt"
             />
             <button
               type="submit"
-              className="rounded-lg bg-wsb-green px-5 py-2 text-sm font-bold text-white transition hover:bg-wsb-green/90"
+              className="rounded-lg bg-ng-cobalt px-5 py-2 text-sm font-bold text-white transition hover:bg-ng-cobalt/90"
             >
               {allowedTypes.includes("cancel") ? "취소 신청" : "요청 접수"}
             </button>

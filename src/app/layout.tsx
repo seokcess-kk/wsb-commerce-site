@@ -7,9 +7,9 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jet
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
-  title: { default: "WSB 스토어", template: "%s | WSB 스토어" },
-  description: "Engineered by Data, Grown by Design. 데이터로 키운 건강기능식품 — NUTROGIN 브레인케어와 WSB 건강기능식품.",
-  openGraph: { type: "website", siteName: "WSB 스토어", locale: "ko_KR" },
+  title: { default: "NUTROGIN BRAINCARE", template: "%s | NUTROGIN" },
+  description: "또렷한 머리, 맑은 하루. 집중·맑은 각성·숙면 회복을 위한 브레인케어 젤리 NUTROGIN — 하루 한 스틱의 데일리 루틴.",
+  openGraph: { type: "website", siteName: "NUTROGIN BRAINCARE", locale: "ko_KR" },
   robots: { index: true, follow: true },
 };
 

@@ -20,17 +20,17 @@ export default async function WishlistPage() {
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-10">
-      <Link href="/account" className="text-sm text-wsb-green">
+      <Link href="/account" className="text-sm text-ng-cobalt">
         ← 마이페이지
       </Link>
-      <h1 className="mt-2 text-2xl font-extrabold text-wsb-carbon">찜한 상품</h1>
+      <h1 className="mt-2 text-2xl font-extrabold text-ng-charcoal">찜한 상품</h1>
       <div className="mt-6">
         {products.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-sm text-stone-500">찜한 상품이 없습니다.</p>
             <Link
               href="/products"
-              className="mt-4 inline-block text-sm font-semibold text-wsb-green hover:underline"
+              className="mt-4 inline-block text-sm font-semibold text-ng-cobalt hover:underline"
             >
               상품 둘러보기 →
             </Link>

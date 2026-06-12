@@ -32,7 +32,7 @@ export function AddToCartButton({ options }: { options: Array<CartItem & { stock
       <select
         value={selected}
         onChange={handleVariantChange}
-        className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green"
+        className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt"
         aria-label="옵션 선택"
       >
         {options.map((o) => (
@@ -50,7 +50,7 @@ export function AddToCartButton({ options }: { options: Array<CartItem & { stock
             onClick={decrement}
             disabled={quantity <= 1}
             aria-label="수량 감소"
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-300 text-stone-600 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green disabled:opacity-40"
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-300 text-stone-600 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt disabled:opacity-40"
           >
             −
           </button>
@@ -61,14 +61,14 @@ export function AddToCartButton({ options }: { options: Array<CartItem & { stock
             max={maxQty}
             readOnly
             aria-label="수량"
-            className="h-8 w-14 rounded-md border border-stone-300 text-center text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green"
+            className="h-8 w-14 rounded-md border border-stone-300 text-center text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt"
           />
           <button
             type="button"
             onClick={increment}
             disabled={quantity >= maxQty}
             aria-label="수량 증가"
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-300 text-stone-600 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green disabled:opacity-40"
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-stone-300 text-stone-600 hover:bg-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt disabled:opacity-40"
           >
             +
           </button>
@@ -86,7 +86,7 @@ export function AddToCartButton({ options }: { options: Array<CartItem & { stock
             router.push("/cart");
           }
         }}
-        className="w-full rounded-md bg-wsb-green py-3 text-sm font-bold text-white disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+        className="w-full rounded-md bg-ng-cobalt py-3 text-sm font-bold text-white disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-2"
       >
         {soldOut ? "품절" : "장바구니 담기"}
       </button>

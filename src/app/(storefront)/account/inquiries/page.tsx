@@ -19,7 +19,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 function statusBadgeClass(status: string) {
   return status === "answered"
-    ? "bg-wsb-green/10 text-wsb-green"
+    ? "bg-ng-cobalt/10 text-ng-cobalt"
     : "bg-stone-100 text-stone-500";
 }
 
@@ -31,17 +31,17 @@ export default async function InquiriesPage() {
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-10">
-      <Link href="/account" className="text-sm text-wsb-green">
+      <Link href="/account" className="text-sm text-ng-cobalt">
         ← 마이페이지
       </Link>
-      <h1 className="mt-2 text-2xl font-extrabold text-wsb-carbon">나의 문의</h1>
+      <h1 className="mt-2 text-2xl font-extrabold text-ng-charcoal">나의 문의</h1>
 
       {inquiries.length === 0 ? (
         <div className="mt-8 rounded-lg border border-stone-200 py-12 text-center">
           <p className="text-sm text-stone-400">접수된 문의가 없습니다.</p>
           <Link
             href="/support/inquiry"
-            className="mt-4 inline-block text-sm font-semibold text-wsb-green hover:underline"
+            className="mt-4 inline-block text-sm font-semibold text-ng-cobalt hover:underline"
           >
             1:1 문의하기
           </Link>
@@ -62,11 +62,11 @@ export default async function InquiriesPage() {
                       {STATUS_LABEL[inq.status] ?? inq.status}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm font-semibold text-wsb-carbon truncate">{inq.subject}</p>
+                  <p className="mt-1 text-sm font-semibold text-ng-charcoal truncate">{inq.subject}</p>
                   <p className="mt-0.5 line-clamp-2 text-sm text-stone-500">{inq.body}</p>
                   {inq.answer && (
-                    <div className="mt-2 rounded-md border border-wsb-green/20 bg-wsb-green/5 px-3 py-2">
-                      <p className="text-xs font-semibold text-wsb-green">답변</p>
+                    <div className="mt-2 rounded-md border border-ng-cobalt/20 bg-ng-cobalt/5 px-3 py-2">
+                      <p className="text-xs font-semibold text-ng-cobalt">답변</p>
                       <p className="mt-0.5 text-sm leading-relaxed text-stone-700 whitespace-pre-line">
                         {inq.answer}
                       </p>

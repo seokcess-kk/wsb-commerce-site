@@ -28,7 +28,7 @@ export function ReorderButton({ items }: Props) {
     <button
       type="button"
       onClick={handleReorder}
-      className="rounded-lg border border-wsb-green px-4 py-2 text-sm font-semibold text-wsb-green transition hover:bg-wsb-green hover:text-white"
+      className="rounded-lg border border-ng-cobalt px-4 py-2 text-sm font-semibold text-ng-cobalt transition hover:bg-ng-cobalt hover:text-white"
     >
       재주문
     </button>

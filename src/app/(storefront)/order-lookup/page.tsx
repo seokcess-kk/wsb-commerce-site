@@ -22,7 +22,7 @@ export default async function OrderLookupPage({
 
   return (
     <section className="mx-auto max-w-xl px-6 py-14">
-      <h1 className="text-2xl font-extrabold text-wsb-carbon">주문 조회</h1>
+      <h1 className="text-2xl font-extrabold text-ng-charcoal">주문 조회</h1>
       <p className="mt-1 text-sm text-stone-500">
         비회원 주문 번호와 주문 시 입력한 이메일로 조회할 수 있습니다.
       </p>
@@ -30,7 +30,7 @@ export default async function OrderLookupPage({
       {/* Search form — submits via GET */}
       <form method="GET" className="mt-6 space-y-4">
         <div>
-          <label htmlFor="orderNumber" className="block text-sm font-semibold text-wsb-carbon">
+          <label htmlFor="orderNumber" className="block text-sm font-semibold text-ng-charcoal">
             주문 번호
           </label>
           <input
@@ -39,12 +39,12 @@ export default async function OrderLookupPage({
             type="text"
             defaultValue={orderNumber ?? ""}
             placeholder="WSB-20240101-XXXX"
-            className="mt-1 w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-wsb-green focus:ring-1 focus:ring-wsb-green"
+            className="mt-1 w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-ng-cobalt focus:ring-1 focus:ring-ng-cobalt"
             required
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-semibold text-wsb-carbon">
+          <label htmlFor="email" className="block text-sm font-semibold text-ng-charcoal">
             이메일
           </label>
           <input
@@ -53,13 +53,13 @@ export default async function OrderLookupPage({
             type="email"
             defaultValue={email ?? ""}
             placeholder="order@example.com"
-            className="mt-1 w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-wsb-green focus:ring-1 focus:ring-wsb-green"
+            className="mt-1 w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-ng-cobalt focus:ring-1 focus:ring-ng-cobalt"
             required
           />
         </div>
         <button
           type="submit"
-          className="w-full rounded-lg bg-wsb-green px-4 py-3 text-sm font-bold text-white transition hover:bg-wsb-green/90"
+          className="w-full rounded-lg bg-ng-cobalt px-4 py-3 text-sm font-bold text-white transition hover:bg-ng-cobalt/90"
         >
           조회하기
         </button>
@@ -76,10 +76,10 @@ export default async function OrderLookupPage({
       {result && (
         <div className="mt-8 space-y-5">
           <div className="flex items-center gap-3">
-            <h2 className="font-mono text-lg font-extrabold text-wsb-carbon">
+            <h2 className="font-mono text-lg font-extrabold text-ng-charcoal">
               {result.order.orderNumber}
             </h2>
-            <span className="rounded-full bg-wsb-green/10 px-2.5 py-0.5 text-xs font-semibold text-wsb-green">
+            <span className="rounded-full bg-ng-cobalt/10 px-2.5 py-0.5 text-xs font-semibold text-ng-cobalt">
               {statusLabel(result.order.status)}
             </span>
           </div>
@@ -89,7 +89,7 @@ export default async function OrderLookupPage({
             const url = trackingUrl(result.order.courier, result.order.trackingNumber);
             return (
               <div className="rounded-lg border border-stone-200 bg-stone-50 p-4 text-sm">
-                <p className="font-semibold text-wsb-carbon">배송 정보</p>
+                <p className="font-semibold text-ng-charcoal">배송 정보</p>
                 <div className="mt-2 flex justify-between text-stone-600">
                   <span>택배사</span>
                   <span>{result.order.courier ?? "-"}</span>
@@ -102,7 +102,7 @@ export default async function OrderLookupPage({
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${result.order.trackingNumber} (새 탭에서 열림)`}
-                      className="font-mono text-wsb-green underline underline-offset-2"
+                      className="font-mono text-ng-cobalt underline underline-offset-2"
                     >
                       {result.order.trackingNumber}
                     </a>
@@ -153,7 +153,7 @@ export default async function OrderLookupPage({
 
       <div className="mt-8 text-center text-sm text-stone-400">
         회원이신가요?{" "}
-        <Link href="/login" className="text-wsb-green underline underline-offset-2">
+        <Link href="/login" className="text-ng-cobalt underline underline-offset-2">
           로그인
         </Link>
         하시면 더 편리하게 주문 내역을 확인할 수 있습니다.

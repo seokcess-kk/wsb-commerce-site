@@ -86,7 +86,7 @@ export function PostcodeSearch({
     <button
       type="button"
       onClick={handleClick}
-      className="rounded-md border border-wsb-green px-3 py-2 text-sm font-semibold text-wsb-green hover:bg-wsb-green hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+      className="rounded-md border border-ng-cobalt px-3 py-2 text-sm font-semibold text-ng-cobalt hover:bg-ng-cobalt hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-2"
     >
       주소 검색
     </button>

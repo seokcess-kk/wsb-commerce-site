@@ -9,7 +9,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green";
+  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
     return (
       <section className="mx-auto max-w-sm px-6 py-16 text-center">
         <div className="mb-4 text-4xl">📬</div>
-        <h1 className="text-xl font-extrabold text-wsb-carbon">메일을 확인해 주세요</h1>
+        <h1 className="text-xl font-extrabold text-ng-charcoal">메일을 확인해 주세요</h1>
         <p className="mt-3 text-sm text-stone-500">
           <strong>{email}</strong> 주소로 비밀번호 재설정 링크를 발송했습니다.
           <br />
@@ -43,7 +43,7 @@ export default function ResetPasswordPage() {
 
   return (
     <section className="mx-auto max-w-sm px-6 py-16">
-      <h1 className="mb-2 text-2xl font-extrabold text-wsb-carbon">비밀번호 재설정</h1>
+      <h1 className="mb-2 text-2xl font-extrabold text-ng-charcoal">비밀번호 재설정</h1>
       <p className="mb-6 text-sm text-stone-500">
         가입 시 사용한 이메일을 입력하시면 재설정 링크를 보내드립니다.
       </p>
@@ -61,7 +61,7 @@ export default function ResetPasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full rounded-md bg-wsb-green py-3 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}
+          className={`w-full rounded-md bg-ng-cobalt py-3 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}
         >
           {loading ? "처리 중…" : "재설정 링크 보내기"}
         </button>

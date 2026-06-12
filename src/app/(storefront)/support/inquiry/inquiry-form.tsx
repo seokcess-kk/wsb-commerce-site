@@ -18,7 +18,7 @@ export function InquiryForm({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green";
+  const ring = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt";
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,7 +40,7 @@ export function InquiryForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Email */}
       <div>
-        <label htmlFor="inq-email" className="mb-1 block text-sm font-semibold text-wsb-carbon">
+        <label htmlFor="inq-email" className="mb-1 block text-sm font-semibold text-ng-charcoal">
           이메일
         </label>
         <input
@@ -59,7 +59,7 @@ export function InquiryForm({
 
       {/* Category */}
       <div>
-        <label htmlFor="inq-category" className="mb-1 block text-sm font-semibold text-wsb-carbon">
+        <label htmlFor="inq-category" className="mb-1 block text-sm font-semibold text-ng-charcoal">
           문의 유형
         </label>
         <select
@@ -78,7 +78,7 @@ export function InquiryForm({
 
       {/* Subject */}
       <div>
-        <label htmlFor="inq-subject" className="mb-1 block text-sm font-semibold text-wsb-carbon">
+        <label htmlFor="inq-subject" className="mb-1 block text-sm font-semibold text-ng-charcoal">
           제목
         </label>
         <input
@@ -94,7 +94,7 @@ export function InquiryForm({
 
       {/* Body */}
       <div>
-        <label htmlFor="inq-body" className="mb-1 block text-sm font-semibold text-wsb-carbon">
+        <label htmlFor="inq-body" className="mb-1 block text-sm font-semibold text-ng-charcoal">
           문의 내용
         </label>
         <textarea
@@ -115,7 +115,7 @@ export function InquiryForm({
       <button
         type="submit"
         disabled={isPending}
-        className={`w-full rounded-md bg-wsb-green py-3 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}
+        className={`w-full rounded-md bg-ng-cobalt py-3 text-sm font-bold text-white disabled:opacity-40 ${ring} focus-visible:ring-offset-2`}
       >
         {isPending ? "처리 중…" : "문의 접수"}
       </button>

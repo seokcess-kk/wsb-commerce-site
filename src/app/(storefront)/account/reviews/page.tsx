@@ -26,13 +26,13 @@ export default async function ReviewsPage() {
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-10">
-      <Link href="/account" className="text-sm text-wsb-green">
+      <Link href="/account" className="text-sm text-ng-cobalt">
         ← 마이페이지
       </Link>
-      <h1 className="mt-2 text-2xl font-extrabold text-wsb-carbon">리뷰 관리</h1>
+      <h1 className="mt-2 text-2xl font-extrabold text-ng-charcoal">리뷰 관리</h1>
 
       {/* Writable items */}
-      <h2 className="mt-8 mb-3 text-lg font-bold text-wsb-carbon">작성 가능한 리뷰</h2>
+      <h2 className="mt-8 mb-3 text-lg font-bold text-ng-charcoal">작성 가능한 리뷰</h2>
       {writableItems.length === 0 ? (
         <div className="rounded-lg border border-stone-200 py-10 text-center">
           <p className="text-sm text-stone-400">작성 가능한 리뷰가 없습니다.</p>
@@ -52,7 +52,7 @@ export default async function ReviewsPage() {
                   />
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-wsb-carbon truncate">{item.productName}</p>
+                  <p className="text-sm font-semibold text-ng-charcoal truncate">{item.productName}</p>
                   <p className="text-xs text-stone-400">{item.variantName}</p>
                   <p className="mt-0.5 font-mono text-xs text-stone-400">주문 {item.orderNumber}</p>
                   <div className="mt-2">
@@ -71,7 +71,7 @@ export default async function ReviewsPage() {
       )}
 
       {/* My reviews */}
-      <h2 className="mt-10 mb-3 text-lg font-bold text-wsb-carbon">내 리뷰</h2>
+      <h2 className="mt-10 mb-3 text-lg font-bold text-ng-charcoal">내 리뷰</h2>
       {myReviews.length === 0 ? (
         <div className="rounded-lg border border-stone-200 py-10 text-center">
           <p className="text-sm text-stone-400">작성된 리뷰가 없습니다.</p>
@@ -84,7 +84,7 @@ export default async function ReviewsPage() {
                 <div>
                   <Link
                     href={`/products/${review.productSlug}`}
-                    className="text-sm font-semibold text-wsb-carbon hover:text-wsb-green hover:underline"
+                    className="text-sm font-semibold text-ng-charcoal hover:text-ng-cobalt hover:underline"
                   >
                     {review.productName}
                   </Link>
@@ -95,7 +95,7 @@ export default async function ReviewsPage() {
                     </time>
                   </div>
                   {review.title && (
-                    <p className="mt-1 text-sm font-medium text-wsb-carbon">{review.title}</p>
+                    <p className="mt-1 text-sm font-medium text-ng-charcoal">{review.title}</p>
                   )}
                   <p className="mt-1 whitespace-pre-line text-sm text-stone-600 line-clamp-3">
                     {review.body}

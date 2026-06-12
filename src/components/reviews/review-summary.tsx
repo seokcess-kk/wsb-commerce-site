@@ -13,7 +13,7 @@ export async function ReviewSummary({ productId }: { productId: string }) {
   return (
     <div className="flex items-center gap-2">
       <StarRating value={Math.round(average)} size={18} />
-      <span className="text-sm font-semibold text-wsb-carbon">
+      <span className="text-sm font-semibold text-ng-charcoal">
         {average.toFixed(1)}
       </span>
       <span className="text-sm text-stone-500">({count}개 리뷰)</span>
