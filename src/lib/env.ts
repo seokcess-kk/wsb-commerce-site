@@ -9,6 +9,8 @@ const envSchema = z.object({
   ADMIN_EMAILS: z.string().optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
   NEXT_PUBLIC_PAYMENTS_ENABLED: z.string().optional(),
+  // 크론 엔드포인트(가상계좌 만료 스윕 등) 인증용. Vercel Cron 이 Bearer 토큰으로 전달.
+  CRON_SECRET: z.string().optional(),
   // DB 커넥션 풀 상한(선택). 미설정 시 db/index.ts의 기본값 사용.
   // Supabase 세션 모드 풀러(한도 15) 사용 시 낮게, 트랜잭션 모드 풀러(6543)면 여유롭게.
   DB_POOL_MAX: z.coerce.number().int().positive().optional(),
