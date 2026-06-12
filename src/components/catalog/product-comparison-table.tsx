@@ -1,12 +1,11 @@
 import { PRODUCTS } from "@/lib/brand/copy";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { CTAButton } from "@/components/ui/cta-button";
+import { Badge } from "@/components/ui/badge";
 
 // NUTROGIN 3종 비교 — 추천상황·섭취타이밍·핵심키워드·가격·구매. 데스크톱 표 / 모바일 카드.
 export function ProductComparisonTable({ priceBySlug = {} }: { priceBySlug?: Record<string, string> }) {
-  const Keyword = ({ k }: { k: string }) => (
-    <span className="inline-block rounded-full bg-ng-neon px-2 py-0.5 text-[11px] font-bold text-ng-charcoal">{k}</span>
-  );
+  const Keyword = ({ k }: { k: string }) => <Badge tone="neon">{k}</Badge>;
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">

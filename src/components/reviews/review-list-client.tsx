@@ -76,6 +76,10 @@ export function ReviewListClient({ reviews }: { reviews: ReviewRow[] }) {
                     key={i}
                     src={url}
                     alt={`리뷰 사진 ${i + 1}`}
+                    width={64}
+                    height={64}
+                    loading="lazy"
+                    decoding="async"
                     className="h-16 w-16 rounded-md object-cover"
                   />
                 ))}
