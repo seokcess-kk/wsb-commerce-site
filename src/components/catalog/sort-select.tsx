@@ -18,7 +18,7 @@ export function SortSelect({ currentSort }: { currentSort: SortKey }) {
       value={currentSort}
       onChange={handleChange}
       aria-label="정렬 기준"
-      className="rounded-md border border-stone-300 px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green"
+      className="rounded-md border border-stone-300 px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt"
     >
       {SORT_OPTIONS.map((o) => (
         <option key={o.key} value={o.key}>

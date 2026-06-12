@@ -51,12 +51,12 @@ export function TermsAgreement({
   return (
     <div className="space-y-2 rounded-lg border border-stone-200 p-4">
       {/* 전체 동의 */}
-      <label className="flex items-center gap-2 font-semibold text-sm text-wsb-carbon">
+      <label className="flex items-center gap-2 font-semibold text-sm text-ng-charcoal">
         <input
           type="checkbox"
           checked={isAll}
           onChange={toggleAll}
-          className="accent-wsb-green"
+          className="accent-ng-cobalt"
           aria-label="전체 동의"
         />
         전체 동의
@@ -71,7 +71,7 @@ export function TermsAgreement({
             type="checkbox"
             checked={state[key]}
             onChange={() => toggle(key)}
-            className="accent-wsb-green"
+            className="accent-ng-cobalt"
           />
           {label}
         </label>
@@ -84,7 +84,7 @@ export function TermsAgreement({
             type="checkbox"
             checked={state[key]}
             onChange={() => toggle(key)}
-            className="accent-wsb-green"
+            className="accent-ng-cobalt"
           />
           {label}
         </label>

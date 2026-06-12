@@ -40,7 +40,7 @@ export function WishlistButton({
       onClick={handleClick}
       aria-pressed={active}
       aria-label={active ? "찜 해제" : "찜하기"}
-      className={`rounded-full p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-1 ${
+      className={`rounded-full p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-1 ${
         active
           ? "text-rose-500 hover:text-rose-600"
           : "text-stone-300 hover:text-stone-500"

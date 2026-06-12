@@ -12,19 +12,19 @@ function renderWithCart(ui: React.ReactElement) {
 }
 
 describe("SiteHeader", () => {
-  it("WSB 로고와 효능 내비를 렌더한다", () => {
+  it("NUTROGIN 로고와 라인업 내비를 렌더한다", () => {
     renderWithCart(<SiteHeader />);
-    expect(screen.getByText("WSB")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "두뇌·집중" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "면역" })).toBeInTheDocument();
+    expect(screen.getByText("NUTROGIN")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "라인업" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "브랜드" })).toBeInTheDocument();
   });
 
-  it("모든 효능 카테고리 링크 4개가 렌더된다", () => {
+  it("NUTROGIN 3종 바로가기 내비가 렌더된다", () => {
     renderWithCart(<SiteHeader />);
-    expect(screen.getByRole("link", { name: "두뇌·집중" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "면역" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "수면" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "활력" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "집중" })).toHaveAttribute("href", "/products/nutrogin-focus");
+    expect(screen.getByRole("link", { name: "각성" })).toHaveAttribute("href", "/products/nutrogin-clear");
+    expect(screen.getByRole("link", { name: "숙면" })).toHaveAttribute("href", "/products/nutrogin-rest");
+    expect(screen.getByRole("link", { name: "고객지원" })).toBeInTheDocument();
   });
 
   it("유틸리티 아이콘 링크가 aria-label로 접근 가능하다", () => {

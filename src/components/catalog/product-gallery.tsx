@@ -64,8 +64,8 @@ export function ProductGallery({
                 aria-label={`${fallbackLabel} 이미지 ${idx + 1}`}
                 className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
                   idx === activeIdx
-                    ? "border-wsb-green"
-                    : "border-stone-200 hover:border-wsb-green/50"
+                    ? "border-ng-cobalt"
+                    : "border-stone-200 hover:border-ng-cobalt/50"
                 }`}
               >
                 <Image

@@ -12,7 +12,7 @@ const base: ProductSummary = {
 describe("ProductCard", () => {
   it("상품명·가격·상세 링크를 렌더한다", () => {
     render(<ProductCard product={base} />);
-    expect(screen.getByText("NUTROGIN FOCUS")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "NUTROGIN FOCUS" })).toBeInTheDocument();
     expect(screen.getByText("₩39,000")).toBeInTheDocument();
     expect(screen.getByRole("link")).toHaveAttribute("href", "/products/nutrogin-focus");
   });

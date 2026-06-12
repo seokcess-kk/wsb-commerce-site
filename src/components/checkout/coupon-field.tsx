@@ -60,11 +60,11 @@ export function CouponField({ subtotal, onApply }: Props) {
 
   if (applied) {
     return (
-      <div className="rounded-md border border-wsb-green/30 bg-wsb-green/5 px-3 py-2.5">
+      <div className="rounded-md border border-ng-cobalt/30 bg-ng-cobalt/5 px-3 py-2.5">
         <div className="flex items-center justify-between">
           <div>
-            <span className="font-mono text-xs font-semibold text-wsb-green">{appliedCode}</span>
-            <span className="ml-2 text-sm text-wsb-green font-bold">
+            <span className="font-mono text-xs font-semibold text-ng-cobalt">{appliedCode}</span>
+            <span className="ml-2 text-sm text-ng-cobalt font-bold">
               −{formatKRW(appliedDiscount)} 할인 적용
             </span>
           </div>
@@ -82,7 +82,7 @@ export function CouponField({ subtotal, onApply }: Props) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold text-wsb-carbon">쿠폰</p>
+      <p className="text-xs font-semibold text-ng-charcoal">쿠폰</p>
 
       {/* Code input row */}
       <div className="flex gap-2">
@@ -93,13 +93,13 @@ export function CouponField({ subtotal, onApply }: Props) {
           onFocus={loadCouponList}
           placeholder="쿠폰 코드 입력"
           aria-label="쿠폰 코드"
-          className="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm font-mono uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green"
+          className="flex-1 rounded-md border border-stone-300 px-3 py-2 text-sm font-mono uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt"
         />
         <button
           type="button"
           disabled={isPending}
           onClick={() => applyCode(code)}
-          className="rounded-md bg-wsb-green px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green"
+          className="rounded-md bg-ng-cobalt px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt"
         >
           {isPending ? "…" : "적용"}
         </button>
@@ -121,10 +121,10 @@ export function CouponField({ subtotal, onApply }: Props) {
                 type="button"
                 disabled={isPending}
                 onClick={() => applyCode(uc.coupon.code)}
-                className="flex w-full items-center justify-between rounded-md border border-stone-200 px-3 py-2 text-xs hover:border-wsb-green/50 hover:bg-wsb-green/5 disabled:opacity-50 text-left"
+                className="flex w-full items-center justify-between rounded-md border border-stone-200 px-3 py-2 text-xs hover:border-ng-cobalt/50 hover:bg-ng-cobalt/5 disabled:opacity-50 text-left"
               >
                 <span className="font-semibold text-stone-700">{uc.coupon.name}</span>
-                <span className="text-wsb-green font-bold">{couponLabel(uc.coupon)}</span>
+                <span className="text-ng-cobalt font-bold">{couponLabel(uc.coupon)}</span>
               </button>
             </li>
           ))}
@@ -135,7 +135,7 @@ export function CouponField({ subtotal, onApply }: Props) {
       {couponListLoaded && availableCoupons.length === 0 && (
         <p className="text-xs text-stone-400">
           보유 쿠폰이 없습니다. 코드를 직접 입력하거나{" "}
-          <a href="/account/coupons" className="underline hover:text-wsb-green">
+          <a href="/account/coupons" className="underline hover:text-ng-cobalt">
             쿠폰함
           </a>
           에서 등록하세요.

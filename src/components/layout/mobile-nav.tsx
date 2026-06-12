@@ -9,7 +9,7 @@ export function MobileNav({ items }: { items: Item[] }) {
   const [open, setOpen] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const ring =
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2 rounded-sm";
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-2 rounded-sm";
 
   // Move focus to close button when drawer opens
   useEffect(() => {
@@ -35,7 +35,7 @@ export function MobileNav({ items }: { items: Item[] }) {
       <button
         type="button"
         aria-label="메뉴 열기"
-        className={`text-wsb-carbon ${ring}`}
+        className={`text-ng-charcoal ${ring}`}
         onClick={() => setOpen(true)}
       >
         <Menu size={20} strokeWidth={1.75} aria-hidden />
@@ -46,7 +46,7 @@ export function MobileNav({ items }: { items: Item[] }) {
           onClick={() => setOpen(false)}
         >
           <nav
-            className="absolute right-0 top-0 flex h-full w-64 flex-col gap-1 bg-wsb-lab p-5"
+            className="absolute right-0 top-0 flex h-full w-64 flex-col gap-1 bg-white p-5"
             aria-label="모바일 메뉴"
             onClick={(e) => e.stopPropagation()}
           >
@@ -54,7 +54,7 @@ export function MobileNav({ items }: { items: Item[] }) {
               ref={closeButtonRef}
               type="button"
               aria-label="메뉴 닫기"
-              className={`self-end text-wsb-carbon ${ring}`}
+              className={`self-end text-ng-charcoal ${ring}`}
               onClick={() => setOpen(false)}
             >
               <X size={20} strokeWidth={1.75} aria-hidden />
@@ -63,7 +63,7 @@ export function MobileNav({ items }: { items: Item[] }) {
               <Link
                 key={it.href}
                 href={it.href}
-                className={`py-2 text-sm font-semibold text-wsb-carbon ${ring}`}
+                className={`py-2 text-sm font-semibold text-ng-charcoal transition-colors hover:text-ng-cobalt ${ring}`}
                 onClick={() => setOpen(false)}
               >
                 {it.label}

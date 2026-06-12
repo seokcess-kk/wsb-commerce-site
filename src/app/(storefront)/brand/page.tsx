@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FlaskConical, ShieldCheck, Brain, Sparkles, Moon } from "lucide-react";
+import { FlaskConical, ShieldCheck, Brain } from "lucide-react";
+import { NutroginLineup } from "@/components/nutrogin/nutrogin-lineup";
 
 export const metadata: Metadata = {
   title: "브랜드 스토리",
   description: "데이터로 키운 건강기능식품. WSB(우리스마트바이오)와 대표 브랜드 NUTROGIN의 이야기.",
 };
-
-const NUTROGIN_LINE = [
-  { code: "FOCUS", desc: "또렷한 집중이 필요한 하루를 위한 브레인케어", icon: Brain, slug: "nutrogin-focus" },
-  { code: "CLEAR", desc: "맑고 가벼운 컨디션을 위한 데일리 케어", icon: Sparkles, slug: "nutrogin-clear" },
-  { code: "REST", desc: "깊은 휴식과 회복을 위한 나이트 케어", icon: Moon, slug: "nutrogin-rest" },
-];
 
 export default function BrandPage() {
   return (
@@ -47,41 +42,15 @@ export default function BrandPage() {
         </div>
       </section>
 
-      {/* NUTROGIN 존 — 코발트·네온 전환 */}
-      <section className="border-t-2 border-ng-neon bg-ng-cobalt px-6 py-20 text-white">
-        <div className="mx-auto max-w-5xl">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-ng-neon">Featured Brand · NUTROGIN</p>
-          <h2 className="mt-4 text-4xl font-extrabold tracking-tight md:text-5xl">
-            Sharper mind,<br />brighter day.
-          </h2>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-white/80">
-            NUTROGIN은 &lsquo;두뇌·집중&rsquo;을 간판으로 하는 WSB의 대표 입점 브랜드입니다.
-            바쁜 일상 속 또렷한 컨디션을 위해, 하루 한 스틱의 간편한 루틴을 제안합니다.
-          </p>
-
-          <div className="mt-12 grid gap-4 md:grid-cols-3">
-            {NUTROGIN_LINE.map(({ code, desc, icon: Icon, slug }) => (
-              <Link
-                key={code}
-                href={`/products/${slug}`}
-                className="group rounded-xl border border-white/15 bg-white/5 p-6 transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-neon"
-              >
-                <Icon size={24} strokeWidth={1.75} className="text-ng-neon" aria-hidden />
-                <p className="mt-4 font-mono text-lg font-bold tracking-wide">NUTROGIN {code}</p>
-                <p className="mt-2 text-sm leading-relaxed text-white/70">{desc}</p>
-                <span className="mt-4 inline-block text-sm font-semibold text-ng-neon">제품 보기 →</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* NUTROGIN 존 — 코발트·네온 (홈과 공유하는 단일 컴포넌트) */}
+      <NutroginLineup eyebrow="Featured Brand · NUTROGIN" />
 
       {/* CTA */}
       <section className="px-6 py-16 text-center">
         <p className="text-sm text-stone-600">효능별로 더 많은 제품을 만나보세요.</p>
         <Link
           href="/products"
-          className="mt-4 inline-block rounded-md bg-wsb-green px-6 py-3 text-sm font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green focus-visible:ring-offset-2"
+          className="mt-4 inline-flex rounded-full bg-ng-cobalt px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#0038cc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt focus-visible:ring-offset-2"
         >
           전체 상품 보기
         </Link>

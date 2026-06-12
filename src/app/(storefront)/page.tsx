@@ -1,31 +1,50 @@
-import { listActiveBanners } from "@/db/queries/banners";
+import type { Metadata } from "next";
 import { listPublishedProducts } from "@/db/queries/products";
-import { ProductGrid } from "@/components/catalog/product-grid";
+import { BRAND } from "@/lib/brand/copy";
+import { HomeHero } from "@/components/home/home-hero";
+import { ConceptSection } from "@/components/home/concept-section";
+import { NutroginLineup } from "@/components/nutrogin/nutrogin-lineup";
+import { SituationRecommend } from "@/components/home/situation-recommend";
+import { BrandTrust } from "@/components/home/brand-trust";
+import { RoutineSection } from "@/components/home/routine-section";
+import { HomeReviews } from "@/components/home/home-reviews";
+import { HomeFaq } from "@/components/home/home-faq";
+import { ConversionCta } from "@/components/home/conversion-cta";
 
 export const dynamic = "force-dynamic";
 
+export const metadata: Metadata = {
+  title: { absolute: `${BRAND.name} ${BRAND.line} — ${BRAND.sloganKo}` },
+  description:
+    "집중·맑은 각성·숙면 회복을 위한 브레인케어 젤리 NUTROGIN. FOCUS·CLEAR·REST 3종, 하루 한 스틱의 데일리 루틴.",
+  openGraph: {
+    title: `${BRAND.name} ${BRAND.line} — ${BRAND.sloganKo}`,
+    description: "또렷한 머리, 맑은 하루. NUTROGIN 브레인케어 3종 — 집중 · 맑은 각성 · 숙면 회복.",
+  },
+};
+
 export default async function HomePage() {
-  const [banners, products] = await Promise.all([listActiveBanners(), listPublishedProducts()]);
-  const hero = banners[0];
+  const products = await listPublishedProducts();
+  const priceBySlug: Record<string, string> = {};
+  const imageBySlug: Record<string, string | null> = {};
+  for (const p of products) {
+    priceBySlug[p.slug] = p.priceLabel;
+    imageBySlug[p.slug] = p.thumbnail;
+  }
+
   return (
-    <div>
-      {hero ? (
-        <a href={hero.linkUrl ?? "#"} className="block border-t-2 border-ng-neon bg-ng-cobalt px-6 py-16 text-white">
-          <div className="mx-auto max-w-5xl">
-            <p className="font-mono text-xs uppercase tracking-widest text-ng-neon">WSB</p>
-            <h1 className="mt-2 text-3xl font-extrabold">{hero.title}</h1>
-          </div>
-        </a>
-      ) : (
-        <section className="mx-auto max-w-5xl px-6 py-16">
-          <p className="text-xs font-bold uppercase tracking-widest text-ng-cobalt">New Launch · NUTROGIN</p>
-          <h1 className="mt-2 text-3xl font-extrabold text-wsb-carbon">Sharper mind, brighter day.</h1>
-        </section>
-      )}
-      <section className="mx-auto max-w-6xl px-6 py-12">
-        <h2 className="mb-5 text-xl font-extrabold text-wsb-carbon">베스트 상품</h2>
-        <ProductGrid products={products.slice(0, 8)} />
-      </section>
-    </div>
+    <>
+      <HomeHero />
+      <ConceptSection />
+      <div id="lineup" className="scroll-mt-16">
+        <NutroginLineup priceBySlug={priceBySlug} imageBySlug={imageBySlug} />
+      </div>
+      <SituationRecommend />
+      <BrandTrust />
+      <RoutineSection />
+      <HomeReviews />
+      <HomeFaq />
+      <ConversionCta />
+    </>
   );
 }

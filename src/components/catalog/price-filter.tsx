@@ -22,9 +22,9 @@ export function PriceFilter({
   currentSort?: string;
 }) {
   const base =
-    "rounded-full border px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wsb-green";
-  const on = "bg-wsb-green text-white border-wsb-green";
-  const off = "border-wsb-green text-wsb-green hover:bg-wsb-green/5";
+    "rounded-full border px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ng-cobalt";
+  const on = "bg-ng-cobalt text-white border-ng-cobalt";
+  const off = "border-ng-cobalt text-ng-cobalt hover:bg-ng-cobalt/5";
 
   const sortSuffix =
     currentSort && currentSort !== "newest" ? `&sort=${currentSort}` : "";
