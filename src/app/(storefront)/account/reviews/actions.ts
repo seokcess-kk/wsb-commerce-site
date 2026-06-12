@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth/current-user";
 import { getDb, schema } from "@/db/index";
 import { createReview } from "@/db/queries/reviews";
 import { canReview } from "@/lib/reviews/eligibility";
+import { forbiddenPhraseMessage } from "@/lib/compliance/forbidden-phrases";
 import type { OrderStatus } from "@/lib/admin/order-status";
 
 export type SubmitReviewInput = {
@@ -37,6 +38,12 @@ export async function submitReview(
   }
   if (!body || body.trim().length < 5) {
     return { error: "리뷰 내용을 5자 이상 입력해 주세요." };
+  }
+
+  // 건강기능식품 표시·광고 기준 — 질병·의약품·치료 효과 단정 표현 차단.
+  const compliance = forbiddenPhraseMessage(`${title ?? ""} ${body}`);
+  if (compliance) {
+    return { error: compliance };
   }
 
   const db = getDb();
