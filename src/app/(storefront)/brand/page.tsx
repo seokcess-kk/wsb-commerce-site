@@ -2,13 +2,24 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FlaskConical, ShieldCheck, Brain } from "lucide-react";
 import { NutroginLineup } from "@/components/nutrogin/nutrogin-lineup";
+import { listPublishedProducts } from "@/db/queries/products";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "브랜드 스토리",
   description: "데이터로 키운 건강기능식품. WSB(우리스마트바이오)와 대표 브랜드 NUTROGIN의 이야기.",
 };
 
-export default function BrandPage() {
+export default async function BrandPage() {
+  const products = await listPublishedProducts();
+  const priceBySlug: Record<string, string> = {};
+  const imageBySlug: Record<string, string | null> = {};
+  for (const p of products) {
+    priceBySlug[p.slug] = p.priceLabel;
+    imageBySlug[p.slug] = p.thumbnail;
+  }
+
   return (
     <div className="bg-wsb-lab">
       {/* WSB 쉘 — 데이터·연구소·신뢰 */}
@@ -43,7 +54,7 @@ export default function BrandPage() {
       </section>
 
       {/* NUTROGIN 존 — 코발트·네온 (홈과 공유하는 단일 컴포넌트) */}
-      <NutroginLineup eyebrow="Featured Brand · NUTROGIN" />
+      <NutroginLineup eyebrow="Featured Brand · NUTROGIN" priceBySlug={priceBySlug} imageBySlug={imageBySlug} />
 
       {/* CTA */}
       <section className="px-6 py-16 text-center">

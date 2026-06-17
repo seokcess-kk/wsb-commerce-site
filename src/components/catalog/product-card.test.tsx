@@ -18,7 +18,8 @@ describe("ProductCard", () => {
   });
   it("NUTROGIN 상품은 브랜드 뱃지를 보여준다", () => {
     render(<ProductCard product={base} />);
-    expect(screen.getByText("NUTROGIN")).toBeInTheDocument();
+    // 썸네일 실사가 있으면 브랜드 타일 대신 이미지를 렌더하므로, 카드 상단 NUTROGIN 뱃지(span)로 단언.
+    expect(screen.getByText("NUTROGIN FOCUS", { selector: "span" })).toBeInTheDocument();
   });
   it("WSB 상품은 NUTROGIN 뱃지를 보여주지 않는다", () => {
     render(<ProductCard product={{ ...base, brand: "WSB", isNutrogin: false, name: "WSB 이뮨" }} />);

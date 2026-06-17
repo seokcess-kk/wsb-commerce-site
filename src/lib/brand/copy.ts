@@ -72,6 +72,22 @@ export function nutroginMeta(slug: string) {
 
 export const NUTROGIN_SLUGS = PRODUCTS.map((p) => p.slug);
 
+// NUTROGIN 3종 제품 사진(public/product/). box=외박스(대표 썸네일), stick=내품 스틱.
+// 파일명 규약: package_<slug_underscored>.png / product_<slug_underscored>.png
+//   예) nutrogin-focus → /product/package_nutrogin_focus.png · /product/product_nutrogin_focus.png
+// 이미지·DB·컴포넌트가 공유하는 단일 출처. WSB 등 비-NUTROGIN 슬러그는 null/[].
+export function nutroginAsset(slug: string): { box: string; stick: string } | null {
+  if (!NUTROGIN_SLUGS.includes(slug)) return null;
+  const key = slug.replace(/-/g, "_");
+  return { box: `/product/package_${key}.png`, stick: `/product/product_${key}.png` };
+}
+
+// 갤러리/카드용 이미지 배열 — [외박스, 내품] 순서(외박스가 images[0]=대표 썸네일).
+export function nutroginImages(slug: string): string[] {
+  const a = nutroginAsset(slug);
+  return a ? [a.box, a.stick] : [];
+}
+
 // 제품 상세 구매 정보 — 구성·섭취·보관·권장대상(건기식 기준 준수, 상황·루틴 중심).
 export const PRODUCT_DETAILS: Record<
   string,

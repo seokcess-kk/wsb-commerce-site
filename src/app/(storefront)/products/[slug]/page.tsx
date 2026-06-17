@@ -4,12 +4,14 @@ import { getProductBySlug, listPublishedProducts } from "@/db/queries/products";
 import { ComplianceNotice } from "@/components/catalog/compliance-notice";
 import { PurchasePanel } from "@/components/cart/purchase-panel";
 import { ProductGallery } from "@/components/catalog/product-gallery";
+import { ProductAssurance } from "@/components/catalog/product-assurance";
 import { ProductInfo } from "@/components/catalog/product-info";
 import { RelatedProducts } from "@/components/catalog/related-products";
 import { WishlistButton } from "@/components/wishlist/wishlist-button";
 import { ReviewSummary } from "@/components/reviews/review-summary";
 import { ReviewList } from "@/components/reviews/review-list";
 import { ProductDetailSection } from "@/components/catalog/product-detail-section";
+import { NutroginDetailImage } from "@/components/catalog/nutrogin-detail-image";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
 import { FAQ, nutroginMeta, productDetail, relatedNutroginSlugs } from "@/lib/brand/copy";
 import { buildProductJsonLd } from "@/lib/seo/product-jsonld";
@@ -77,12 +79,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="pb-28 md:pb-0">
-        <article className="mx-auto grid max-w-6xl gap-10 px-6 py-10 md:grid-cols-2">
-          <div className="md:sticky md:top-6 md:self-start">
+        <article className="mx-auto grid max-w-6xl gap-10 px-6 py-10 md:grid-cols-2 md:items-stretch">
+          <div>
             <ProductGallery images={product.images} fallbackLabel={product.name} isNutrogin={product.isNutrogin} />
           </div>
 
-          <div>
+          <div className="md:flex md:flex-col">
             {product.isNutrogin && (
               <div className="flex items-center gap-2">
                 <span className="font-mono text-xs font-bold tracking-wide text-ng-cobalt">
@@ -105,25 +107,32 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <WishlistButton productId={product.id} initialActive={initialWishlisted} />
             </div>
 
-            <PurchasePanel
-              productName={product.name}
-              productSlug={product.slug}
-              thumbnail={product.thumbnail}
-              options={options}
-              alt={altForSoldOut}
-            />
-
-            <div className="mt-6">
-              <ComplianceNotice
-                reviewPhraseNo={product.reviewPhraseNo}
-                noticeText={product.noticeText}
-                reportNo={product.reportNo}
-                functionality={product.functionality}
-                intakeNotice={product.intakeNotice}
+            {/* 구매 패널 — 우측 컬럼 하단에 고정해 좌측 트러스트 블록 하단과 정렬 */}
+            <div className="md:mt-auto">
+              <PurchasePanel
+                productName={product.name}
+                productSlug={product.slug}
+                thumbnail={product.thumbnail}
+                options={options}
+                alt={altForSoldOut}
               />
             </div>
           </div>
         </article>
+
+        {/* 좌: 배송·교환·정품 안심 정보 / 우: 건강기능식품 표시·광고 심의필 — 좌우 분할 */}
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid gap-4 md:grid-cols-2 md:items-stretch">
+            <ProductAssurance />
+            <ComplianceNotice
+              reviewPhraseNo={product.reviewPhraseNo}
+              noticeText={product.noticeText}
+              reportNo={product.reportNo}
+              functionality={product.functionality}
+              intakeNotice={product.intakeNotice}
+            />
+          </div>
+        </div>
 
         {/* 제품 정보 — 구매 판단에 필요한 핵심 사실(숨기지 않음) */}
         {(detail || product.ingredients || product.functionality) && (
@@ -140,16 +149,20 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           </section>
         )}
 
-        {/* 상세 설명 / 상세 이미지 */}
-        <ProductDetailSection
-          description={product.description}
-          images={product.images}
-          functionality={product.functionality}
-          intakeNotice={product.intakeNotice}
-          ingredients={product.ingredients}
-          isNutrogin={product.isNutrogin}
-          productName={product.name}
-        />
+        {/* 상세 설명 / 상세 이미지 — NUTROGIN은 브랜드 롱폼 상세, 그 외는 기본 섹션 */}
+        {product.isNutrogin ? (
+          <NutroginDetailImage slug={product.slug} productName={product.name} />
+        ) : (
+          <ProductDetailSection
+            description={product.description}
+            images={product.images}
+            functionality={product.functionality}
+            intakeNotice={product.intakeNotice}
+            ingredients={product.ingredients}
+            isNutrogin={product.isNutrogin}
+            productName={product.name}
+          />
+        )}
 
         {/* FAQ */}
         <section className="mx-auto max-w-3xl px-6 py-12">

@@ -1,4 +1,5 @@
-import { PRODUCTS } from "@/lib/brand/copy";
+import Image from "next/image";
+import { PRODUCTS, nutroginAsset } from "@/lib/brand/copy";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { CTAButton } from "@/components/ui/cta-button";
 import { Badge } from "@/components/ui/badge";
@@ -36,8 +37,23 @@ export function ProductComparisonTable({ priceBySlug = {} }: { priceBySlug?: Rec
             {PRODUCTS.map((p) => (
               <tr key={p.slug}>
                 <td>
-                  <span className="font-mono text-sm font-bold text-ng-cobalt">{p.code}</span>
-                  <span className="ml-2 text-stone-500">{p.ko}</span>
+                  <div className="flex items-center gap-3">
+                    {nutroginAsset(p.slug) && (
+                      <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-ng-offwhite ring-1 ring-stone-200">
+                        <Image
+                          src={nutroginAsset(p.slug)!.box}
+                          alt={`NUTROGIN ${p.code} 외박스`}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                        />
+                      </span>
+                    )}
+                    <span>
+                      <span className="font-mono text-sm font-bold text-ng-cobalt">{p.code}</span>
+                      <span className="ml-2 text-stone-500">{p.ko}</span>
+                    </span>
+                  </div>
                 </td>
                 <td className="text-stone-600">{p.situation}</td>
                 <td className="text-stone-600">{p.timing}</td>
@@ -60,10 +76,23 @@ export function ProductComparisonTable({ priceBySlug = {} }: { priceBySlug?: Rec
       <div className="mt-8 grid gap-3 md:hidden">
         {PRODUCTS.map((p) => (
           <div key={p.slug} className="rounded-2xl border border-stone-200 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="font-mono text-sm font-bold text-ng-cobalt">{p.code}</span>
-                <span className="ml-2 text-sm text-stone-500">{p.ko}</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                {nutroginAsset(p.slug) && (
+                  <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-ng-offwhite ring-1 ring-stone-200">
+                    <Image
+                      src={nutroginAsset(p.slug)!.box}
+                      alt={`NUTROGIN ${p.code} 외박스`}
+                      fill
+                      sizes="48px"
+                      className="object-cover"
+                    />
+                  </span>
+                )}
+                <div>
+                  <span className="font-mono text-sm font-bold text-ng-cobalt">{p.code}</span>
+                  <span className="ml-2 text-sm text-stone-500">{p.ko}</span>
+                </div>
               </div>
               <Keyword k={p.keyword} />
             </div>

@@ -1,4 +1,4 @@
-import { PRODUCTS, BRAND } from "@/lib/brand/copy";
+import { PRODUCTS, BRAND, nutroginAsset } from "@/lib/brand/copy";
 import { ProductVisual } from "@/components/catalog/product-visual";
 import { CTAButton } from "@/components/ui/cta-button";
 
@@ -55,12 +55,13 @@ export function HomeHero() {
           {PRODUCTS.map((p, i) => (
             <ProductVisual
               key={p.slug}
-              src={null}
-              alt={`NUTROGIN ${p.code}`}
+              src={nutroginAsset(p.slug)?.box ?? null}
+              alt={`NUTROGIN ${p.code} 외박스`}
               tone={p.tone}
               code={p.code}
               className={`aspect-[3/4] rounded-2xl ring-1 ring-white/15 ${i === 1 ? "md:-translate-y-5" : ""}`}
               sizes="(max-width: 768px) 30vw, 18vw"
+              priority={i === 1}
             />
           ))}
         </div>

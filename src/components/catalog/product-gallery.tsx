@@ -23,7 +23,7 @@ export function ProductGallery({
       : "bg-stone-100 text-stone-400";
     return (
       <div
-        className={`flex min-h-80 items-center justify-center rounded-lg ${zone}`}
+        className={`flex aspect-square items-center justify-center rounded-lg ${zone}`}
       >
         <span
           className={`font-mono text-sm${isNutrogin ? " text-ng-neon" : ""}`}
@@ -39,8 +39,8 @@ export function ProductGallery({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Main image */}
-      <div className="relative min-h-80 w-full overflow-hidden rounded-lg bg-stone-100">
+      {/* Main image — 1:1 정사각 프레임 */}
+      <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-stone-100">
         <Image
           src={mainSrc}
           alt={`${fallbackLabel} 메인 이미지`}

@@ -3,6 +3,7 @@ config({ path: ".env.local" });
 
 import { eq, like, or, sql } from "drizzle-orm";
 import { getDb, schema } from "./index";
+import { nutroginImages } from "../lib/brand/copy";
 
 const NOTICE = "본 제품은 질병의 예방 및 치료를 위한 것이 아닙니다.";
 const PAID_LIKE = ["paid", "preparing", "shipped", "delivered"];
@@ -59,7 +60,8 @@ function product(slug: string, name: string, brand: string, catSlug: string, bas
     intakeNotice: extra.intakeNotice ?? "정해진 섭취량을 지키십시오. 이상사례 발생 시 섭취를 중단하고 전문가와 상담하십시오.",
     ingredients: extra.ingredients ?? "주원료 농축액, 비타민·미네랄",
     description: extra.description ?? null,
-    images: [`/products/${slug}.png`],
+    // NUTROGIN 3종은 실사 [외박스, 내품], 그 외(WSB)는 이미지 없음 → 카드/갤러리에서 브랜드 타일 폴백.
+    images: nutroginImages(slug),
     isPublished: true,
   };
 }

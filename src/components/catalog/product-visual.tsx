@@ -1,8 +1,8 @@
 import Image from "next/image";
 import type { ProductTone } from "@/lib/brand/copy";
 
-// 상품 비주얼 — 실사(원격 URL)는 next/image, 그 외(이미지 없음/로컬 미존재)는 브랜드 타일.
-// NUTROGIN 3종은 실사 없이 톤별 그라디언트 타일로 일관된 브랜드 룩을 유지한다.
+// 상품 비주얼 — 실사(로컬 /product/* 또는 원격 URL)는 next/image로, 이미지가 없으면 톤별 브랜드 타일로 폴백.
+// NUTROGIN 3종은 외박스 실사를 대표 이미지로 쓰고, 실사가 없는 상품(WSB 등)만 그라디언트 타일을 유지한다.
 type Tone = ProductTone | "wsb";
 
 const TILE: Record<Tone, { bg: string; accent: string; sub: string }> = {
@@ -46,11 +46,20 @@ export function ProductVisual({
   sizes?: string;
   priority?: boolean;
 }) {
-  const remote = !!src && /^https?:\/\//.test(src);
+  const hasImage = !!src;
+  const remote = hasImage && /^https?:\/\//.test(src as string);
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {remote ? (
-        <Image src={src as string} alt={alt} fill sizes={sizes} className="object-cover" priority={priority} />
+      {hasImage ? (
+        <Image
+          src={src as string}
+          alt={alt}
+          fill
+          sizes={sizes}
+          className="object-cover"
+          priority={priority}
+          unoptimized={remote}
+        />
       ) : (
         <BrandTile tone={tone} code={code} />
       )}
