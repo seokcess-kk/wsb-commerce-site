@@ -93,7 +93,7 @@ export default function TermsPage() {
       <p className="text-sm leading-relaxed text-stone-600">
         이 약관과 관련된 분쟁에는 대한민국 법률이 적용됩니다. 회사와 이용자 간 발생한 분쟁에 대해 소송이
         제기될 경우 민사소송법상의 관할 법원에 제소합니다. 소비자 분쟁과 관련하여서는
-        공정거래위원회의 소비자분쟁해결기준에 따릅니다. 회사의 상호 및 연락처: (주)우리스마트바이오 / ○○○.
+        공정거래위원회의 소비자분쟁해결기준에 따릅니다. 회사의 상호 및 연락처: (주)우리스마트바이오 / dasom@woorismartbio.com.
       </p>
 
       <p className="mt-12 text-xs text-stone-400">

@@ -49,8 +49,18 @@ export function SiteFooter() {
 
         <div className="mt-10 border-t border-white/10 pt-6 text-[11px] leading-6">
           <p>
-            <strong className="text-stone-200">(주)우리스마트바이오</strong> · 대표 ○○○ · 사업자등록번호 000-00-00000 ·
-            통신판매업 0000-서울-0000
+            <strong className="text-stone-200">(주)우리스마트바이오</strong> · 대표 주종문 · 사업자등록번호 361-88-01159 ·
+            통신판매업 제2025-경기연천-00016호
+          </p>
+          <p className="mt-1">
+            경기도 연천군 연천읍 차옥로 149, 106동 8층 801호 · 고객센터{" "}
+            <a href="tel:031-834-4515" className={`hover:text-white ${RING}`}>
+              031-834-4515
+            </a>{" "}
+            ·{" "}
+            <a href="mailto:dasom@woorismartbio.com" className={`hover:text-white ${RING}`}>
+              dasom@woorismartbio.com
+            </a>
           </p>
           <p className="mt-1">
             <Link href="/policy/privacy" className={RING}>

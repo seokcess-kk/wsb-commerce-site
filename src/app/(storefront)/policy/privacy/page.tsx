@@ -73,7 +73,7 @@ export default function PrivacyPage() {
       </p>
       <ul className="list-disc pl-5 text-sm leading-relaxed text-stone-600">
         <li>결제 처리: 토스페이먼츠(주)</li>
-        <li>배송 처리: 위탁 택배사(○○○)</li>
+        <li>배송 처리: CJ대한통운(주)</li>
         <li>서비스 인프라 운영: Supabase, Vercel</li>
       </ul>
 
@@ -110,8 +110,9 @@ export default function PrivacyPage() {
         이용자의 개인정보 관련 문의, 불만 처리, 피해 구제 등을 담당하는 개인정보 보호책임자는 다음과 같습니다.
       </p>
       <ul className="list-disc pl-5 text-sm leading-relaxed text-stone-600">
-        <li>성명: ○○○</li>
-        <li>연락처: ○○○</li>
+        <li>성명: (지정 예정)</li>
+        <li>연락처: (지정 예정)</li>
+        <li>이메일: dasom@woorismartbio.com</li>
       </ul>
 
       <h2 className="mb-2 mt-8 text-base font-bold text-ng-charcoal">
