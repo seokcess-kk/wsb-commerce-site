@@ -165,7 +165,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         )}
 
         {/* FAQ */}
-        <section className="mx-auto max-w-3xl px-6 py-12">
+        <section className="mx-auto max-w-6xl px-6 py-12">
           <h2 className="mb-6 text-lg font-extrabold text-ng-charcoal">자주 묻는 질문</h2>
           <FaqAccordion items={FAQ} />
         </section>
