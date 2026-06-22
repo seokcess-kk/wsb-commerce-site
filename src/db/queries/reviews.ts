@@ -120,6 +120,60 @@ export async function createReview(input: CreateReviewInput): Promise<boolean> {
   return result.length > 0;
 }
 
+export type UpdateReviewInput = {
+  id: string;
+  userId: string;
+  rating: number;
+  title?: string | null;
+  body: string;
+  images?: string[];
+};
+
+/**
+ * Update a review the user owns. Guarded by (id, userId) so users can only
+ * edit their own. Returns the product slug for PDP revalidation, or null if
+ * no matching row was updated (not found / not owner).
+ */
+export async function updateReview(input: UpdateReviewInput): Promise<string | null> {
+  const db = getDb();
+  const [row] = await db
+    .update(schema.reviews)
+    .set({
+      rating: input.rating,
+      title: input.title ?? null,
+      body: input.body,
+      images: input.images ?? [],
+    })
+    .where(and(eq(schema.reviews.id, input.id), eq(schema.reviews.userId, input.userId)))
+    .returning({ productId: schema.reviews.productId });
+  if (!row) return null;
+  const [product] = await db
+    .select({ slug: schema.products.slug })
+    .from(schema.products)
+    .where(eq(schema.products.id, row.productId))
+    .limit(1);
+  return product?.slug ?? null;
+}
+
+/**
+ * Delete a review the user owns. Guarded by (id, userId). Returns the product
+ * slug for PDP revalidation, or null if nothing was deleted.
+ */
+export async function deleteReview(id: string, userId: string): Promise<string | null> {
+  const db = getDb();
+  const [row] = await db
+    .delete(schema.reviews)
+    .where(and(eq(schema.reviews.id, id), eq(schema.reviews.userId, userId)))
+    .returning({ productId: schema.reviews.productId });
+  if (!row) return null;
+  const [product] = await db
+    .select({ slug: schema.products.slug })
+    .from(schema.products)
+    .where(eq(schema.products.id, row.productId))
+    .limit(1);
+  return product?.slug ?? null;
+}
+
 /**
  * Items from the user's delivered orders that do not yet have a review.
  */

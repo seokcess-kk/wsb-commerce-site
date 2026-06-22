@@ -6,6 +6,8 @@ import { parseQuantity } from "@/lib/checkout/quantity";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getApplicableCoupon } from "@/db/queries/coupons";
 import { orderTotal, shippingFee } from "@/lib/checkout/pricing";
+import { isPaymentsEnabled } from "@/lib/payments/toggle";
+import { getEnv } from "@/lib/env";
 
 type IncomingItem = { variantId: string; quantity: unknown };
 type Body = {
@@ -22,6 +24,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "잘못된 요청 형식입니다." }, { status: 400 });
   }
 
+  // 결제 레이어 OFF(소프트오픈) 시 서버에서도 주문 생성을 차단(클라이언트 토글 우회 방지).
+  if (!isPaymentsEnabled(getEnv().NEXT_PUBLIC_PAYMENTS_ENABLED)) {
+    return NextResponse.json({ error: "현재 온라인 결제를 준비 중입니다." }, { status: 409 });
+  }
+
   if (!body.items?.length) return NextResponse.json({ error: "장바구니가 비어 있습니다." }, { status: 400 });
   const { name, phone, email, address } = body.customer ?? {};
   if (!name || !phone || !email || !address) {
@@ -35,7 +42,7 @@ export async function POST(req: Request) {
     const variants = await db.select().from(schema.productVariants).where(inArray(schema.productVariants.id, variantIds));
     const productIds = [...new Set(variants.map((v) => v.productId))];
     const products = await db.select().from(schema.products).where(inArray(schema.products.id, productIds));
-    const productOf = (id: string) => products.find((p) => p.id === id)!;
+    const productOf = (id: string) => products.find((p) => p.id === id);
 
     let subtotal = 0;
     const itemRows = [];
@@ -46,11 +53,19 @@ export async function POST(req: Request) {
       const v = variants.find((x) => x.id === i.variantId);
       if (!v) return NextResponse.json({ error: "존재하지 않는 옵션이 포함되어 있습니다." }, { status: 400 });
 
-      // NOTE: This is a best-effort guard only, not concurrency-safe.
-      // Atomic stock decrement/reservation is deferred to a later plan.
-      if (v.stock <= 0) return NextResponse.json({ error: "품절된 상품이 포함되어 있습니다." }, { status: 400 });
-
       const p = productOf(v.productId);
+      // 미게시(비공개/초안) 상품은 variantId 를 알더라도 주문 불가.
+      if (!p || !p.isPublished) {
+        return NextResponse.json({ error: "판매 중이 아닌 상품이 포함되어 있습니다." }, { status: 400 });
+      }
+
+      // 재고 가드(best-effort, 동시성 안전 X — 실제 차감은 결제 승인 트랜잭션에서 원자적으로).
+      // 품절(0) 차단 + 명백한 수량 초과 주문 차단(oversell 1차 방어).
+      if (v.stock <= 0) return NextResponse.json({ error: "품절된 상품이 포함되어 있습니다." }, { status: 400 });
+      if (qty > v.stock) {
+        return NextResponse.json({ error: `재고가 부족한 상품이 있습니다. (남은 수량: ${v.stock})` }, { status: 400 });
+      }
+
       const unitPrice = p.basePrice + v.priceDelta;
       const lineTotal = unitPrice * qty;
       subtotal += lineTotal;

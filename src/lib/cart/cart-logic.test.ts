@@ -24,4 +24,20 @@ describe("cart-logic", () => {
     expect(cartCount([a, b])).toBe(3);
     expect(cartSubtotal([a, b])).toBe(39000 + 22000 * 2);
   });
+
+  it("maxStock 이 있으면 추가 시 재고 상한으로 캡한다", () => {
+    const s: CartItem = { ...a, quantity: 1, maxStock: 3 };
+    const r = addItem([s], { ...s, quantity: 5 }); // 1 + 5 = 6 → 3 으로 캡
+    expect(r[0].quantity).toBe(3);
+    expect(r[0].maxStock).toBe(3);
+  });
+  it("maxStock 이 있으면 수량 변경 시 상한을 넘지 못한다", () => {
+    const s: CartItem = { ...a, quantity: 1, maxStock: 2 };
+    expect(setQuantity([s], "v1", 9)[0].quantity).toBe(2);
+    expect(setQuantity([s], "v1", 1)[0].quantity).toBe(1);
+  });
+  it("maxStock 이 없으면(구버전 카트) 캡하지 않는다", () => {
+    const r = addItem([a], { ...a, quantity: 10 });
+    expect(r[0].quantity).toBe(11);
+  });
 });

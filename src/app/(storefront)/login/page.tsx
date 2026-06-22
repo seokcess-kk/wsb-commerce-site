@@ -4,9 +4,9 @@ import { SocialButtons } from "@/components/auth/social-buttons";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; next?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, next } = await searchParams;
 
   return (
     <section className="mx-auto max-w-sm px-6 py-16">
@@ -16,7 +16,7 @@ export default async function LoginPage({
           {decodeURIComponent(error)}
         </p>
       )}
-      <AuthForm mode="login" />
+      <AuthForm mode="login" next={next} />
       <p className="mt-3 text-center text-sm">
         <a href="/auth/reset" className="text-ng-cobalt hover:underline">비밀번호를 잊으셨나요?</a>
       </p>

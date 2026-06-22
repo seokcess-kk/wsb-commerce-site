@@ -25,6 +25,9 @@ export function AddressesClient({ initialAddresses }: Props) {
       setError(res.error);
       return;
     }
+    // 성공 시 폼을 닫고 목록으로 복귀(서버 최신 데이터로 갱신).
+    setError(null);
+    setMode("list");
     router.refresh();
   }
 
@@ -34,6 +37,8 @@ export function AddressesClient({ initialAddresses }: Props) {
       setError(res.error);
       return;
     }
+    setError(null);
+    setMode("list");
     router.refresh();
   }
 

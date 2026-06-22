@@ -34,7 +34,7 @@ export default async function AccountPage({
   searchParams: Promise<Record<string, string>>;
 }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/login?next=/account");
 
   const { status } = await searchParams;
 

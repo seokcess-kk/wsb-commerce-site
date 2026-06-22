@@ -9,6 +9,7 @@ import { statusLabel } from "@/lib/admin/order-status";
 import { availableRequestTypes, REQUEST_TYPE_LABEL } from "@/lib/orders/cancellation";
 import { trackingUrl } from "@/lib/orders/courier";
 import { ReorderButton } from "@/components/account/reorder-button";
+import { CancellationRequestForm } from "@/components/account/cancellation-request-form";
 import { requestCancellation } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -18,12 +19,13 @@ const CANCELLATION_STATUS_LABEL: Record<string, string> = {
   approved: "승인",
   rejected: "거절",
   completed: "완료",
+  refunded: "환불 완료",
 };
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect(`/login?next=/account/orders/${orderNumber}`);
 
   const detail = await getOrderDetailForUser(user.id, orderNumber);
   if (!detail) notFound();
@@ -135,47 +137,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
           <h2 className="font-semibold text-ng-charcoal">
             {allowedTypes.includes("cancel") ? "취소 신청" : "교환/반품 신청"}
           </h2>
-          <form
-            action={async (formData: FormData) => {
-              "use server";
-              const type = formData.get("type") as "cancel" | "exchange" | "return";
-              const reason = String(formData.get("reason") ?? "").trim();
-              if (!type || !reason) return;
-              await requestCancellation(orderNumber, type, reason);
-            }}
-            className="mt-3 space-y-3"
-          >
-            {allowedTypes.length > 1 && (
-              <div className="flex gap-3">
-                {allowedTypes.map((t) => (
-                  <label key={t} className="flex items-center gap-1.5 text-sm">
-                    <input type="radio" name="type" value={t} defaultChecked={t === allowedTypes[0]} />
-                    {REQUEST_TYPE_LABEL[t]}
-                  </label>
-                ))}
-              </div>
-            )}
-            {allowedTypes.length === 1 && (
-              <input type="hidden" name="type" value={allowedTypes[0]} />
-            )}
-            <label htmlFor="reason" className="block text-sm font-medium text-ng-charcoal">
-              사유
-            </label>
-            <textarea
-              id="reason"
-              name="reason"
-              placeholder="사유를 입력해 주세요 (필수)"
-              required
-              rows={3}
-              className="w-full rounded-lg border border-stone-200 px-3 py-2.5 text-sm outline-none focus:border-ng-cobalt focus:ring-1 focus:ring-ng-cobalt"
-            />
-            <button
-              type="submit"
-              className="rounded-lg bg-ng-cobalt px-5 py-2 text-sm font-bold text-white transition hover:bg-ng-cobalt/90"
-            >
-              {allowedTypes.includes("cancel") ? "취소 신청" : "요청 접수"}
-            </button>
-          </form>
+          <CancellationRequestForm
+            orderNumber={orderNumber}
+            allowedTypes={allowedTypes}
+            action={requestCancellation}
+          />
         </div>
       )}
     </section>

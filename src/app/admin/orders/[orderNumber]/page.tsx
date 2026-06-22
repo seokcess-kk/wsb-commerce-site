@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getOrderAdmin } from "@/db/queries/admin-orders";
-import { STATUS_LABEL, nextStatuses } from "@/lib/admin/order-status";
+import { STATUS_LABEL, nextStatuses, isCancellableByAdmin } from "@/lib/admin/order-status";
 import { updateOrderStatus, updateShipping } from "../actions";
+import { OrderCancelButton } from "@/components/admin/order-cancel-button";
 import { formatKRW } from "@/lib/format";
 import { trackingUrl, SUPPORTED_COURIERS } from "@/lib/orders/tracking";
 import { AdminCard } from "@/components/admin/ui/card";
@@ -73,10 +74,16 @@ export default async function AdminOrderDetail({
             </form>
           );
         })}
-        {next.length === 0 && (
+        {next.length === 0 && !isCancellableByAdmin(order.status) && (
           <span className="text-sm text-[var(--ad-mut-2)]">변경 가능한 상태가 없습니다.</span>
         )}
       </div>
+
+      {isCancellableByAdmin(order.status) && (
+        <div className="mt-4">
+          <OrderCancelButton orderNumber={order.orderNumber} />
+        </div>
+      )}
 
       <AdminCard className="mt-6">
         <form action={updateShipping} className="flex flex-wrap items-end gap-2">

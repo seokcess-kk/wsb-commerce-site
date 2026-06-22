@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
-// `next`는 동일 출처 경로만 허용 (오픈 리다이렉트 방지): "/foo"는 허용, "//evil.com"·"https://.."는 거부
-export function safeNext(raw: string | null): string {
-  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/account";
-  return raw;
-}
+// 동일 출처 경로 검증은 공용 헬퍼로 일원화(클라이언트 AuthForm 과 공유). 기존 import 호환을 위해 re-export.
+import { safeNext } from "@/lib/auth/safe-next";
+export { safeNext };
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);

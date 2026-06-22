@@ -13,7 +13,7 @@ import { ReviewList } from "@/components/reviews/review-list";
 import { ProductDetailSection } from "@/components/catalog/product-detail-section";
 import { NutroginDetailImage } from "@/components/catalog/nutrogin-detail-image";
 import { FaqAccordion } from "@/components/ui/faq-accordion";
-import { FAQ, nutroginMeta, productDetail, relatedNutroginSlugs } from "@/lib/brand/copy";
+import { FAQ, GENERIC_FAQ, nutroginMeta, productDetail, relatedNutroginSlugs } from "@/lib/brand/copy";
 import { buildProductJsonLd } from "@/lib/seo/product-jsonld";
 import { getSiteUrl } from "@/lib/site";
 import { getCurrentUser } from "@/lib/auth/current-user";
@@ -164,14 +164,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           />
         )}
 
-        {/* FAQ */}
+        {/* FAQ — NUTROGIN(스틱)은 전용 FAQ, 그 외 상품은 제형 중립 공통 FAQ(섭취법 오안내 방지) */}
         <section className="mx-auto max-w-6xl px-6 py-12">
           <h2 className="mb-6 text-lg font-extrabold text-ng-charcoal">자주 묻는 질문</h2>
-          <FaqAccordion items={FAQ} />
+          <FaqAccordion items={product.isNutrogin ? FAQ : GENERIC_FAQ} />
         </section>
 
-        {/* 연관 상품 */}
-        <RelatedProducts products={related} title="함께 보면 좋은 NUTROGIN" />
+        {/* 연관 상품 — NUTROGIN 라인업 교차 추천 */}
+        <RelatedProducts
+          products={related}
+          title={product.isNutrogin ? "함께 보면 좋은 NUTROGIN" : "NUTROGIN 라인업도 만나보세요"}
+        />
 
         {/* 리뷰 */}
         <section className="mx-auto max-w-6xl px-6 py-12">

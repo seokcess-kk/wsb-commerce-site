@@ -3,10 +3,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { listWritableOrderItems, listMyReviews } from "@/db/queries/reviews";
-import { StarRating } from "@/components/reviews/star-rating";
 import { WriteReviewButton } from "@/components/reviews/write-review-button";
-import { formatDate } from "@/lib/format";
-import { submitReview } from "./actions";
+import { EditableReviewItem } from "@/components/reviews/editable-review-item";
+import { submitReview, updateReviewAction, deleteReviewAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -79,30 +78,12 @@ export default async function ReviewsPage() {
       ) : (
         <ul className="divide-y divide-stone-100 rounded-lg border border-stone-200">
           {myReviews.map((review) => (
-            <li key={review.id} className="p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <Link
-                    href={`/products/${review.productSlug}`}
-                    className="text-sm font-semibold text-ng-charcoal hover:text-ng-cobalt hover:underline"
-                  >
-                    {review.productName}
-                  </Link>
-                  <div className="mt-1 flex items-center gap-2">
-                    <StarRating value={review.rating} size={14} />
-                    <time className="text-xs text-stone-400" dateTime={new Date(review.createdAt).toISOString()}>
-                      {formatDate(review.createdAt)}
-                    </time>
-                  </div>
-                  {review.title && (
-                    <p className="mt-1 text-sm font-medium text-ng-charcoal">{review.title}</p>
-                  )}
-                  <p className="mt-1 whitespace-pre-line text-sm text-stone-600 line-clamp-3">
-                    {review.body}
-                  </p>
-                </div>
-              </div>
-            </li>
+            <EditableReviewItem
+              key={review.id}
+              review={review}
+              onUpdate={updateReviewAction}
+              onDelete={deleteReviewAction}
+            />
           ))}
         </ul>
       )}

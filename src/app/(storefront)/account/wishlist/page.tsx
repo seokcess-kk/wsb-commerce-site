@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { listWishlist } from "@/db/queries/wishlists";
-import { ProductGrid } from "@/components/catalog/product-grid";
+import { WishlistGrid } from "@/components/wishlist/wishlist-grid";
 
 export const dynamic = "force-dynamic";
 
@@ -25,19 +25,7 @@ export default async function WishlistPage() {
       </Link>
       <h1 className="mt-2 text-2xl font-extrabold text-ng-charcoal">찜한 상품</h1>
       <div className="mt-6">
-        {products.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-stone-500">찜한 상품이 없습니다.</p>
-            <Link
-              href="/products"
-              className="mt-4 inline-block text-sm font-semibold text-ng-cobalt hover:underline"
-            >
-              상품 둘러보기 →
-            </Link>
-          </div>
-        ) : (
-          <ProductGrid products={products} />
-        )}
+        <WishlistGrid initialProducts={products} />
       </div>
     </section>
   );

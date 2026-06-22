@@ -35,24 +35,34 @@ export default async function SuccessPage({
   let awaitingDeposit = false;
 
   if (order.status !== "paid") {
+    let result: TossPayment;
     try {
-      const result = await confirmTossPayment({ paymentKey, orderId, amount: order.totalAmount });
-      // 가상계좌: 승인 시점엔 미입금(WAITING_FOR_DEPOSIT) — 입금 대기만 기록, 정산은 웹훅이.
-      if (result.status === "WAITING_FOR_DEPOSIT") {
-        await db
-          .insert(schema.payments)
-          .values({
-            orderId: order.id, provider: "toss", paymentKey: result.paymentKey,
-            method: result.method ?? null, amount: result.totalAmount, status: result.status, approvedAt: null,
-          })
-          .onConflictDoNothing({ target: schema.payments.paymentKey });
-        awaitingDeposit = true;
-        virtualAccount = result.virtualAccount ?? null;
-      } else {
-        await settlePaidOrder(order, result);
-      }
+      result = await confirmTossPayment({ paymentKey, orderId, amount: order.totalAmount });
     } catch (e) {
+      // 승인 자체 실패 — 청구가 발생하지 않았으므로 '실패'로 안내.
       return <FailResult message={(e as Error).message} />;
+    }
+
+    // 가상계좌: 승인 시점엔 미입금(WAITING_FOR_DEPOSIT) — 입금 대기만 기록, 정산은 웹훅이.
+    if (result.status === "WAITING_FOR_DEPOSIT") {
+      await db
+        .insert(schema.payments)
+        .values({
+          orderId: order.id, provider: "toss", paymentKey: result.paymentKey,
+          method: result.method ?? null, amount: result.totalAmount, status: result.status, approvedAt: null,
+        })
+        .onConflictDoNothing({ target: schema.payments.paymentKey });
+      awaitingDeposit = true;
+      virtualAccount = result.virtualAccount ?? null;
+    } else {
+      try {
+        await settlePaidOrder(order, result);
+      } catch (e) {
+        // 청구는 성공했으나 로컬 정산 트랜잭션 실패 — 결제는 유효하므로 reconcile 스윕이 곧 마무리한다.
+        // 이미 청구된 고객에게 '실패'로 보이면 재결제·오해를 부르므로 '처리 중'으로 안내한다.
+        console.error(`[checkout/success] settle 실패 order=${order.orderNumber}:`, e);
+        return <ProcessingResult orderNumber={order.orderNumber} totalAmount={order.totalAmount} />;
+      }
     }
   }
 
@@ -170,6 +180,33 @@ function formatDueDate(iso: string): string {
   return d.toLocaleString("ko-KR", {
     year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
   });
+}
+
+// 청구는 성공했으나 로컬 정산이 일시 실패한 경우 — '실패'가 아닌 '처리 중'으로 안내.
+// reconcile 스윕(10분 주기)이 토스 상태를 재확인해 자동으로 주문을 확정한다.
+function ProcessingResult({ orderNumber, totalAmount }: { orderNumber: string; totalAmount: number }) {
+  return (
+    <section className="mx-auto max-w-md px-6 py-20 text-center">
+      <ClearCartOnMount />
+      <h1 className="text-2xl font-extrabold text-ng-charcoal">결제가 확인되었습니다</h1>
+      <p className="mt-3 text-sm text-stone-500">
+        결제는 정상 완료되었습니다. 주문 확정 처리가 잠시 지연되고 있어 곧 자동으로 완료됩니다.
+        잠시 후 주문 내역에서 상태를 확인해 주세요.
+      </p>
+      <dl className="mt-6 space-y-2 rounded-2xl border border-stone-200 bg-ng-offwhite p-5 text-left text-sm">
+        <Row label="주문번호" value={orderNumber} mono />
+        <Row label="결제금액" value={formatKRW(totalAmount)} mono />
+      </dl>
+      <p className="mt-4 text-xs text-stone-400">
+        문제가 지속되면 고객센터로 주문번호와 함께 문의해 주세요. 중복 결제가 되지 않으니 안심하세요.
+      </p>
+      <div className="mt-6">
+        <CTAButton href="/account" variant="primary" size="md">
+          주문 내역 보기
+        </CTAButton>
+      </div>
+    </section>
+  );
 }
 
 function FailResult({ message }: { message: string }) {

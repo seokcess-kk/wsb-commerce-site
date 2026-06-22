@@ -55,6 +55,7 @@ export function CartView({
                 <button
                   type="button"
                   onClick={() => onSetQty(it.variantId, it.quantity + 1)}
+                  disabled={it.maxStock != null && it.quantity >= it.maxStock}
                   aria-label={`${it.name} 수량 증가`}
                   className={stepBtn}
                 >

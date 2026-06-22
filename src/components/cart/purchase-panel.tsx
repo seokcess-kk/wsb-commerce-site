@@ -59,6 +59,7 @@ export function PurchasePanel({
       unitPrice: opt.unitPrice,
       quantity,
       thumbnail,
+      maxStock: opt.stock,
     };
   }
 
