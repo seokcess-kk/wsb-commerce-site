@@ -123,6 +123,16 @@ export async function listProductsByCategory(categorySlug: string): Promise<Prod
 }
 
 export type ProductVariant = typeof productVariants.$inferSelect;
+// PDP 가 쓰는 variant 필드만(Date 인 createdAt 제외) — unstable_cache 직렬화 안전성을 위해.
+export type CatalogVariant = {
+  id: string;
+  productId: string;
+  name: string;
+  sku: string | null;
+  priceDelta: number;
+  stock: number;
+  sortOrder: number;
+};
 export type ProductDetail = ProductSummary & {
   description: string | null;
   reviewPhraseNo: string | null;
@@ -132,41 +142,59 @@ export type ProductDetail = ProductSummary & {
   intakeNotice: string | null;
   ingredients: string | null;
   images: string[];
-  variants: ProductVariant[];
+  variants: CatalogVariant[];
 };
 
-// React cache() 로 요청 단위 메모이즈 — 세그먼트 layout(존재 확인)과 page(렌더)가 같은 slug 로
-// 호출해도 DB 쿼리는 요청당 1회만 실행된다(soft-404 수정에서 layout 가드가 추가되며 중복 호출됨).
-export const getProductBySlug = cache(async (slug: string): Promise<ProductDetail | null> => {
-  const db = getDb();
-  const rows = await db
-    .select({ product: products, category: categories })
-    .from(products)
-    .leftJoin(categories, eq(products.categoryId, categories.id))
-    .where(eq(products.slug, slug))
-    .limit(1);
-  if (rows.length === 0) return null;
-  const p = rows[0].product;
-  if (!p.isPublished) return null;
-  const summary = toProductSummary(joinRowToProductRow(rows[0]));
-  const variants = await db
-    .select()
-    .from(productVariants)
-    .where(eq(productVariants.productId, p.id))
-    .orderBy(productVariants.sortOrder);
-  return {
-    ...summary,
-    description: p.description,
-    reviewPhraseNo: p.reviewPhraseNo,
-    noticeText: p.noticeText,
-    reportNo: p.reportNo,
-    functionality: p.functionality,
-    intakeNotice: p.intakeNotice,
-    ingredients: p.ingredients,
-    images: p.images,
-    variants,
-  };
-});
+// PDP 본문 쿼리(상품+옵션). 요청 간 캐시(unstable_cache) + 요청 단위 메모이즈(cache).
+// variant 에 stock 이 포함되므로 revalidate 를 짧게(60s) 두어 재고 staleness 를 제한한다.
+// 'catalog' 태그라 어드민 상품 변경·취소/환불(재고 원복) 시 즉시 무효화된다. 구매 시 재고 차감(settle)은
+// 60s 윈도우로 수렴하며, 실제 oversell 은 주문 생성 API 의 재고 재검증으로 차단된다.
+// createdAt(Date) 을 제외하고 컬럼을 명시 select 해 직렬화를 안전하게 만든다.
+const PRODUCT_CACHE = { tags: [CATALOG_TAG], revalidate: 60 };
+export const getProductBySlug = cache(
+  unstable_cache(
+    async (slug: string): Promise<ProductDetail | null> => {
+      const db = getDb();
+      const rows = await db
+        .select({ product: products, category: categories })
+        .from(products)
+        .leftJoin(categories, eq(products.categoryId, categories.id))
+        .where(eq(products.slug, slug))
+        .limit(1);
+      if (rows.length === 0) return null;
+      const p = rows[0].product;
+      if (!p.isPublished) return null;
+      const summary = toProductSummary(joinRowToProductRow(rows[0]));
+      const variants = await db
+        .select({
+          id: productVariants.id,
+          productId: productVariants.productId,
+          name: productVariants.name,
+          sku: productVariants.sku,
+          priceDelta: productVariants.priceDelta,
+          stock: productVariants.stock,
+          sortOrder: productVariants.sortOrder,
+        })
+        .from(productVariants)
+        .where(eq(productVariants.productId, p.id))
+        .orderBy(productVariants.sortOrder);
+      return {
+        ...summary,
+        description: p.description,
+        reviewPhraseNo: p.reviewPhraseNo,
+        noticeText: p.noticeText,
+        reportNo: p.reportNo,
+        functionality: p.functionality,
+        intakeNotice: p.intakeNotice,
+        ingredients: p.ingredients,
+        images: p.images,
+        variants,
+      };
+    },
+    ["product-by-slug"],
+    PRODUCT_CACHE,
+  ),
+);
 
 // 요청 단위 메모이즈(cache) + 요청 간 캐시(unstable_cache). generateMetadata/layout(존재 확인)/page 가 공유한다.
 export const listCategories = cache(

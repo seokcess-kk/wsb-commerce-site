@@ -1,11 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { isValidTransition, isCancellableByAdmin } from "@/lib/admin/order-status";
 import { cancelTossPayment } from "@/lib/payments/toss-cancel";
+import { CATALOG_TAG } from "@/db/queries/products";
 
 export async function updateOrderStatus(orderNumber: string, to: string) {
   await requireAdmin();
@@ -89,6 +90,8 @@ export async function cancelOrderAsAdmin(
     }
   });
 
+  // 재고 원복이 PDP 캐시(getProductBySlug)에 즉시 반영되도록 카탈로그 태그 무효화.
+  revalidateTag(CATALOG_TAG, "max");
   revalidatePath(`/admin/orders/${orderNumber}`);
   revalidatePath("/admin/orders");
   return {};

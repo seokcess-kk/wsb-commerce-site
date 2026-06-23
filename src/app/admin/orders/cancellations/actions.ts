@@ -1,15 +1,18 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { and, eq, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { requireAdmin } from "@/lib/admin/require-admin";
 import { canProcessCancellation } from "@/lib/orders/cancellation";
 import { cancelTossPayment } from "@/lib/payments/toss-cancel";
+import { CATALOG_TAG } from "@/db/queries/products";
 
 function revalidate() {
   revalidatePath("/admin/orders/cancellations");
   revalidatePath("/admin/orders");
+  // 재고 원복이 PDP 캐시(getProductBySlug)에 즉시 반영되도록 카탈로그 태그 무효화.
+  revalidateTag(CATALOG_TAG, "max");
 }
 
 // 취소/반품 요청 승인 → 토스 환불 + 재고 원복 + 상태 전이(멱등).
