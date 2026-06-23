@@ -26,18 +26,18 @@ export async function POST(req: Request) {
   if (!orderId) return NextResponse.json({ ok: false, error: "missing orderId" }, { status: 400 });
 
   try {
-    // 서버 대 서버 재확인 — 위조된 웹훅으로는 결제 조회가 일치하지 않는다.
-    const payment = await getTossPaymentByOrderId(orderId);
-
     const db = getDb();
+    // 우리 주문을 먼저 DB 에서 확인한다. 우리 주문이 아니면 토스 조회(외부 호출) 없이 200 ack —
+    // 위조 webhook 본문은 신뢰하지 않으며, 임의 orderId 로 토스 조회를 유발하는 DoS 표면을 줄인다.
     const [order] = await db
       .select()
       .from(schema.orders)
       .where(eq(schema.orders.orderNumber, orderId))
       .limit(1);
-
-    // 우리 주문이 아니면 200으로 ack 해 토스의 재시도를 멈춘다(일시 오류만 재시도 대상).
     if (!order) return NextResponse.json({ ok: true });
+
+    // 우리 주문일 때만 서버 대 서버 재확인 — 위조된 웹훅으로는 결제 조회가 일치하지 않는다.
+    const payment = await getTossPaymentByOrderId(orderId);
 
     const action = decideDepositAction(payment.status, payment.totalAmount, order.totalAmount);
     if (action === "settle") {

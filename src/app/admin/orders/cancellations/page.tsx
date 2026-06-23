@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 const FILTERS = [
   { value: "", label: "전체" }, { value: "requested", label: "접수" },
-  { value: "refunded", label: "환불완료" }, { value: "rejected", label: "반려" },
+  { value: "refunded", label: "환불완료" }, { value: "resolved", label: "처리완료" }, { value: "rejected", label: "반려" },
 ];
 
 export default async function AdminCancellationsPage({
@@ -38,7 +38,7 @@ export default async function AdminCancellationsPage({
   return (
     <div>
       <h1 className="text-[22px] font-extrabold text-[var(--ad-ink)]">취소/반품 관리</h1>
-      <p className="mb-4 mt-0.5 text-[12.5px] text-[var(--ad-mut)]">승인 시 토스 결제가 자동 환불되고 재고가 원복됩니다(전체취소 기준).</p>
+      <p className="mb-4 mt-0.5 text-[12.5px] text-[var(--ad-mut)]">취소·반품 승인 시 토스 결제가 전액 환불됩니다. 재고는 취소만 자동 원복(반품은 검수 후 수동 입고), 교환은 환불 없이 처리완료로 마감됩니다.</p>
       <DataTable
         toolbar={toolbar}
         empty={rows.length === 0}
@@ -51,7 +51,7 @@ export default async function AdminCancellationsPage({
             <td className={`${TD} max-w-[16rem] text-[var(--ad-mut)]`}><span className="line-clamp-2 whitespace-pre-wrap">{r.reason}</span></td>
             <td className={`${TD} font-mono`}>{formatKRW(r.totalAmount)}</td>
             <td className={TD}><StatusBadge value={r.status} /></td>
-            <td className={`${TD} text-right`}>{canProcessCancellation(r.status) ? <CancellationActions id={r.id} /> : <span className="text-xs text-[var(--ad-mut-2)]">처리 완료</span>}</td>
+            <td className={`${TD} text-right`}>{canProcessCancellation(r.status) ? <CancellationActions id={r.id} type={r.type} /> : <span className="text-xs text-[var(--ad-mut-2)]">처리 완료</span>}</td>
           </tr>
         ))}
       </DataTable>

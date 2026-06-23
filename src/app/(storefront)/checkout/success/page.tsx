@@ -44,12 +44,19 @@ export default async function SuccessPage({
     }
 
     // 가상계좌: 승인 시점엔 미입금(WAITING_FOR_DEPOSIT) — 입금 대기만 기록, 정산은 웹훅이.
+    // 계좌번호/은행/기한을 영속화해 고객이 이 페이지를 벗어나도 주문내역에서 재확인할 수 있게 한다.
     if (result.status === "WAITING_FOR_DEPOSIT") {
+      const va = result.virtualAccount ?? null;
+      const dueDate = va?.dueDate ? new Date(va.dueDate) : null;
       await db
         .insert(schema.payments)
         .values({
           orderId: order.id, provider: "toss", paymentKey: result.paymentKey,
           method: result.method ?? null, amount: result.totalAmount, status: result.status, approvedAt: null,
+          vaAccountNumber: va?.accountNumber ?? null,
+          vaBankCode: va?.bankCode ?? null,
+          vaCustomerName: va?.customerName ?? null,
+          vaDueDate: dueDate && !Number.isNaN(dueDate.getTime()) ? dueDate : null,
         })
         .onConflictDoNothing({ target: schema.payments.paymentKey });
       awaitingDeposit = true;

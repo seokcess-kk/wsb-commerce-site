@@ -10,6 +10,7 @@ const MAP: Record<string, { label: string; fg: string; bg: string }> = {
   // cancellation
   requested: { label: "접수", fg: "#B45309", bg: "#FBEEDD" },
   refunded: { label: "환불완료", fg: "#177A4B", bg: "#E7F6EE" },
+  resolved: { label: "처리완료", fg: "#1D4ED8", bg: "#E5EDFF" },
   rejected: { label: "반려", fg: "#6B756E", bg: "#EFF1EB" },
   // inquiry
   open: { label: "미답변", fg: "#B45309", bg: "#FBEEDD" },

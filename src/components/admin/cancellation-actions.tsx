@@ -2,12 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { approveCancellation, rejectCancellation } from "@/app/admin/orders/cancellations/actions";
+import { resolveCancellation } from "@/lib/orders/cancellation";
 
-export function CancellationActions({ id }: { id: string }) {
+export function CancellationActions({ id, type }: { id: string; type: string }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
+
+  // 환불이 발생하는 타입(취소/반품)만 '승인·환불', 교환은 환불 없는 '승인'.
+  const approveLabel = resolveCancellation(type).refund ? "승인·환불" : "승인";
 
   function onApprove() {
     setError(null);
@@ -35,7 +39,7 @@ export function CancellationActions({ id }: { id: string }) {
           disabled={pending}
           className="rounded-md bg-[var(--ad-accent)] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-50"
         >
-          {pending ? "처리 중…" : "승인·환불"}
+          {pending ? "처리 중…" : approveLabel}
         </button>
         <button
           type="button"

@@ -8,6 +8,7 @@ import { formatKRW } from "@/lib/format";
 import { statusLabel } from "@/lib/admin/order-status";
 import { availableRequestTypes, REQUEST_TYPE_LABEL } from "@/lib/orders/cancellation";
 import { trackingUrl } from "@/lib/orders/courier";
+import { bankName } from "@/lib/payments/banks";
 import { ReorderButton } from "@/components/account/reorder-button";
 import { CancellationRequestForm } from "@/components/account/cancellation-request-form";
 import { requestCancellation } from "./actions";
@@ -20,7 +21,14 @@ const CANCELLATION_STATUS_LABEL: Record<string, string> = {
   rejected: "거절",
   completed: "완료",
   refunded: "환불 완료",
+  resolved: "처리완료",
 };
+
+function formatDueDate(d: Date): string {
+  return d.toLocaleString("ko-KR", {
+    year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+}
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
@@ -38,6 +46,17 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
     .from(schema.orderCancellations)
     .where(eq(schema.orderCancellations.orderId, order.id));
 
+  // 가상계좌 입금 대기 정보 — 미입금 상태면 계좌번호/은행/기한을 재노출한다.
+  const [payment] = await db
+    .select()
+    .from(schema.payments)
+    .where(eq(schema.payments.orderId, order.id))
+    .limit(1);
+  const awaitingDeposit =
+    order.status === "pending" &&
+    payment?.status === "WAITING_FOR_DEPOSIT" &&
+    !!payment.vaAccountNumber;
+
   // Fetch reorder items (server-side for the client island)
   const reorderItems = await getReorderItems(user.id, orderNumber) ?? [];
 
@@ -54,6 +73,23 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
           <ReorderButton items={reorderItems} />
         </div>
       </div>
+
+      {/* 가상계좌 입금 대기 안내 */}
+      {awaitingDeposit && payment && (
+        <div className="mt-5 rounded-lg border border-ng-cobalt/30 bg-ng-cobalt/5 p-4 text-sm">
+          <p className="font-semibold text-ng-charcoal">가상계좌 입금 대기</p>
+          <p className="mt-1 text-stone-600">아래 계좌로 입금이 확인되면 주문이 자동으로 완료됩니다.</p>
+          <dl className="mt-3 space-y-1.5">
+            <div className="flex justify-between"><dt className="text-stone-500">입금 은행</dt><dd className="font-semibold text-ng-charcoal">{bankName(payment.vaBankCode)}</dd></div>
+            <div className="flex justify-between"><dt className="text-stone-500">계좌번호</dt><dd className="font-mono font-semibold text-ng-charcoal">{payment.vaAccountNumber}</dd></div>
+            <div className="flex justify-between"><dt className="text-stone-500">입금 금액</dt><dd className="font-mono font-semibold text-ng-charcoal">{formatKRW(order.totalAmount)}</dd></div>
+            {payment.vaDueDate && (
+              <div className="flex justify-between"><dt className="text-stone-500">입금 기한</dt><dd className="font-semibold text-ng-charcoal">{formatDueDate(payment.vaDueDate)}</dd></div>
+            )}
+          </dl>
+          <p className="mt-3 text-xs text-stone-400">입금 기한 내에 입금해 주세요. 입금자명이 달라도 정상 처리됩니다.</p>
+        </div>
+      )}
 
       {/* Tracking block */}
       {order.trackingNumber ? (

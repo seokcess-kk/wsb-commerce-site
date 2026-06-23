@@ -55,10 +55,23 @@ export async function settlePaidOrder(order: OrderRow, payment: TossPayment): Pr
       // 결제는 이미 승인됐으므로 운영자가 주문관리에서 처리한다.
       const items = await tx.select().from(schema.orderItems).where(eq(schema.orderItems.orderId, order.id));
       for (const it of items) {
-        await tx
+        // returning 으로 차감 성공 여부를 판정한다(가드 미매칭이면 0행).
+        const deducted = await tx
           .update(schema.productVariants)
           .set({ stock: sql`${schema.productVariants.stock} - ${it.quantity}` })
-          .where(and(eq(schema.productVariants.id, it.variantId), gte(schema.productVariants.stock, it.quantity)));
+          .where(and(eq(schema.productVariants.id, it.variantId), gte(schema.productVariants.stock, it.quantity)))
+          .returning({ id: schema.productVariants.id });
+
+        if (deducted.length > 0) {
+          // 실제 차감된 항목만 표시 — 취소 환불 시 이 수량만 원복(blind add 방지).
+          await tx.update(schema.orderItems).set({ stockDeducted: true }).where(eq(schema.orderItems.id, it.id));
+        } else {
+          // 가드 미매칭(재고 부족) — 결제는 승인됐으나 차감 못 함(oversell 가능).
+          // 운영자가 탐지·수동 처리할 수 있도록 로그를 남긴다.
+          console.error(
+            `[settle] 재고 부족으로 차감 실패 order=${order.orderNumber} variant=${it.variantId} qty=${it.quantity} (oversell 가능 — 운영자 확인 필요)`,
+          );
+        }
       }
 
       // 쿠폰 소진도 같은 멱등 블록 안에서 1회만 호출(markCouponUsed 는 usedAt IS NULL 가드라 재호출 안전).
