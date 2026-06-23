@@ -83,7 +83,7 @@ describe("AuthForm — SIGNUP mode", () => {
   });
 
   it("필수 동의 후 제출 시 signUp이 marketing_consent=false, 필수 동의 booleans와 함께 호출된다", async () => {
-    mockSignUp.mockResolvedValue({ error: null });
+    mockSignUp.mockResolvedValue({ data: { session: { access_token: "t" }, user: { id: "u1" } }, error: null });
     render(<AuthForm mode="signup" />);
     await userEvent.type(screen.getByPlaceholderText("이메일"), "user@example.com");
     await userEvent.type(screen.getByPlaceholderText("비밀번호"), "password123");
@@ -104,7 +104,7 @@ describe("AuthForm — SIGNUP mode", () => {
   });
 
   it("마케팅 동의 체크 시 signUp이 marketing_consent=true로 호출된다", async () => {
-    mockSignUp.mockResolvedValue({ error: null });
+    mockSignUp.mockResolvedValue({ data: { session: { access_token: "t" }, user: { id: "u1" } }, error: null });
     render(<AuthForm mode="signup" />);
     await userEvent.type(screen.getByPlaceholderText("이메일"), "user@example.com");
     await userEvent.type(screen.getByPlaceholderText("비밀번호"), "password123");
@@ -121,6 +121,29 @@ describe("AuthForm — SIGNUP mode", () => {
         }),
       );
     });
+  });
+
+  it("이메일 확인 필요(세션 없음) 시 안내 메시지를 표시하고 리다이렉트하지 않는다", async () => {
+    mockSignUp.mockResolvedValue({ data: { session: null, user: { id: "u1" } }, error: null });
+    render(<AuthForm mode="signup" />);
+    await userEvent.type(screen.getByPlaceholderText("이메일"), "user@example.com");
+    await userEvent.type(screen.getByPlaceholderText("비밀번호"), "password123");
+    await userEvent.click(screen.getByLabelText(/이용약관 동의/));
+    await userEvent.click(screen.getByLabelText(/개인정보 수집·이용 동의/));
+    await userEvent.click(screen.getByRole("button", { name: "회원가입" }));
+    expect(await screen.findByText(/확인 메일을 보냈습니다/)).toBeInTheDocument();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("회원가입 비밀번호가 8자 미만이면 에러를 표시하고 signUp을 호출하지 않는다", async () => {
+    render(<AuthForm mode="signup" />);
+    await userEvent.type(screen.getByPlaceholderText("이메일"), "user@example.com");
+    await userEvent.type(screen.getByPlaceholderText("비밀번호"), "short7!");
+    await userEvent.click(screen.getByLabelText(/이용약관 동의/));
+    await userEvent.click(screen.getByLabelText(/개인정보 수집·이용 동의/));
+    await userEvent.click(screen.getByRole("button", { name: "회원가입" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(/8자 이상/);
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
 
   it("에러 시 role=alert인 에러 메시지를 표시한다", async () => {

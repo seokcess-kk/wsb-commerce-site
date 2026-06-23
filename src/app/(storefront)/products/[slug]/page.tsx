@@ -24,7 +24,8 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  if (!product) return { title: "상품" };
+  // 메타데이터 단계에서 notFound() — 본문 스트리밍(streaming metadata) 전에 404 상태를 확정한다(soft-404 방지).
+  if (!product) notFound();
   return {
     title: product.name,
     description: product.summary ?? product.name,
@@ -38,13 +39,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [product, user, allProducts] = await Promise.all([
-    getProductBySlug(slug),
-    getCurrentUser(),
-    listPublishedProducts(),
-  ]);
+  // 존재 확인을 쿠키 접근(getCurrentUser)보다 먼저 — 동적 API(cookies) 접근이 응답 스트리밍을
+  // 시작시켜 notFound() 가 soft-404(HTTP 200)가 되는 것을 막는다. getProductBySlug 는 layout 과
+  // 공유되는 cache() 라 추가 쿼리가 없다.
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
+  const [user, allProducts] = await Promise.all([getCurrentUser(), listPublishedProducts()]);
   const initialWishlisted = user ? await isWishlisted(user.id, product.id) : false;
 
   const jsonLd = buildProductJsonLd({

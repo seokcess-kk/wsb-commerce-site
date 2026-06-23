@@ -86,11 +86,12 @@ test("헤더: 로고·검색·장바구니·라인업 네비 동작", async ({ p
 // ───────────────────────── 3. 상품목록 → PDP ─────────────────────────
 test("상품목록: 카드 렌더 + PDP 진입", async ({ page }) => {
   await page.goto("/products");
-  const links = page.locator('a[href^="/products/"]');
-  expect(await links.count(), "상품 링크가 1개 이상").toBeGreaterThan(0);
-  await links.first().click();
+  // 헤더 nav 가 아니라 본문(main)의 상품 카드를 대상으로 — 카탈로그가 스트리밍되므로 보일 때까지 대기.
+  const card = page.locator('main a[href^="/products/"]').first();
+  await expect(card).toBeVisible({ timeout: 15000 });
+  await card.click();
   await page.waitForURL("**/products/**");
-  await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toBeVisible({ timeout: 15000 });
 });
 
 // ───────────────────────── 4. PDP 구성요소 ─────────────────────────
@@ -213,11 +214,18 @@ test("어드민 게이트: /admin → /login?next=/admin", async ({ page }) => {
 });
 
 // ───────────────────────── 12. 존재하지 않는 상품 ─────────────────────────
-test("없는 상품 slug: 브랜드 한국어 404(영문 기본 페이지 아님) + 구매 패널 미노출", async ({ page }) => {
-  await page.goto("/products/this-slug-does-not-exist-xyz");
+test("없는 상품 slug: 실제 HTTP 404 + 브랜드 한국어 + 구매 패널 미노출", async ({ page }) => {
+  const res = await page.goto("/products/this-slug-does-not-exist-xyz");
+  expect(res?.status(), "soft-404 가 아니라 실제 404 여야 함").toBe(404);
   await expect(page.getByRole("button", { name: "바로 구매하기" })).toHaveCount(0);
   await expect(page.locator("body")).toContainText("페이지를 찾을 수 없습니다");
   await expect(page.locator("body")).not.toContainText("This page could not be found");
+});
+
+test("없는 카테고리 slug: 실제 HTTP 404", async ({ page }) => {
+  const res = await page.goto("/category/this-category-does-not-exist-xyz");
+  expect(res?.status()).toBe(404);
+  await expect(page.locator("body")).toContainText("페이지를 찾을 수 없습니다");
 });
 
 test("최상위 미존재 경로: 헤더/푸터 포함 브랜드 404", async ({ page }) => {

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { listPublishedProducts, listCategories } from "@/db/queries/products";
 import { ProductGrid } from "@/components/catalog/product-grid";
 import { CategoryFilter } from "@/components/catalog/category-filter";
@@ -5,6 +6,7 @@ import { SortSelect } from "@/components/catalog/sort-select";
 import { PriceFilter } from "@/components/catalog/price-filter";
 import { CatalogHero } from "@/components/catalog/catalog-hero";
 import { ProductComparisonTable } from "@/components/catalog/product-comparison-table";
+import { LoadingState } from "@/components/ui/states";
 import { BRAND } from "@/lib/brand/copy";
 import type { SortKey } from "@/lib/catalog/sort";
 import { SORT_OPTIONS } from "@/lib/catalog/sort";
@@ -14,7 +16,24 @@ export const dynamic = "force-dynamic";
 
 export const metadata = { title: "전체 상품" };
 
-export default async function ProductsPage({
+// 정적 히어로는 즉시 렌더하고, 데이터 의존 카탈로그는 Suspense 로 스트리밍해 즉시 로딩 스켈레톤을 보여준다.
+// (이전엔 route-level loading.tsx 를 썼으나, 그 경계가 중첩된 [slug] 서브트리까지 감싸 soft-404 를 유발했다.)
+export default function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string>>;
+}) {
+  return (
+    <div>
+      <CatalogHero eyebrow="LINEUP" title="NUTROGIN 라인업" description={`${BRAND.sloganKo}. 집중·맑은 각성·숙면 회복을 위한 브레인케어 3종.`} />
+      <Suspense fallback={<LoadingState label="라인업을 불러오는 중…" />}>
+        <ProductsCatalog searchParams={searchParams} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function ProductsCatalog({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string>>;
@@ -33,9 +52,7 @@ export default async function ProductsPage({
   for (const p of allProducts) priceBySlug[p.slug] = p.priceLabel;
 
   return (
-    <div>
-      <CatalogHero eyebrow="LINEUP" title="NUTROGIN 라인업" description={`${BRAND.sloganKo}. 집중·맑은 각성·숙면 회복을 위한 브레인케어 3종.`} />
-
+    <>
       <ProductComparisonTable priceBySlug={priceBySlug} />
 
       <section className="mx-auto max-w-6xl px-6 pb-12">
@@ -56,6 +73,6 @@ export default async function ProductsPage({
           )}
         </div>
       </section>
-    </div>
+    </>
   );
 }

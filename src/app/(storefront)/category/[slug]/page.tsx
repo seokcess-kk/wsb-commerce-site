@@ -20,7 +20,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const categories = await listCategories();
   const current = categories.find((c) => c.slug === slug);
-  return { title: current?.name ?? "카테고리" };
+  // 메타데이터 단계에서 notFound() — 본문 스트리밍 전에 404 상태를 확정한다(soft-404 방지).
+  if (!current) notFound();
+  return { title: current.name };
 }
 
 export default async function CategoryPage({

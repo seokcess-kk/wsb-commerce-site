@@ -62,7 +62,7 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
     });
     if (error) { setError(error.message); setLoading(false); return; }
     // 이메일 확인이 켜져 있으면 세션이 없다 — /account 로 보내면 다시 튕기므로 안내 메시지를 보여준다.
-    if (!data.session) {
+    if (!data?.session) {
       setInfo("확인 메일을 보냈습니다. 메일의 링크로 인증을 완료한 뒤 로그인해 주세요.");
       setLoading(false);
       return;

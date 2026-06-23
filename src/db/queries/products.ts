@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { eq, desc, asc, and, or, ilike, gte, lt, SQL } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { toProductSummary, type ProductRow, type ProductSummary } from "@/lib/catalog/product-view";
@@ -101,7 +102,9 @@ export type ProductDetail = ProductSummary & {
   variants: ProductVariant[];
 };
 
-export async function getProductBySlug(slug: string): Promise<ProductDetail | null> {
+// React cache() 로 요청 단위 메모이즈 — 세그먼트 layout(존재 확인)과 page(렌더)가 같은 slug 로
+// 호출해도 DB 쿼리는 요청당 1회만 실행된다(soft-404 수정에서 layout 가드가 추가되며 중복 호출됨).
+export const getProductBySlug = cache(async (slug: string): Promise<ProductDetail | null> => {
   const db = getDb();
   const rows = await db
     .select({ product: products, category: categories })
@@ -130,10 +133,11 @@ export async function getProductBySlug(slug: string): Promise<ProductDetail | nu
     images: p.images,
     variants,
   };
-}
+});
 
-export async function listCategories(): Promise<{ slug: string; name: string }[]> {
+// 요청 단위 메모이즈 — generateMetadata/layout(존재 확인)/page 가 공유한다.
+export const listCategories = cache(async (): Promise<{ slug: string; name: string }[]> => {
   const db = getDb();
   const rows = await db.select().from(categories).orderBy(categories.sortOrder);
   return rows.map((c) => ({ slug: c.slug, name: c.name }));
-}
+});
