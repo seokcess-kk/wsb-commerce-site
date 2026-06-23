@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MarkdownContent } from "./markdown-content";
 
 function isExternalUrl(src: string): boolean {
   return src.startsWith("http://") || src.startsWith("https://");
@@ -50,9 +51,7 @@ export function ProductDetailSection({
           상세 설명
         </h2>
         {description ? (
-          <p className="whitespace-pre-line leading-relaxed text-stone-700">
-            {description}
-          </p>
+          <MarkdownContent source={description} className="leading-relaxed text-stone-700" />
         ) : (
           <div
             className={`rounded-lg border-2 border-dashed ${accentBorder} px-6 py-10 text-center`}

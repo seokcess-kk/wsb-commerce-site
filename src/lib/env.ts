@@ -6,6 +6,10 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   NEXT_PUBLIC_TOSS_CLIENT_KEY: z.string().optional(),
   TOSS_SECRET_KEY: z.string().optional(),
+  // Supabase Storage(상품 이미지 업로드). service_role 키는 서버 전용 — 절대 NEXT_PUBLIC_ 금지.
+  // 미설정 시 업로드 액션이 친절한 에러를 반환한다(빌드/부팅은 통과).
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  SUPABASE_STORAGE_BUCKET: z.string().default("product-images"),
   ADMIN_EMAILS: z.string().optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().optional(),
   NEXT_PUBLIC_PAYMENTS_ENABLED: z.string().optional(),

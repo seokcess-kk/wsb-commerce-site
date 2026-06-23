@@ -18,6 +18,9 @@ export const products = pgTable("products", {
   ingredients: text("ingredients"),                         // 원료명 및 함량
   images: jsonb("images").$type<string[]>().notNull().default([]),
   isPublished: boolean("is_published").notNull().default(false),
+  // 소프트 삭제(보관): 값이 있으면 '삭제됨'. 공개 쿼리는 isPublished 로 이미 숨겨지고,
+  // 어드민 목록은 deletedAt IS NULL 로 필터한다. 주문 이력(order_items 스냅샷)은 보존된다.
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

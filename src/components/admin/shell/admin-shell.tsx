@@ -10,6 +10,7 @@ const ICON = {
   inquiry: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
   review: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2l3 6 7 .5-5 4.5 1.5 7-6.5-4-6.5 4 1.5-7-5-4.5 7-.5z"/></svg>,
   banner: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></svg>,
+  category: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 5a1 1 0 0 1 1-1h4l2 2h8a1 1 0 0 1 1 1v3H4z"/><path d="M4 10h17v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>,
 };
 
 export function AdminShell({
@@ -29,6 +30,7 @@ export function AdminShell({
       title: "COMMERCE",
       items: [
         { href: "/admin/products", label: "상품관리", icon: ICON.product },
+        { href: "/admin/categories", label: "카테고리", icon: ICON.category },
         { href: "/admin/orders", label: "주문관리", icon: ICON.order },
         { href: "/admin/orders/cancellations", label: "취소/반품", icon: ICON.refund, badge: badges.cancellations || undefined },
         { href: "/admin/coupons", label: "쿠폰관리", icon: ICON.coupon },

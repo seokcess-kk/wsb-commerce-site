@@ -1,5 +1,7 @@
-import { eq, desc, and, or, ilike, sql, type SQL } from "drizzle-orm";
+import { eq, desc, and, or, ilike, isNull, inArray, sql, type SQL } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
+
+export type AdminVariantStock = { id: string; name: string; stock: number };
 
 export type ProductListParams = {
   q?: string;
@@ -14,7 +16,8 @@ export async function listAllProductsAdmin(params: ProductListParams = {}) {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = params.pageSize ?? 30;
 
-  const conds: SQL[] = [];
+  // 소프트 삭제된 상품은 항상 제외.
+  const conds: SQL[] = [isNull(schema.products.deletedAt)];
   if (params.published !== undefined) {
     conds.push(eq(schema.products.isPublished, params.published));
   }
@@ -26,9 +29,9 @@ export async function listAllProductsAdmin(params: ProductListParams = {}) {
     );
     if (search) conds.push(search);
   }
-  const where = conds.length ? and(...conds) : undefined;
+  const where = and(...conds);
 
-  const rows = await db
+  const baseRows = await db
     .select({
       id: schema.products.id, name: schema.products.name, brand: schema.products.brand,
       basePrice: schema.products.basePrice, isPublished: schema.products.isPublished, slug: schema.products.slug,
@@ -38,6 +41,31 @@ export async function listAllProductsAdmin(params: ProductListParams = {}) {
     .orderBy(desc(schema.products.createdAt))
     .limit(pageSize)
     .offset((page - 1) * pageSize);
+
+  // 각 상품의 옵션(variant)별 재고 — 목록 표시 + 빠른수정용.
+  const ids = baseRows.map((r) => r.id);
+  const variantRows = ids.length
+    ? await db
+        .select({
+          id: schema.productVariants.id,
+          productId: schema.productVariants.productId,
+          name: schema.productVariants.name,
+          stock: schema.productVariants.stock,
+        })
+        .from(schema.productVariants)
+        .where(inArray(schema.productVariants.productId, ids))
+        .orderBy(schema.productVariants.sortOrder)
+    : [];
+  const byProduct = new Map<string, AdminVariantStock[]>();
+  for (const v of variantRows) {
+    const arr = byProduct.get(v.productId) ?? [];
+    arr.push({ id: v.id, name: v.name, stock: v.stock });
+    byProduct.set(v.productId, arr);
+  }
+  const rows = baseRows.map((r) => {
+    const variants = byProduct.get(r.id) ?? [];
+    return { ...r, variants, totalStock: variants.reduce((s, v) => s + v.stock, 0) };
+  });
 
   const [countRow] = await db
     .select({ c: sql<number>`count(*)::int` })

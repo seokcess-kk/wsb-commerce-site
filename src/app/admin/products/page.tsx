@@ -5,6 +5,8 @@ import { formatKRW } from "@/lib/format";
 import { DataTable, TH, TD, ROW } from "@/components/admin/ui/data-table";
 import { StatusBadge } from "@/components/admin/ui/status-badge";
 import { AdminInput, AdminButton } from "@/components/admin/ui/controls";
+import { ProductDeleteButton } from "@/components/admin/product-delete-button";
+import { StockQuickEdit } from "@/components/admin/stock-quick-edit";
 
 export const dynamic = "force-dynamic";
 
@@ -72,15 +74,30 @@ export default async function AdminProductsPage({
         toolbar={toolbar}
         empty={rows.length === 0}
         pagination={pagination}
-        head={<><th className={TH}>상품명</th><th className={TH}>브랜드</th><th className={TH}>가격</th><th className={TH}>노출</th><th className={`${TH} text-right`}>관리</th></>}
+        head={<><th className={TH}>상품명</th><th className={TH}>브랜드</th><th className={TH}>가격</th><th className={TH}>재고</th><th className={TH}>노출</th><th className={`${TH} text-right`}>관리</th></>}
       >
         {rows.map((p) => (
           <tr key={p.id} className={ROW}>
             <td className={`${TD} font-semibold`}>{p.name}</td>
             <td className={`${TD} font-mono text-xs text-[var(--ad-mut)]`}>{p.brand}</td>
             <td className={`${TD} font-mono`}>{formatKRW(p.basePrice)}</td>
+            <td className={TD}>
+              <div className="flex flex-col gap-1">
+                {p.totalStock <= 0 ? (
+                  <span className="inline-flex w-fit rounded-full bg-[var(--ad-neg)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--ad-neg)]">품절</span>
+                ) : p.totalStock < 10 ? (
+                  <span className="inline-flex w-fit rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">임박 {p.totalStock}</span>
+                ) : null}
+                <StockQuickEdit variants={p.variants} />
+              </div>
+            </td>
             <td className={TD}><StatusBadge value={p.isPublished ? "visible" : "hidden"} /></td>
-            <td className={`${TD} text-right`}><Link href={`/admin/products/${p.id}`} className="font-semibold text-[var(--ad-accent)] hover:underline">수정</Link></td>
+            <td className={`${TD} text-right`}>
+              <div className="flex items-center justify-end gap-3">
+                <Link href={`/admin/products/${p.id}`} className="font-semibold text-[var(--ad-accent)] hover:underline">수정</Link>
+                <ProductDeleteButton id={p.id} />
+              </div>
+            </td>
           </tr>
         ))}
       </DataTable>

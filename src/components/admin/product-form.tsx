@@ -3,6 +3,9 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { saveProduct, type ProductInput } from "@/app/admin/products/actions";
+import { slugify } from "@/lib/catalog/slugify";
+import { ImageUploader } from "@/components/admin/image-uploader";
+import { MarkdownEditor } from "@/components/admin/markdown-editor";
 
 type Category = { id: string; name: string };
 
@@ -17,7 +20,16 @@ interface Props {
 
 export function ProductForm({ categories, initial }: Props) {
   const [slug, setSlug] = useState(initial?.slug ?? "");
+  // 운영자가 slug 를 직접 수정했는지 추적. 기존 상품(initial.slug 있음)은 URL 동결을 위해
+  // 처음부터 touched 로 본다 — 상품명을 바꿔도 slug(=공개 URL)가 자동으로 바뀌지 않는다.
+  const [slugTouched, setSlugTouched] = useState(!!initial?.slug);
   const [name, setName] = useState(initial?.name ?? "");
+
+  function handleNameChange(value: string) {
+    setName(value);
+    // 신규 등록에서 slug 를 아직 손대지 않았으면 상품명으로 자동 제안.
+    if (!slugTouched) setSlug(slugify(value));
+  }
   const [brand, setBrand] = useState(initial?.brand ?? "WSB");
   const [categoryId, setCategoryId] = useState<string>(initial?.categoryId ?? "");
   const [basePrice, setBasePrice] = useState<number>(initial?.basePrice ?? 0);
@@ -29,9 +41,7 @@ export function ProductForm({ categories, initial }: Props) {
   const [intakeNotice, setIntakeNotice] = useState(initial?.intakeNotice ?? "");
   const [ingredients, setIngredients] = useState(initial?.ingredients ?? "");
   const [noticeText, setNoticeText] = useState(initial?.noticeText ?? "");
-  const [imagesText, setImagesText] = useState(
-    (initial?.images ?? []).join("\n"),
-  );
+  const [images, setImages] = useState<string[]>(initial?.images ?? []);
   const [isPublished, setIsPublished] = useState(initial?.isPublished ?? false);
   const [variants, setVariants] = useState<VariantRow[]>(
     initial?.variants && initial.variants.length > 0
@@ -75,10 +85,7 @@ export function ProductForm({ categories, initial }: Props) {
       functionality: functionality.trim() || null,
       intakeNotice: intakeNotice.trim() || null,
       ingredients: ingredients.trim() || null,
-      images: imagesText
-        .split("\n")
-        .map((s) => s.trim())
-        .filter(Boolean),
+      images,
       isPublished,
       variants: variants.map((v) => ({
         name: v.name,
@@ -89,7 +96,9 @@ export function ProductForm({ categories, initial }: Props) {
 
     startTransition(async () => {
       try {
-        await saveProduct(input);
+        const res = await saveProduct(input);
+        // 성공 시 서버에서 redirect — 아래 분기는 검증/저장 실패만 처리.
+        if (res?.error) setError(res.error);
       } catch (err: unknown) {
         // redirect() throws a NEXT_REDIRECT error — that is not an actual error
         if (
@@ -124,26 +133,29 @@ export function ProductForm({ categories, initial }: Props) {
         <h2 className="text-sm font-extrabold uppercase tracking-widest text-[var(--ad-mut-2)]">기본 정보</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className={fieldCls}>
-            <label className={labelCls}>슬러그 *</label>
-            <input
-              type="text"
-              required
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              placeholder="product-slug-en"
-              className={inputCls}
-            />
-          </div>
-          <div className={fieldCls}>
             <label className={labelCls}>상품명 *</label>
             <input
               type="text"
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               placeholder="상품명을 입력하세요"
               className={inputCls}
             />
+          </div>
+          <div className={fieldCls}>
+            <label className={labelCls}>슬러그 (URL · 자동 생성, 수정 가능)</label>
+            <input
+              type="text"
+              value={slug}
+              onChange={(e) => {
+                setSlug(e.target.value);
+                setSlugTouched(true);
+              }}
+              placeholder="상품명에서 자동 생성됩니다"
+              className={inputCls}
+            />
+            <p className="mt-1 text-xs text-[var(--ad-mut-2)]">공개 주소 /products/{slug || "..."} · 영문·숫자·하이픈</p>
           </div>
           <div className={fieldCls}>
             <label className={labelCls}>브랜드</label>
@@ -192,24 +204,12 @@ export function ProductForm({ categories, initial }: Props) {
           />
         </div>
         <div className={fieldCls}>
-          <label className={labelCls}>상품 상세 설명</label>
-          <textarea
-            rows={6}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="상세 설명 (HTML 또는 마크다운)"
-            className={inputCls}
-          />
+          <label className={labelCls}>상품 상세 설명 (마크다운 · HTML · 이미지)</label>
+          <MarkdownEditor value={description} onChange={setDescription} />
         </div>
         <div className={fieldCls}>
-          <label className={labelCls}>이미지 URL (한 줄에 하나씩)</label>
-          <textarea
-            rows={4}
-            value={imagesText}
-            onChange={(e) => setImagesText(e.target.value)}
-            placeholder={"https://cdn.example.com/image1.jpg\nhttps://cdn.example.com/image2.jpg"}
-            className={inputCls}
-          />
+          <label className={labelCls}>상품 이미지</label>
+          <ImageUploader images={images} onChange={setImages} />
         </div>
       </section>
 
