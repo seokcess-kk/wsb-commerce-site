@@ -1,7 +1,11 @@
 import { getEnv } from "@/lib/env";
 
 export function getTossClientKey(): string {
-  const key = getEnv().NEXT_PUBLIC_TOSS_CLIENT_KEY;
+  // 이 함수는 체크아웃 클라이언트(checkout/page.tsx)에서 호출된다.
+  // getEnv() 는 env 스키마 전체를 parse 하는데, 클라이언트 번들에는 서버 전용 변수
+  // (DATABASE_URL 등)가 없어 zod 검증이 실패한다. NEXT_PUBLIC_ 변수는 Next 가 클라이언트
+  // 번들에서 정적 치환하므로 process.env 를 직접(정적) 접근해야 한다.
+  const key = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY;
   if (!key) throw new Error("NEXT_PUBLIC_TOSS_CLIENT_KEY 가 설정되지 않았습니다.");
   return key;
 }

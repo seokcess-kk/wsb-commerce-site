@@ -54,6 +54,9 @@ export default function GlobalError({
           >
             다시 시도
           </button>
+          {/* global-error 는 라우터 컨텍스트 밖(최후의 에러 바운더리)이라 next/link 가 동작하지 않는다.
+              전체 새로고침 <a> 가 의도된 동작이므로 페이지 링크 규칙을 끈다. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/"
             style={{

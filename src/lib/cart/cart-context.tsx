@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from "react";
 import { addItem, setQuantity, removeItem, cartCount, cartSubtotal, type CartItem } from "./cart-logic";
 
 const STORAGE_KEY = "wsb-cart-v1";
@@ -35,15 +35,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (hydrated) localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items, hydrated]);
 
-  const value: CartContextValue = {
-    items,
-    add: (item) => setItems((c) => addItem(c, item)),
-    setQty: (id, qty) => setItems((c) => setQuantity(c, id, qty)),
-    remove: (id) => setItems((c) => removeItem(c, id)),
-    clear: () => setItems([]),
-    count: cartCount(items),
-    subtotal: cartSubtotal(items),
-  };
+  // mutator 들을 useCallback 으로 안정화한다. setItems 는 stable 하므로 의존성 없음.
+  // 이렇게 해야 이 함수들을 useEffect 의존성으로 쓰는 소비자(예: ClearCartOnMount 의
+  // `useEffect(() => clear(), [clear])`)가 매 렌더 새 참조로 인해 무한 루프에 빠지지 않는다.
+  const add = useCallback((item: CartItem) => setItems((c) => addItem(c, item)), []);
+  const setQty = useCallback((id: string, qty: number) => setItems((c) => setQuantity(c, id, qty)), []);
+  const remove = useCallback((id: string) => setItems((c) => removeItem(c, id)), []);
+  const clear = useCallback(() => setItems([]), []);
+
+  const value = useMemo<CartContextValue>(
+    () => ({
+      items,
+      add,
+      setQty,
+      remove,
+      clear,
+      count: cartCount(items),
+      subtotal: cartSubtotal(items),
+    }),
+    [items, add, setQty, remove, clear],
+  );
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
