@@ -1,6 +1,7 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProductBySlug, listPublishedProducts } from "@/db/queries/products";
+import { getProductBySlug, listProductsBySlugs } from "@/db/queries/products";
 import { ComplianceNotice } from "@/components/catalog/compliance-notice";
 import { PurchasePanel } from "@/components/cart/purchase-panel";
 import { ProductGallery } from "@/components/catalog/product-gallery";
@@ -45,7 +46,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [user, allProducts] = await Promise.all([getCurrentUser(), listPublishedProducts()]);
+  // 연관/교차 추천 — NUTROGIN 3종 중 현재 상품 제외(현재가 NUTROGIN이 아니면 3종 전부 소개).
+  // 전체 상품을 로드해 필터링하던 것을 필요한 슬러그만 조회로 교체(쿼리 다이어트).
+  const relatedSlugs = product.isNutrogin ? relatedNutroginSlugs(product.slug) : relatedNutroginSlugs("");
+  const [user, related] = await Promise.all([getCurrentUser(), listProductsBySlugs(relatedSlugs)]);
   const initialWishlisted = user ? await isWishlisted(user.id, product.id) : false;
 
   const jsonLd = buildProductJsonLd({
@@ -61,9 +65,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const meta = nutroginMeta(product.slug);
   const detail = productDetail(product.slug);
 
-  // 연관/교차 추천 — NUTROGIN 3종 중 현재 상품 제외(현재가 NUTROGIN이 아니면 3종 전부 소개).
-  const relatedSet = new Set(product.isNutrogin ? relatedNutroginSlugs(product.slug) : relatedNutroginSlugs(""));
-  const related = allProducts.filter((p) => relatedSet.has(p.slug));
   const altForSoldOut = related.map((p) => {
     const m = nutroginMeta(p.slug);
     return { slug: p.slug, code: m?.code ?? "", ko: m?.ko ?? p.name };
@@ -99,7 +100,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-ng-charcoal md:text-3xl">{product.name}</h1>
             {meta && <p className="mt-1.5 text-sm text-stone-500">{meta.tagline}</p>}
             <div className="mt-3">
-              <ReviewSummary productId={product.id} />
+              {/* 리뷰 요약은 별도 쿼리 — Suspense 로 분리해 본문이 먼저 렌더되게 한다(스트리밍). */}
+              <Suspense fallback={<div className="h-5 w-32 animate-pulse rounded bg-stone-100" />}>
+                <ReviewSummary productId={product.id} />
+              </Suspense>
             </div>
             {product.summary && <p className="mt-3 leading-relaxed text-stone-600">{product.summary}</p>}
 
@@ -177,9 +181,11 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           title={product.isNutrogin ? "함께 보면 좋은 NUTROGIN" : "NUTROGIN 라인업도 만나보세요"}
         />
 
-        {/* 리뷰 */}
+        {/* 리뷰 — 별도 쿼리라 Suspense 로 분리 스트리밍(본문/구매 영역을 막지 않음) */}
         <section className="mx-auto max-w-6xl px-6 py-12">
-          <ReviewList productId={product.id} />
+          <Suspense fallback={<p className="text-sm text-stone-400">리뷰를 불러오는 중…</p>}>
+            <ReviewList productId={product.id} />
+          </Suspense>
         </section>
       </div>
     </>

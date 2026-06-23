@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { CATALOG_TAG } from "@/db/queries/products";
 
 type VariantInput = { name: string; priceDelta: number; stock: number };
 
@@ -66,6 +67,8 @@ export async function saveProduct(input: ProductInput) {
     );
   }
 
+  // 카탈로그 데이터 캐시(목록·연관·검색·카테고리) 무효화 — 'max'는 stale-while-revalidate(권장).
+  revalidateTag(CATALOG_TAG, "max");
   revalidatePath("/admin/products");
   revalidatePath("/products");
   redirect("/admin/products");

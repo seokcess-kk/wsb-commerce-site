@@ -1,11 +1,19 @@
 import { cache } from "react";
-import { eq, desc, asc, and, or, ilike, gte, lt, SQL } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
+import { eq, desc, asc, and, or, ilike, gte, lt, inArray, SQL } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { toProductSummary, type ProductRow, type ProductSummary } from "@/lib/catalog/product-view";
 import { toLikePattern } from "@/lib/catalog/search";
 import type { SortKey } from "@/lib/catalog/sort";
 
 const { products, categories, productVariants } = schema;
+
+// 카탈로그 read 쿼리 캐시 옵션. 'catalog' 태그로 어드민 상품 변경 시 즉시 무효화하고(revalidateTag),
+// revalidate(초)는 태그 무효화를 놓쳐도 데이터가 갱신되도록 하는 안전망이다.
+// ProductSummary 반환(Date 필드 없음)이라 직렬화가 안전하다. getProductBySlug 는 variant.createdAt(Date)
+// 직렬화 리스크가 있어 캐시하지 않고 요청 단위 cache() 만 적용한다.
+export const CATALOG_TAG = "catalog";
+const CATALOG_CACHE = { tags: [CATALOG_TAG], revalidate: 300 };
 
 function joinRowToProductRow(r: {
   product: typeof products.$inferSelect;
@@ -42,39 +50,64 @@ function buildProductOrderBy(sort: SortKey | undefined) {
   }
 }
 
-export async function listPublishedProducts(opts: ListProductsOptions = {}): Promise<ProductSummary[]> {
-  const db = getDb();
-  const { sort, minPrice, maxPrice, categorySlug } = opts;
+export const listPublishedProducts = unstable_cache(
+  async (opts: ListProductsOptions = {}): Promise<ProductSummary[]> => {
+    const db = getDb();
+    const { sort, minPrice, maxPrice, categorySlug } = opts;
 
-  const conditions: SQL[] = [eq(products.isPublished, true)];
-  // 반개구간 [minPrice, maxPrice): 상한은 배타 — 인접 프리셋(예: "1~3만"/"3만~")의 경계 중복 방지.
-  if (minPrice !== undefined) conditions.push(gte(products.basePrice, minPrice));
-  if (maxPrice !== undefined) conditions.push(lt(products.basePrice, maxPrice));
-  if (categorySlug !== undefined) conditions.push(eq(categories.slug, categorySlug));
+    const conditions: SQL[] = [eq(products.isPublished, true)];
+    // 반개구간 [minPrice, maxPrice): 상한은 배타 — 인접 프리셋(예: "1~3만"/"3만~")의 경계 중복 방지.
+    if (minPrice !== undefined) conditions.push(gte(products.basePrice, minPrice));
+    if (maxPrice !== undefined) conditions.push(lt(products.basePrice, maxPrice));
+    if (categorySlug !== undefined) conditions.push(eq(categories.slug, categorySlug));
 
-  const query = db
-    .select({ product: products, category: categories })
-    .from(products)
-    .leftJoin(categories, eq(products.categoryId, categories.id))
-    .where(and(...conditions))
-    .orderBy(buildProductOrderBy(sort));
+    const query = db
+      .select({ product: products, category: categories })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(and(...conditions))
+      .orderBy(buildProductOrderBy(sort));
 
-  const rows = await query;
-  return rows.map(joinRowToProductRow).map(toProductSummary);
-}
+    const rows = await query;
+    return rows.map(joinRowToProductRow).map(toProductSummary);
+  },
+  ["published-products"],
+  CATALOG_CACHE,
+);
 
 // 발행 상품을 이름/요약 부분일치로 검색. 빈 쿼리는 호출 측에서 거른다.
-export async function searchProducts(query: string): Promise<ProductSummary[]> {
-  const db = getDb();
-  const pattern = toLikePattern(query);
-  const rows = await db
-    .select({ product: products, category: categories })
-    .from(products)
-    .leftJoin(categories, eq(products.categoryId, categories.id))
-    .where(and(eq(products.isPublished, true), or(ilike(products.name, pattern), ilike(products.summary, pattern))))
-    .orderBy(desc(products.createdAt));
-  return rows.map(joinRowToProductRow).map(toProductSummary);
-}
+export const searchProducts = unstable_cache(
+  async (query: string): Promise<ProductSummary[]> => {
+    const db = getDb();
+    const pattern = toLikePattern(query);
+    const rows = await db
+      .select({ product: products, category: categories })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(and(eq(products.isPublished, true), or(ilike(products.name, pattern), ilike(products.summary, pattern))))
+      .orderBy(desc(products.createdAt));
+    return rows.map(joinRowToProductRow).map(toProductSummary);
+  },
+  ["search-products"],
+  CATALOG_CACHE,
+);
+
+// 발행 상품을 슬러그 목록으로 직접 조회(연관/교차추천용). 전체 상품을 로드해 필터링하는 대신
+// 필요한 몇 개만 가져온다(PDP 쿼리 다이어트).
+export const listProductsBySlugs = unstable_cache(
+  async (slugs: string[]): Promise<ProductSummary[]> => {
+    if (slugs.length === 0) return [];
+    const db = getDb();
+    const rows = await db
+      .select({ product: products, category: categories })
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(and(eq(products.isPublished, true), inArray(products.slug, slugs)));
+    return rows.map(joinRowToProductRow).map(toProductSummary);
+  },
+  ["products-by-slugs"],
+  CATALOG_CACHE,
+);
 
 export async function listProductsByCategory(categorySlug: string): Promise<ProductSummary[]> {
   const db = getDb();
@@ -135,9 +168,15 @@ export const getProductBySlug = cache(async (slug: string): Promise<ProductDetai
   };
 });
 
-// 요청 단위 메모이즈 — generateMetadata/layout(존재 확인)/page 가 공유한다.
-export const listCategories = cache(async (): Promise<{ slug: string; name: string }[]> => {
-  const db = getDb();
-  const rows = await db.select().from(categories).orderBy(categories.sortOrder);
-  return rows.map((c) => ({ slug: c.slug, name: c.name }));
-});
+// 요청 단위 메모이즈(cache) + 요청 간 캐시(unstable_cache). generateMetadata/layout(존재 확인)/page 가 공유한다.
+export const listCategories = cache(
+  unstable_cache(
+    async (): Promise<{ slug: string; name: string }[]> => {
+      const db = getDb();
+      const rows = await db.select().from(categories).orderBy(categories.sortOrder);
+      return rows.map((c) => ({ slug: c.slug, name: c.name }));
+    },
+    ["categories"],
+    CATALOG_CACHE,
+  ),
+);
