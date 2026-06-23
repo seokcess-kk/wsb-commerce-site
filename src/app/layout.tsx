@@ -17,6 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className={jetbrainsMono.variable}>
       <head>
+        {/* 폰트 CDN 연결을 조기 수립해 render-blocking CSS 의 대기 시간을 줄인다(DNS+TLS 선행). */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
       </head>
       <body className="min-h-screen bg-white font-sans text-ng-charcoal antialiased">

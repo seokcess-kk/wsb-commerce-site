@@ -1,5 +1,11 @@
+import { unstable_cache } from "next/cache";
 import { eq, desc, and, isNull, sql } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
+
+// 공개 리뷰 read 캐시. 리뷰 작성/수정/삭제·어드민 모더레이션 시 revalidateTag(REVIEWS_TAG) 로 무효화.
+// revalidate(초)는 무효화 누락 대비 안전망. PDP 리뷰는 Suspense 로 스트리밍되므로 캐시히트 시 즉시 채워진다.
+export const REVIEWS_TAG = "reviews";
+const REVIEWS_CACHE = { tags: [REVIEWS_TAG], revalidate: 300 };
 
 export type ReviewRow = {
   id: string;
@@ -7,7 +13,8 @@ export type ReviewRow = {
   title: string | null;
   body: string;
   images: string[];
-  createdAt: Date;
+  // 캐시 직렬화 안전성을 위해 ISO 문자열로 보관(ReviewListClient 는 string/Date 모두 처리).
+  createdAt: string;
   maskedAuthor: string;
 };
 
@@ -46,46 +53,54 @@ function maskUserId(userId: string): string {
   return `회원 ${short}`;
 }
 
-export async function listProductReviews(productId: string): Promise<ReviewRow[]> {
-  const db = getDb();
-  const rows = await db
-    .select({
-      id: schema.reviews.id,
-      rating: schema.reviews.rating,
-      title: schema.reviews.title,
-      body: schema.reviews.body,
-      images: schema.reviews.images,
-      createdAt: schema.reviews.createdAt,
-      userId: schema.reviews.userId,
-    })
-    .from(schema.reviews)
-    .where(and(eq(schema.reviews.productId, productId), eq(schema.reviews.isHidden, false)))
-    .orderBy(desc(schema.reviews.createdAt));
+export const listProductReviews = unstable_cache(
+  async (productId: string): Promise<ReviewRow[]> => {
+    const db = getDb();
+    const rows = await db
+      .select({
+        id: schema.reviews.id,
+        rating: schema.reviews.rating,
+        title: schema.reviews.title,
+        body: schema.reviews.body,
+        images: schema.reviews.images,
+        createdAt: schema.reviews.createdAt,
+        userId: schema.reviews.userId,
+      })
+      .from(schema.reviews)
+      .where(and(eq(schema.reviews.productId, productId), eq(schema.reviews.isHidden, false)))
+      .orderBy(desc(schema.reviews.createdAt));
 
-  return rows.map((r) => ({
-    id: r.id,
-    rating: r.rating,
-    title: r.title,
-    body: r.body,
-    images: r.images,
-    createdAt: r.createdAt,
-    maskedAuthor: maskUserId(r.userId),
-  }));
-}
+    return rows.map((r) => ({
+      id: r.id,
+      rating: r.rating,
+      title: r.title,
+      body: r.body,
+      images: r.images,
+      createdAt: r.createdAt.toISOString(),
+      maskedAuthor: maskUserId(r.userId),
+    }));
+  },
+  ["product-reviews"],
+  REVIEWS_CACHE,
+);
 
-export async function getRatingSummary(productId: string): Promise<RatingSummary> {
-  const db = getDb();
-  const [row] = await db
-    .select({
-      count: sql<number>`COUNT(*)::int`,
-      avg: sql<number>`COALESCE(AVG(${schema.reviews.rating}), 0)`,
-    })
-    .from(schema.reviews)
-    .where(and(eq(schema.reviews.productId, productId), eq(schema.reviews.isHidden, false)));
+export const getRatingSummary = unstable_cache(
+  async (productId: string): Promise<RatingSummary> => {
+    const db = getDb();
+    const [row] = await db
+      .select({
+        count: sql<number>`COUNT(*)::int`,
+        avg: sql<number>`COALESCE(AVG(${schema.reviews.rating}), 0)`,
+      })
+      .from(schema.reviews)
+      .where(and(eq(schema.reviews.productId, productId), eq(schema.reviews.isHidden, false)));
 
-  if (!row || row.count === 0) return { count: 0, average: 0 };
-  return { count: row.count, average: Math.round(row.avg * 10) / 10 };
-}
+    if (!row || row.count === 0) return { count: 0, average: 0 };
+    return { count: row.count, average: Math.round(row.avg * 10) / 10 };
+  },
+  ["rating-summary"],
+  REVIEWS_CACHE,
+);
 
 export type CreateReviewInput = {
   userId: string;

@@ -4,7 +4,8 @@ import { FlaskConical, ShieldCheck, Brain } from "lucide-react";
 import { NutroginLineup } from "@/components/nutrogin/nutrogin-lineup";
 import { listPublishedProducts } from "@/db/queries/products";
 
-export const dynamic = "force-dynamic";
+// 정적 프리렌더 + ISR(헤더 인증 클라이언트화로 정적 생성 가능). 'catalog' 태그로 즉시 무효화.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "브랜드 스토리",

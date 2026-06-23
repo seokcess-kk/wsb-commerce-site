@@ -12,10 +12,8 @@ export function ReviewListClient({ reviews }: { reviews: ReviewRow[] }) {
 
   const sorted = [...reviews].sort((a, b) => {
     if (sort === "highest") return b.rating - a.rating;
-    // newest: compare dates
-    const tA = typeof a.createdAt === "string" ? new Date(a.createdAt).getTime() : a.createdAt.getTime();
-    const tB = typeof b.createdAt === "string" ? new Date(b.createdAt).getTime() : b.createdAt.getTime();
-    return tB - tA;
+    // newest: createdAt 은 ISO 문자열(캐시 직렬화)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   if (reviews.length === 0) {

@@ -1,9 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { eq } from "drizzle-orm";
 import { getDb, schema } from "@/db/index";
 import { requireAdmin } from "@/lib/admin/require-admin";
+import { REVIEWS_TAG } from "@/db/queries/reviews";
 
 // 리뷰가 속한 상품 PDP·목록을 무효화(숨김/복원/삭제가 즉시 반영되도록).
 async function revalidateForReview(reviewId: string) {
@@ -14,6 +15,8 @@ async function revalidateForReview(reviewId: string) {
     .innerJoin(schema.products, eq(schema.reviews.productId, schema.products.id))
     .where(eq(schema.reviews.id, reviewId))
     .limit(1);
+  // 캐시된 리뷰 쿼리(getRatingSummary/listProductReviews) 무효화.
+  revalidateTag(REVIEWS_TAG, "max");
   if (row?.slug) revalidatePath(`/products/${row.slug}`);
   revalidatePath("/admin/reviews");
 }

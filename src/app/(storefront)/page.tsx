@@ -11,7 +11,10 @@ import { HomeReviews } from "@/components/home/home-reviews";
 import { HomeFaq } from "@/components/home/home-faq";
 import { ConversionCta } from "@/components/home/conversion-cta";
 
-export const dynamic = "force-dynamic";
+// 정적 프리렌더 + ISR. 레이아웃이 더 이상 쿠키를 읽지 않아(헤더 인증 클라이언트화) 정적 생성이 가능하다.
+// 카탈로그 데이터는 'catalog' 태그라 어드민 상품 변경 시 즉시 재생성되고, revalidate 는 안전망이다.
+// 정적 페이지라 Link 프리페치가 전체 페이로드를 받아 클릭 시 즉시 이동한다.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: { absolute: `${BRAND.name} ${BRAND.line} — ${BRAND.sloganKo}` },

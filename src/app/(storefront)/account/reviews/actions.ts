@@ -1,11 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { eq, and } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getDb, schema } from "@/db/index";
-import { createReview, updateReview, deleteReview } from "@/db/queries/reviews";
+import { createReview, updateReview, deleteReview, REVIEWS_TAG } from "@/db/queries/reviews";
 import { canReview } from "@/lib/reviews/eligibility";
 import { forbiddenPhraseMessage } from "@/lib/compliance/forbidden-phrases";
 import type { OrderStatus } from "@/lib/admin/order-status";
@@ -118,6 +118,7 @@ export async function submitReview(
     .where(eq(schema.products.id, productId))
     .limit(1);
 
+  revalidateTag(REVIEWS_TAG, "max");
   revalidatePath("/account/reviews");
   if (product?.slug) {
     revalidatePath(`/products/${product.slug}`);
@@ -165,6 +166,7 @@ export async function updateReviewAction(input: UpdateReviewInput): Promise<{ er
   });
   if (slug === null) return { error: "리뷰를 수정할 수 없습니다." };
 
+  revalidateTag(REVIEWS_TAG, "max");
   revalidatePath("/account/reviews");
   revalidatePath(`/products/${slug}`);
   return {};
@@ -178,6 +180,7 @@ export async function deleteReviewAction(reviewId: string): Promise<{ error?: st
   const slug = await deleteReview(reviewId, user.id);
   if (slug === null) return { error: "리뷰를 삭제할 수 없습니다." };
 
+  revalidateTag(REVIEWS_TAG, "max");
   revalidatePath("/account/reviews");
   if (slug) revalidatePath(`/products/${slug}`);
   return {};
